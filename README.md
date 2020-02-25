@@ -4,18 +4,18 @@ Included are implementations of quick_sort and merge_sort as well as new sorting
 
 They have the following characteristics.
 
-| Name | Inplace | Stable | Average Complexity (Big O) | Worst Case Complexity (Big O) | Additional memeory | speed sorting 700 random numbers (MSVC compiler in debug) |
+| Name | Inplace | Stable | Average Complexity (Big O) | Worst Case Complexity (Big O) | Additional memeory | speed sorting 1000 random numbers (microseconds) (MSVC compiler in release x64) |
 | --- | --- | --- | --- | --- | --- | --- |
-| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 2353 |
-| merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 2804 |
-| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 20572 |
-| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 15269 |
+| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 63 |
+| merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 71 |
+| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 166 |
+| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 275 |
 
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
 
 The idea for sweep_sort and merge_sweep_sort came from the idea of using std::rotate as part for a recursive decent sorting algorithm, and so both sweep_sort and merge_sweep_sort make use of the rotate function.
 
-merge_sweep_sort maybe the fastest in-place, stable sorting algorithm that uses zero additional memory (more testing/comparison needed).
+sweep_sort maybe the fastest in-place, stable sorting algorithm that uses zero additional memory (more testing/comparison needed).
 
 
 # Example use - C++
