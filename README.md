@@ -1,6 +1,4 @@
-# stable-inplace-sorting-algorithms
-
-These are some new and tested sorting algorithms inspired by quick_sort and merge_sort
+# stable-in place-sorting-algorithms
 
 Included are implementations of quick_sort and merge_sort as well as new sorting algorithms sweep_sort and merge_sweep_sort.
 
