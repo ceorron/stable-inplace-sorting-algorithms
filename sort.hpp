@@ -442,12 +442,12 @@ void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, char* buf) {
 
 	//go through both lists, build the sorted list
 	for(; beg1 != end1 && beg2 != end2; ++tmp) {
-		if(*beg1 < *beg2) {
-			construct(*tmp, std::move(*beg1));
-			++beg1;
-		} else {
+		if(*beg2 < *beg1) {
 			construct(*tmp, std::move(*beg2));
 			++beg2;
+		} else {
+			construct(*tmp, std::move(*beg1));
+			++beg1;
 		}
 	}
 
@@ -499,12 +499,12 @@ void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, char* buf, Comp cmp)
 
 	//go through both lists, build the sorted list
 	for(; beg1 != end1 && beg2 != end2; ++tmp) {
-		if(cmp(*beg1, *beg2)) {
-			construct(*tmp, std::move(*beg1));
-			++beg1;
-		} else {
+		if(cmp(*beg2, *beg1)) {
 			construct(*tmp, std::move(*beg2));
 			++beg2;
+		} else {
+			construct(*tmp, std::move(*beg1));
+			++beg1;
 		}
 	}
 
