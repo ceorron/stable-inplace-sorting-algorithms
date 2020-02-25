@@ -2,20 +2,20 @@
 
 These are some new and tested sorting algorithms inspired by quick_sort and merge_sort
 
-Included are implementations of quick_sort and merge_sort as well as new sorting algorithms stable_quick_sort and merge_sweep_sort.
+Included are implementations of quick_sort and merge_sort as well as new sorting algorithms sweep_sort and merge_sweep_sort.
 
 They have the following characteristics.
 
 | Name | Inplace | Stable | Average Complexity (Big O) | Worst Case Complexity (Big O) | speed sorting 700 random numbers (MSVC compiler in debug) |
 | --- | --- | --- | --- | --- | --- |
 | quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | 2353 |
-| stable_quick_sort | Yes | Yes | O(n<sup>2</sup> log n) | O(n<sup>2</sup>) | 20572 |
 | merge_sort | No | Yes | O(n log n) | O(n log n) | 2804 |
+| sweep_sort | Yes | Yes | O(n<sup>2</sup> log n) | O(n<sup>2</sup>) | 20572 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n log n) | 15269 |
 
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
 
-The idea for stable_quick_sort and merge_sweep_sort came from the idea of using std::rotate as part for a recursive decent sorting algorithm, and so both stable_quick_sort and merge_sweep_sort make use of the rotate function.
+The idea for sweep_sort and merge_sweep_sort came from the idea of using std::rotate as part for a recursive decent sorting algorithm, and so both stable_quick_sort and merge_sweep_sort make use of the rotate function.
 
 # Example use - C++
 
@@ -58,7 +58,7 @@ int main() {
 
         {
             timer tmr;
-            stdlib::quick_sort(vec.begin(), vec.end());
+            stlib::quick_sort(vec.begin(), vec.end());
         }
 
         std::cout << "[" << std::endl;
@@ -69,7 +69,7 @@ int main() {
         }
         std::cout << "]" << std::endl;
 
-        std::cout << "sorted : " << stdlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
         std::cout << "test stable quick sort" << std::endl;
@@ -80,7 +80,7 @@ int main() {
 
         {
             timer tmr;
-            stdlib::stable_quick_sort(vec.begin(), vec.end());
+            stlib::sweep_sort(vec.begin(), vec.end());
         }
 
         std::cout << "[" << std::endl;
@@ -91,7 +91,7 @@ int main() {
         }
         std::cout << "]" << std::endl;
 
-        std::cout << "sorted : " << stdlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
         std::cout << "test merge sort" << std::endl;
@@ -102,7 +102,7 @@ int main() {
 
         {
             timer tmr;
-            stdlib::merge_sort(vec.begin(), vec.end());
+            stlib::merge_sort(vec.begin(), vec.end());
         }
 
         std::cout << "[" << std::endl;
@@ -113,7 +113,7 @@ int main() {
         }
         std::cout << "]" << std::endl;
 
-        std::cout << "sorted : " << stdlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
         std::cout << "test merge sweep sort" << std::endl;
@@ -124,7 +124,7 @@ int main() {
 
         {
             timer tmr;
-            stdlib::merge_sweep_sort(vec.begin(), vec.end());
+            stlib::merge_sweep_sort(vec.begin(), vec.end());
         }
 
         std::cout << "[" << std::endl;
@@ -135,7 +135,7 @@ int main() {
         }
         std::cout << "]" << std::endl;
 
-        std::cout << "sorted : " << stdlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
 
     return 0;
