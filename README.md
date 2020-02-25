@@ -8,7 +8,7 @@ They have the following characteristics.
 | --- | --- | --- | --- | --- | --- | --- |
 | quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 2353 |
 | merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 2804 |
-| sweep_sort | Yes | Yes | O(n<sup>2</sup> log n) | O(n<sup>2</sup>) | No | 20572 |
+| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 20572 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 15269 |
 
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
