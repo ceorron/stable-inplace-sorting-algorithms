@@ -28,7 +28,7 @@
 #include <utility>
 #include <stdlib.h>
 
-namespace stdlib {
+namespace stlib {
 
 template<typename T>
 struct value_for {
@@ -128,7 +128,7 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 }
 
 template<typename Itr>
-void stable_quick_sort(Itr beg, Itr end) {
+void sweep_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
 	auto pivot = half_point(beg, end);
@@ -201,13 +201,13 @@ void stable_quick_sort(Itr beg, Itr end) {
 	rotate(pivot, pivotstore - total_less_count, pivotstore);
 	pivot += distance(pivotstore - total_less_count, pivotstore);
 
-	stable_quick_sort(beg, pivot);
-	stable_quick_sort(pivot + 1, end);
+	sweep_sort(beg, pivot);
+	sweep_sort(pivot + 1, end);
 }
 
 
 template<typename Itr, typename Comp>
-void stable_quick_sort(Itr beg, Itr end, Comp cmp) {
+void sweep_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
 	auto pivot = half_point(beg, end);
@@ -280,12 +280,12 @@ void stable_quick_sort(Itr beg, Itr end, Comp cmp) {
 	rotate(pivot, pivotstore - total_less_count, pivotstore);
 	pivot += distance(pivotstore - total_less_count, pivotstore);
 
-	stable_quick_sort(beg, pivot, cmp);
-	stable_quick_sort(pivot + 1, end, cmp);
+	sweep_sort(beg, pivot, cmp);
+	sweep_sort(pivot + 1, end, cmp);
 }
 
 
-namespace stdlib_internal {
+namespace stlib_internal {
 template<typename Itr>
 void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf) {
 	if(distance(beg, end) == 0) {
@@ -324,7 +324,7 @@ void merge_sweep_sort(Itr beg, Itr end) {
 	auto pivot = half_point(beg, end);
 
 	Itr nhalf;
-	stdlib_internal::merge_sweep_sort_recurse(pivot, beg, end, nhalf);
+	stlib_internal::merge_sweep_sort_recurse(pivot, beg, end, nhalf);
 
 	size_t greater_count = 0;
 	{
@@ -358,7 +358,7 @@ void merge_sweep_sort(Itr beg, Itr end) {
 	merge_sweep_sort(beg, nhalf);
 	merge_sweep_sort(pivot + 1, end);
 }
-namespace stdlib_internal {
+namespace stlib_internal {
 template<typename Itr, typename Comp>
 void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf, Comp cmp) {
 	if(distance(beg, end) == 0) {
@@ -397,7 +397,7 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 	auto pivot = half_point(beg, end);
 
 	Itr nhalf;
-	stdlib_internal::merge_sweep_sort_recurse(pivot, beg, end, nhalf, cmp);
+	stlib_internal::merge_sweep_sort_recurse(pivot, beg, end, nhalf, cmp);
 
 	size_t greater_count = 0;
 	{
@@ -433,12 +433,12 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 }
 
 
-namespace stdlib_internal {
+namespace stlib_internal {
 template<typename Itr>
 void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, char* buf) {
 	Itr begrng = beg1;
-	typename stdlib::value_for<Itr>::value_type* tmp = (typename stdlib::value_for<Itr>::value_type*)buf;
-	typename stdlib::value_for<Itr>::value_type* tmpbeg = tmp;
+	typename stlib::value_for<Itr>::value_type* tmp = (typename stlib::value_for<Itr>::value_type*)buf;
+	typename stlib::value_for<Itr>::value_type* tmpbeg = tmp;
 
 	//go through both lists, build the sorted list
 	for(; beg1 != end1 && beg2 != end2; ++tmp) {
@@ -478,10 +478,10 @@ template<typename Itr>
 bool merge_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return true;
-	using valueof = typename stdlib::value_for<Itr>::value_type;
+	using valueof = typename stlib::value_for<Itr>::value_type;
 	char* buf = (char*)malloc(distance(beg, end) * sizeof(valueof));
 	if(buf) {
-		stdlib_internal::merge_sort_internal(beg, end, buf);
+		stlib_internal::merge_sort_internal(beg, end, buf);
 
 		free(buf);
 		return true;
@@ -490,12 +490,12 @@ bool merge_sort(Itr beg, Itr end) {
 }
 
 
-namespace stdlib_internal {
+namespace stlib_internal {
 template<typename Itr, typename Comp>
 void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, char* buf, Comp cmp) {
 	Itr begrng = beg1;
-	typename stdlib::value_for<Itr>::value_type* tmp = (typename stdlib::value_for<Itr>::value_type*)buf;
-	typename stdlib::value_for<Itr>::value_type* tmpbeg = tmp;
+	typename stlib::value_for<Itr>::value_type* tmp = (typename stlib::value_for<Itr>::value_type*)buf;
+	typename stlib::value_for<Itr>::value_type* tmpbeg = tmp;
 
 	//go through both lists, build the sorted list
 	for(; beg1 != end1 && beg2 != end2; ++tmp) {
@@ -535,10 +535,10 @@ template<typename Itr, typename Comp>
 bool merge_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return true;
-	using valueof = typename stdlib::value_for<Itr>::value_type;
+	using valueof = typename stlib::value_for<Itr>::value_type;
 	char* buf = (char*)malloc(distance(beg, end) * sizeof(valueof));
 	if(buf) {
-		stdlib_internal::merge_sort_internal(beg, end, buf, cmp);
+		stlib_internal::merge_sort_internal(beg, end, buf, cmp);
 
 		free(buf);
 		return true;
