@@ -73,7 +73,7 @@ int main() {
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
-        std::cout << "test stable quick sort" << std::endl;
+        std::cout << "test sweep sort" << std::endl;
         //test stable quick sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
