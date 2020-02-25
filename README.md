@@ -2,7 +2,7 @@
 
 These are some new and tested sorting algorithms inspired by quick_sort and merge_sort
 
-Inlcuded are implementations of quick_sort and merge_sort as well as new sorting algorithms stable_quick_sort and merge_sweep_sort.
+Included are implementations of quick_sort and merge_sort as well as new sorting algorithms stable_quick_sort and merge_sweep_sort.
 
 They have the following characteristics.
 
@@ -15,7 +15,7 @@ They have the following characteristics.
 
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
 
-The idea for stable_quick_sort and merge_sweep_sort came from the idea of using std::rotate as part for a recursive decent sorting algorithm, and so both stable_quick_sort and merge_sweep_sort make use of rotate function.
+The idea for stable_quick_sort and merge_sweep_sort came from the idea of using std::rotate as part for a recursive decent sorting algorithm, and so both stable_quick_sort and merge_sweep_sort make use of the rotate function.
 
 # Example use - C++
 
