@@ -186,7 +186,7 @@ void quick_sort(Itr beg, Itr end) {
 		Itr beg;
 		Itr end;
 	};
-	std::vector<stack_less_data> stk;
+	vector<stack_less_data> stk;
 	stk.reserve(50);
 	stack_less_data dat = {
 		beg,
@@ -202,28 +202,31 @@ void quick_sort(Itr beg, Itr end) {
 		Itr pivot = half_point(tmp.beg, tmp.end);
 
 		while(left != right) {
-			//all that are equal go to the right
-			while(left != right && (left != pivot && less_func(*left, *pivot)))
+			//pivot goes to the right!!
+			while(left != right && left != pivot && less_equal_func(*left, *pivot))
 				++left;
-			while(left != right && (right == pivot || greater_equal_func(*right, *pivot)))
+			while(left != right && greater_equal_func(*right, *pivot))
 				--right;
-			if(left != right) {
-				std::swap(*left, *right);
-				if(left == pivot)
-					pivot = right;
-				//we have swapped the less to the left, and greater to the right, move to next
-				if(left != right)
-					++left;
-				if(left != right)
-					--right;
-			}
+			if(left == right)
+				break;
+
+			std::swap(*left, *right);
+			if(left == pivot)
+				pivot = right;
+			//we have swapped the less to the left, and greater to the right, move to next
+			++left;
+			if(left != right)
+				--right;
 		}
 
 		//if right is on the less side, move back
-		if(right != pivot && less_func(*right, *pivot))
-			++right;
-		//move the pivot into place
-		stlib_internal::move_pivot(right, pivot);
+		if(right != pivot) {
+			if(less_func(*right, *pivot))
+				++right;
+			//move the pivot into place
+			if(right != pivot)
+				std::swap(*right, *pivot);
+		}
 
 		if(distance(pivot + 1, tmp.end + 1) > 1) {
 			stack_less_data dat = {
@@ -232,10 +235,10 @@ void quick_sort(Itr beg, Itr end) {
 			};
 			stk.push_back(std::move(dat));
 		}
-		if(distance(tmp.beg, right) > 1) {
+		if(distance(tmp.beg, pivot) > 1) {
 			stack_less_data dat = {
 				tmp.beg,
-				right - 1
+				pivot - 1
 			};
 			stk.push_back(std::move(dat));
 		}
@@ -250,7 +253,7 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 		Itr beg;
 		Itr end;
 	};
-	std::vector<stack_less_data> stk;
+	vector<stack_less_data> stk;
 	stk.reserve(50);
 	stack_less_data dat = {
 		beg,
@@ -266,28 +269,31 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 		Itr pivot = half_point(tmp.beg, tmp.end);
 
 		while(left != right) {
-			//all that are equal go to the right
-			while(left != right && (left != pivot && less_func(*left, *pivot, cmp)))
+			//pivot goes to the right!!
+			while(left != right && left != pivot && less_equal_func(*left, *pivot, cmp))
 				++left;
-			while(left != right && (right == pivot || greater_equal_func(*right, *pivot, cmp)))
+			while(left != right && greater_equal_func(*right, *pivot, cmp))
 				--right;
-			if(left != right) {
-				std::swap(*left, *right);
-				if(left == pivot)
-					pivot = right;
-				//we have swapped the less to the left, and greater to the right, move to next
-				if(left != right)
-					++left;
-				if(left != right)
-					--right;
-			}
+			if(left == right)
+				break;
+
+			std::swap(*left, *right);
+			if(left == pivot)
+				pivot = right;
+			//we have swapped the less to the left, and greater to the right, move to next
+			++left;
+			if(left != right)
+				--right;
 		}
 
 		//if right is on the less side, move back
-		if(right != pivot && less_func(*right, *pivot, cmp))
-			++right;
-		//move the pivot into place
-		stlib_internal::move_pivot(right, pivot, cmp);
+		if(right != pivot) {
+			if(less_func(*right, *pivot, cmp))
+				++right;
+			//move the pivot into place
+			if(right != pivot)
+				std::swap(*right, *pivot);
+		}
 
 		if(distance(pivot + 1, tmp.end + 1) > 1) {
 			stack_less_data dat = {
@@ -296,10 +302,10 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 			};
 			stk.push_back(std::move(dat));
 		}
-		if(distance(tmp.beg, right) > 1) {
+		if(distance(tmp.beg, pivot) > 1) {
 			stack_less_data dat = {
 				tmp.beg,
-				right - 1
+				pivot - 1
 			};
 			stk.push_back(std::move(dat));
 		}
