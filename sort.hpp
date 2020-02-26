@@ -27,6 +27,7 @@
 
 #include <utility>
 #include <stdlib.h>
+#include <vector>
 
 namespace stlib {
 
@@ -177,7 +178,7 @@ void quick_sort(Itr beg, Itr end) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stack_less_data dat = {
 		beg,
 		end - 1
@@ -240,7 +241,7 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stack_less_data dat = {
 		beg,
 		end - 1
@@ -463,7 +464,7 @@ void sweep_sort(Itr beg, Itr end) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stack_less_data dat = {
 		beg,
 		end
@@ -586,7 +587,7 @@ void sweep_sort(Itr beg, Itr end, Comp cmp) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stack_less_data dat = {
 		beg,
 		end
@@ -672,7 +673,7 @@ void merge_sweep_sort(Itr beg, Itr end) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stack_less_data dat = {
 		beg,
 		end
@@ -760,7 +761,7 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stack_less_data dat = {
 		beg,
 		end
