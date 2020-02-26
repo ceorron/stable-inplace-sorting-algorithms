@@ -6,10 +6,11 @@ They have the following characteristics.
 
 | Name | Inplace | Stable | Average Complexity (Big O) | Worst Case Complexity (Big O) | Additional memeory | speed sorting 1000 random numbers (microseconds) (MSVC compiler in release x64) |
 | --- | --- | --- | --- | --- | --- | --- |
-| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 63 |
-| merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 71 |
-| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 166 |
-| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 275 |
+| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 145 |
+| merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 70 |
+| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 370 |
+| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 514 |
+| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 1168 |
 
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
 
@@ -130,6 +131,28 @@ int main() {
 
         std::cout << "[" << std::endl;
         for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+	{
+        std::cout << "test bubble sort" << std::endl;
+        //test sweep merge sort
+        vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 1000; ++i)
+            vec.push_back(gen.rand());
+
+        {
+            timer tmr;
+            stlib::bubble_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 1000; ++i) {
             std::cout << "[ " << vec[i] << "], ";
             if(i > 0 && i % 5 == 0)
                 std::cout << std::endl;
