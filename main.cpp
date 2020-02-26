@@ -60,7 +60,7 @@ int main() {
 
 		{
 			timer tmr;
-			stdlib::quick_sort(vec.begin(), vec.end());
+			stlib::quick_sort(vec.begin(), vec.end());
 		}
 
 		std::cout << "[" << std::endl;
@@ -71,7 +71,7 @@ int main() {
 		}
 		std::cout << "]" << std::endl;
 
-		std::cout << "sorted : " << stdlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+		std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
 	}
 	{
 		std::cout << "test sweep sort" << std::endl;
@@ -82,7 +82,7 @@ int main() {
 
 		{
 			timer tmr;
-			stdlib::stable_quick_sort(vec.begin(), vec.end());
+			stlib::stable_quick_sort(vec.begin(), vec.end());
 		}
 
 		std::cout << "[" << std::endl;
@@ -93,7 +93,7 @@ int main() {
 		}
 		std::cout << "]" << std::endl;
 
-		std::cout << "sorted : " << stdlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+		std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
 	}
 	{
 		std::cout << "test merge sort" << std::endl;
@@ -104,7 +104,7 @@ int main() {
 
 		{
 			timer tmr;
-			stdlib::merge_sort(vec.begin(), vec.end());
+			stlib::merge_sort(vec.begin(), vec.end());
 		}
 
 		std::cout << "[" << std::endl;
@@ -115,7 +115,7 @@ int main() {
 		}
 		std::cout << "]" << std::endl;
 
-		std::cout << "sorted : " << stdlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+		std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
 	}
 	{
 		std::cout << "test merge sweep sort" << std::endl;
@@ -126,7 +126,7 @@ int main() {
 
 		{
 			timer tmr;
-			stdlib::merge_sweep_sort(vec.begin(), vec.end());
+			stlib::merge_sweep_sort(vec.begin(), vec.end());
 		}
 
 		std::cout << "[" << std::endl;
@@ -137,8 +137,30 @@ int main() {
 		}
 		std::cout << "]" << std::endl;
 
-		std::cout << "sorted : " << stdlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+		std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
 	}
+    {
+        std::cout << "test bubble sort" << std::endl;
+        //test sweep merge sort
+        vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 1000; ++i)
+            vec.push_back(gen.rand());
+
+        {
+            timer tmr;
+            stlib::bubble_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 1000; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
 
 	return 0;
 }
