@@ -143,7 +143,7 @@ int main() {
         std::cout << "test bubble sort" << std::endl;
         //test sweep merge sort
         std::vector<uint32_t> vec;
-        for(uint32_t i = 0; i < 1000; ++i)
+        for(uint32_t i = 0; i < 700; ++i)
             vec.push_back(rand());
 
         {
@@ -152,7 +152,7 @@ int main() {
         }
 
         std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < 1000; ++i) {
+        for(uint32_t i = 0; i < 700; ++i) {
             std::cout << "[ " << vec[i] << "], ";
             if(i > 0 && i % 5 == 0)
                 std::cout << std::endl;
