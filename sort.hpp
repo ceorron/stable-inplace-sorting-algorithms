@@ -378,72 +378,43 @@ namespace stlib_internal {
 template<typename Itr>
 void sweep_sort_internal(Itr& pivot, Itr beg, Itr end) {
 	//record to pivot + 1 for later use
-	Itr pivotstore = pivot + 1;
+	Itr pivotstore = pivot;
+	Itr begleft = pivot;
+	Itr begright = pivot + 1;
 
-	//go from the pivot to the beginning, find all of the items greater than pivot, move them past the pivot
-	size_t greater_count = 0;
-	size_t less_count = 0;
-	size_t total_less_count = 0;
-	{
-		Itr it = pivot - 1;
-		Itr moveit = pivot + 1;
-		while(it != beg - 1) {
-			//count in those less (or equal) to pivot
-			while(it != beg - 1 && less_equal_func(*it, *pivot))
-				--it;
-			if(it != beg - 1) {
-				--it;
-				++greater_count;
-			}
-			//count in those greater than pivot
-			while(it != beg - 1 && greater_func(*it, *pivot)) {
-				--it;
-				++greater_count;
-			}
-
-			//do move
-			stlib::rotate(it + 1, it + (1 + greater_count), moveit);
-			moveit -= greater_count;
-			pivot -= greater_count;
-
-			greater_count = 0;
-			if(it != beg - 1)
-				--it;
+	//go forwards move those less than pivot to right side of pivot
+	Itr moveright = begright;
+	Itr tmpright = begright;
+	size_t right_total = 0;
+	for(; begright != end; ++begright) {
+		if(less_func(*begright, *pivot)) {
+			if(moveright != begright)
+				std::swap(*moveright, *begright);
+			++moveright;
+			++right_total;
 		}
 	}
-
-	//go from the old pivot to the end, find all of the items less than pivot, move them after the pivot
-	{
-		Itr it = pivotstore;
-		while(it != end) {
-			//count in those greater (or equal) to pivot
-			while(it != end && greater_equal_func(*it, *pivot))
-				++it;
-			if(it != end) {
-				++it;
-				++less_count;
-				++total_less_count;
+	//go backwards move those greater than pivot to left side of pivot
+	Itr moveleft = begleft - 1;
+	if(pivot != beg) {
+		do {
+			--begleft;
+			if(greater_func(*begleft, *pivot)) {
+				if(moveleft != begleft)
+					std::swap(*moveleft, *begleft);
+				--moveleft;
 			}
-			//count in those less than pivot
-			while(it != end && less_func(*it, *pivot)) {
-				++it;
-				++less_count;
-				++total_less_count;
-			}
-
-			//do moveg
-			stlib::rotate(pivotstore, it - less_count, it);
-			pivotstore += less_count;
-
-			less_count = 0;
-			if(it != end)
-				++it;
-		}
+		} while(begleft != (beg - 1));
 	}
 
-	//do a final rotate to reorder pivot
-	stlib::rotate(pivot, pivotstore - total_less_count, pivotstore);
-	pivot += distance(pivotstore - total_less_count, pivotstore);
+	//do two rotates here,
+	//put the pivot in place (at beginning of left, could be at end of right)
+	stdlib::rotate(moveleft + 1, pivot, pivot + 1);
+	pivot -= distance(moveleft + 1, pivot);
+
+	//rotate the right side over
+	stdlib::rotate(moveleft + 1, tmpright, moveright);
+	pivot += distance(tmpright, moveright);
 }
 }
 template<typename Itr>
@@ -502,72 +473,43 @@ namespace stlib_internal {
 template<typename Itr, typename Comp>
 void sweep_sort_internal(Itr& pivot, Itr beg, Itr end, Comp cmp) {
 	//record to pivot + 1 for later use
-	Itr pivotstore = pivot + 1;
+	Itr pivotstore = pivot;
+	Itr begleft = pivot;
+	Itr begright = pivot + 1;
 
-	//go from the pivot to the beginning, find all of the items greater than pivot, move them past the pivot
-	size_t greater_count = 0;
-	size_t less_count = 0;
-	size_t total_less_count = 0;
-	{
-		Itr it = pivot - 1;
-		Itr moveit = pivot + 1;
-		while(it != beg - 1) {
-			//count in those less (or equal) to pivot
-			while(it != beg - 1 && less_equal_func(*it, *pivot, cmp))
-				--it;
-			if(it != beg - 1) {
-				--it;
-				++greater_count;
-			}
-			//count in those greater than pivot
-			while(it != beg - 1 && greater_func(*it, *pivot, cmp)) {
-				--it;
-				++greater_count;
-			}
-
-			//do move
-			stlib::rotate(it + 1, it + (1 + greater_count), moveit);
-			moveit -= greater_count;
-			pivot -= greater_count;
-
-			greater_count = 0;
-			if(it != beg - 1)
-				--it;
+	//go forwards move those less than pivot to right side of pivot
+	Itr moveright = begright;
+	Itr tmpright = begright;
+	size_t right_total = 0;
+	for(; begright != end; ++begright) {
+		if(less_func(*begright, *pivot, cmp)) {
+			if(moveright != begright)
+				std::swap(*moveright, *begright);
+			++moveright;
+			++right_total;
 		}
 	}
-
-	//go from the old pivot to the end, find all of the items less than pivot, move them after the pivot
-	{
-		Itr it = pivotstore;
-		while(it != end) {
-			//count in those greater (or equal) to pivot
-			while(it != end && greater_equal_func(*it, *pivot, cmp))
-				++it;
-			if(it != end) {
-				++it;
-				++less_count;
-				++total_less_count;
+	//go backwards move those greater than pivot to left side of pivot
+	Itr moveleft = begleft - 1;
+	if(pivot != beg) {
+		do {
+			--begleft;
+			if(greater_func(*begleft, *pivot, cmp)) {
+				if(moveleft != begleft)
+					std::swap(*moveleft, *begleft);
+				--moveleft;
 			}
-			//count in those less than pivot
-			while(it != end && less_func(*it, *pivot, cmp)) {
-				++it;
-				++less_count;
-				++total_less_count;
-			}
-
-			//do move
-			stlib::rotate(pivotstore, it - less_count, it);
-			pivotstore += less_count;
-
-			less_count = 0;
-			if(it != end)
-				++it;
-		}
+		} while(begleft != (beg - 1));
 	}
 
-	//do a final rotate to reorder pivot
-	stlib::rotate(pivot, pivotstore - total_less_count, pivotstore);
-	pivot += distance(pivotstore - total_less_count, pivotstore);
+	//do two rotates here,
+	//put the pivot in place (at beginning of left, could be at end of right)
+	stdlib::rotate(moveleft + 1, pivot, pivot + 1);
+	pivot -= distance(moveleft + 1, pivot);
+
+	//rotate the right side over
+	stdlib::rotate(moveleft + 1, tmpright, moveright);
+	pivot += distance(tmpright, moveright);
 }
 }
 template<typename Itr, typename Comp>
