@@ -8,7 +8,7 @@ They have the following characteristics.
 | --- | --- | --- | --- | --- | --- | --- |
 | quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 143 |
 | merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 57 |
-| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 164 |
+| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 577 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 354 |
 | bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 1075 |
 
