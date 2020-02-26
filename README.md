@@ -16,8 +16,6 @@ This is presented for those looking to study some new sorting techniques and who
 
 The idea for sweep_sort and merge_sweep_sort came from the idea of using std::rotate as part of a recursive decent sorting algorithm, and so both sweep_sort and merge_sweep_sort make use of the rotate function.
 
-sweep_sort, due to it's high use of rotate performs generally poorly for large numbers of elements, it is advised to use merge_sweep_sort instead.
-
 # Example use - C++
 
 (test in main.cpp)
