@@ -186,7 +186,7 @@ void quick_sort(Itr beg, Itr end) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stk.reserve(50);
 	stack_less_data dat = {
 		beg,
@@ -253,7 +253,7 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stk.reserve(50);
 	stack_less_data dat = {
 		beg,
