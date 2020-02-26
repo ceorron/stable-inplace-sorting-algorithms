@@ -179,6 +179,7 @@ void quick_sort(Itr beg, Itr end) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
+	stk.reserve(50);
 	stack_less_data dat = {
 		beg,
 		end - 1
@@ -214,19 +215,19 @@ void quick_sort(Itr beg, Itr end) {
 		if(right != pivot && less_func(*right, *pivot))
 			++right;
 		//move the pivot into place
-		stlib_internalm::move_pivot(right, pivot);
+		stlib_internal::move_pivot(right, pivot);
 
-		if(distance(tmp.beg, right) > 1) {
-			stack_less_data dat = {
-				tmp.beg,
-				right - 1
-			};
-			stk.push_back(std::move(dat));
-		}
 		if(distance(pivot + 1, tmp.end + 1) > 1) {
 			stack_less_data dat = {
 				pivot + 1,
 				tmp.end
+			};
+			stk.push_back(std::move(dat));
+		}
+		if(distance(tmp.beg, right) > 1) {
+			stack_less_data dat = {
+				tmp.beg,
+				right - 1
 			};
 			stk.push_back(std::move(dat));
 		}
@@ -242,6 +243,7 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
+	stk.reserve(50);
 	stack_less_data dat = {
 		beg,
 		end - 1
@@ -279,17 +281,17 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 		//move the pivot into place
 		stlib_internal::move_pivot(right, pivot, cmp);
 
-		if(distance(tmp.beg, right) > 1) {
-			stack_less_data dat = {
-				tmp.beg,
-				right - 1
-			};
-			stk.push_back(std::move(dat));
-		}
 		if(distance(pivot + 1, tmp.end + 1) > 1) {
 			stack_less_data dat = {
 				pivot + 1,
 				tmp.end
+			};
+			stk.push_back(std::move(dat));
+		}
+		if(distance(tmp.beg, right) > 1) {
+			stack_less_data dat = {
+				tmp.beg,
+				right - 1
 			};
 			stk.push_back(std::move(dat));
 		}
@@ -465,6 +467,7 @@ void sweep_sort(Itr beg, Itr end) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
+	stk.reserve(50);
 	stack_less_data dat = {
 		beg,
 		end
@@ -478,17 +481,17 @@ void sweep_sort(Itr beg, Itr end) {
 
 		stlib_internal::sweep_sort_internal(pivot, item.beg, item.end);
 
-		if(distance(item.beg, pivot) > 1) {
-			stack_less_data dat = {
-				item.beg,
-				pivot
-			};
-			stk.push_back(std::move(dat));
-		}
 		if(distance(pivot + 1, item.end) > 1) {
 			stack_less_data dat = {
 				pivot + 1,
 				item.end
+			};
+			stk.push_back(std::move(dat));
+		}
+		if(distance(item.beg, pivot) > 1) {
+			stack_less_data dat = {
+				item.beg,
+				pivot
 			};
 			stk.push_back(std::move(dat));
 		}
@@ -588,6 +591,7 @@ void sweep_sort(Itr beg, Itr end, Comp cmp) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
+	stk.reserve(50);
 	stack_less_data dat = {
 		beg,
 		end
@@ -601,17 +605,17 @@ void sweep_sort(Itr beg, Itr end, Comp cmp) {
 
 		stlib_internal::sweep_sort_internal(pivot, item.beg, item.end, cmp);
 
-		if(distance(item.beg, pivot) > 1) {
-			stack_less_data dat = {
-				item.beg,
-				pivot
-			};
-			stk.push_back(std::move(dat));
-		}
 		if(distance(pivot + 1, item.end) > 1) {
 			stack_less_data dat = {
 				pivot + 1,
 				item.end
+			};
+			stk.push_back(std::move(dat));
+		}
+		if(distance(item.beg, pivot) > 1) {
+			stack_less_data dat = {
+				item.beg,
+				pivot
 			};
 			stk.push_back(std::move(dat));
 		}
@@ -674,6 +678,7 @@ void merge_sweep_sort(Itr beg, Itr end) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
+	stk.reserve(50);
 	stack_less_data dat = {
 		beg,
 		end
@@ -690,17 +695,17 @@ void merge_sweep_sort(Itr beg, Itr end) {
 
 		stlib_internal::move_pivot(nhalf, pivot);
 
-		if(distance(item.beg, nhalf) > 1) {
-			stack_less_data dat = {
-				item.beg,
-				nhalf
-			};
-			stk.push_back(std::move(dat));
-		}
 		if(distance(pivot + 1, item.end) > 1) {
 			stack_less_data dat = {
 				pivot + 1,
 				item.end
+			};
+			stk.push_back(std::move(dat));
+		}
+		if(distance(item.beg, nhalf) > 1) {
+			stack_less_data dat = {
+				item.beg,
+				nhalf
 			};
 			stk.push_back(std::move(dat));
 		}
@@ -762,6 +767,7 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
+	stk.reserve(50);
 	stack_less_data dat = {
 		beg,
 		end
@@ -778,17 +784,17 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 
 		stlib_internal::move_pivot(nhalf, pivot, cmp);
 
-		if(distance(item.beg, nhalf) > 1) {
-			stack_less_data dat = {
-				item.beg,
-				nhalf
-			};
-			stk.push_back(std::move(dat));
-		}
 		if(distance(pivot + 1, item.end) > 1) {
 			stack_less_data dat = {
 				pivot + 1,
 				item.end
+			};
+			stk.push_back(std::move(dat));
+		}
+		if(distance(item.beg, nhalf) > 1) {
+			stack_less_data dat = {
+				item.beg,
+				nhalf
 			};
 			stk.push_back(std::move(dat));
 		}
