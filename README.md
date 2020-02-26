@@ -6,11 +6,11 @@ They have the following characteristics.
 
 | Name | Inplace | Stable | Average Complexity (Big O) | Worst Case Complexity (Big O) | Additional memeory | speed sorting 1000 random numbers (microseconds) (MSVC compiler in release x64) |
 | --- | --- | --- | --- | --- | --- | --- |
-| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 145 |
-| merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 70 |
-| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 370 |
-| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 514 |
-| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 1168 |
+| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 143 |
+| merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 57 |
+| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 344 |
+| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 345 |
+| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 1090 |
 
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
 
@@ -139,7 +139,7 @@ int main() {
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
-	{
+    {
         std::cout << "test bubble sort" << std::endl;
         //test sweep merge sort
         vector<uint32_t> vec;
