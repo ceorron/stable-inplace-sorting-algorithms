@@ -48,6 +48,40 @@ void construct(T& lhs, T&& rhs) {
 	new (&lhs) T(std::move(rhs));
 }
 
+//some function abstractions, only use less than operator
+template<typename T>
+inline bool less_func(const T& lhs, const T& rhs) {
+	return lhs < rhs;
+}
+template<typename T>
+inline bool greater_func(const T& lhs, const T& rhs) {
+	return rhs < lhs;
+}
+template<typename T>
+inline bool less_equal_func(const T& lhs, const T& rhs) {
+	return !(rhs < lhs);
+}
+template<typename T>
+inline bool greater_equal_func(const T& lhs, const T& rhs) {
+	return !(lhs < rhs);
+}
+template<typename T, typename Comp>
+inline bool less_func(const T& lhs, const T& rhs, Comp cmp) {
+	return cmp(lhs, rhs);
+}
+template<typename T, typename Comp>
+inline bool greater_func(const T& lhs, const T& rhs, Comp cmp) {
+	return cmp(rhs, lhs);
+}
+template<typename T, typename Comp>
+inline bool less_equal_func(const T& lhs, const T& rhs, Comp cmp) {
+	return !cmp(rhs, lhs);
+}
+template<typename T, typename Comp>
+inline bool greater_equal_func(const T& lhs, const T& rhs, Comp cmp) {
+	return !cmp(lhs, rhs);
+}
+
 template<typename Itr>
 void rotate(Itr first, Itr middle, Itr last) {
 	if(middle == last)
@@ -67,151 +101,279 @@ inline Itr half_point(Itr first, Itr last) {
 	return first + (tmp/2);
 }
 
+namespace stlib_internal {
+template<typename Itr>
+void move_pivot(Itr nhalf, Itr& pivot) {
+	//move any that are greater than the pivot to the right of the pivot
+	size_t greater_count = 0;
+	{
+		Itr it = pivot - 1;
+		Itr moveit = pivot + 1;
+		while(it != nhalf - 1) {
+			//count in those less (or equal) to pivot
+			while(it != nhalf - 1 && less_equal_func(*it, *pivot))
+				--it;
+			if(it != nhalf - 1) {
+				--it;
+				++greater_count;
+			}
+			//count in those greater than pivot
+			while(it != nhalf - 1 && greater_func(*it, *pivot)) {
+				--it;
+				++greater_count;
+			}
+
+			//do move
+			stlib::rotate(it + 1, it + (1 + greater_count), moveit);
+			moveit -= greater_count;
+			pivot -= greater_count;
+
+			greater_count = 0;
+			if(it != nhalf - 1)
+				--it;
+		}
+	}
+}
+template<typename Itr, typename Comp>
+void move_pivot(Itr nhalf, Itr& pivot, Comp cmp) {
+	//move any that are greater than the pivot to the right of the pivot
+	size_t greater_count = 0;
+	{
+		Itr it = pivot - 1;
+		Itr moveit = pivot + 1;
+		while(it != nhalf - 1) {
+			//count in those less (or equal) to pivot
+			while(it != nhalf - 1 && less_equal_func(*it, *pivot, cmp))
+				--it;
+			if(it != nhalf - 1) {
+				--it;
+				++greater_count;
+			}
+			//count in those greater than pivot
+			while(it != nhalf - 1 && greater_func(*it, *pivot, cmp)) {
+				--it;
+				++greater_count;
+			}
+
+			//do move
+			stlib::rotate(it + 1, it + (1 + greater_count), moveit);
+			moveit -= greater_count;
+			pivot -= greater_count;
+
+			greater_count = 0;
+			if(it != nhalf - 1)
+				--it;
+		}
+	}
+}
+}
 
 template<typename Itr>
 void quick_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
-	Itr left = beg;
-	Itr right = end;
-	--right;
-	Itr rend = right;
+	//add a stack item
+	struct stack_less_data {
+		Itr beg;
+		Itr end;
+	};
+	vector<stack_less_data> stk;
+	stack_less_data dat = {
+		beg,
+		end - 1
+	};
+	stk.push_back(std::move(dat));
 
-	auto pivot = half_point(beg, end);
-	while(left != right) {
-		//all that are equal go to the left!!
-		while(left != pivot && !(*pivot < *left))
-			++left;
-		while(right != pivot && *pivot < *right)
-			--right;
-		if(left != right) {
-			std::swap(*left, *right);
-			if(left == pivot)
-				pivot = right;
-			else if(right == pivot)
-				pivot = left;
+	while(stk.size() > 0) {
+		stack_less_data tmp = stk.back();
+		stk.pop_back();
+		Itr left = tmp.beg;
+		Itr right = tmp.end;
+		Itr pivot = half_point(tmp.beg, tmp.end);
+
+		while(left != right) {
+			//all that are equal go to the right
+			while(left != right && (left != pivot && less_func(*left, *pivot)))
+				++left;
+			while(left != right && (right == pivot || greater_equal_func(*right, *pivot)))
+				--right;
+			if(left != right) {
+				std::swap(*left, *right);
+				if(left == pivot)
+					pivot = right;
+				//we have swapped the less to the left, and greater to the right, move to next
+				if(left != right)
+					++left;
+				if(left != right)
+					--right;
+			}
+		}
+
+		//if right is on the less side, move back
+		if(right != pivot && less_func(*right, *pivot))
+			++right;
+		//move the pivot into place
+		stlib_internalm::move_pivot(right, pivot);
+
+		if(distance(tmp.beg, right) > 1) {
+			stack_less_data dat = {
+				tmp.beg,
+				right - 1
+			};
+			stk.push_back(std::move(dat));
+		}
+		if(distance(pivot + 1, tmp.end + 1) > 1) {
+			stack_less_data dat = {
+				pivot + 1,
+				tmp.end
+			};
+			stk.push_back(std::move(dat));
 		}
 	}
-
-	if(beg != left) quick_sort(beg, left);
-	if(left != rend) quick_sort(left, end);
 }
-
-
 template<typename Itr, typename Comp>
 void quick_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
+	//add a stack item
+	struct stack_less_data {
+		Itr beg;
+		Itr end;
+	};
+	vector<stack_less_data> stk;
+	stack_less_data dat = {
+		beg,
+		end - 1
+	};
+	stk.push_back(std::move(dat));
+
+	while(stk.size() > 0) {
+		stack_less_data tmp = stk.back();
+		stk.pop_back();
+		Itr left = tmp.beg;
+		Itr right = tmp.end;
+		Itr pivot = half_point(tmp.beg, tmp.end);
+
+		while(left != right) {
+			//all that are equal go to the right
+			while(left != right && (left != pivot && less_func(*left, *pivot, cmp)))
+				++left;
+			while(left != right && (right == pivot || greater_equal_func(*right, *pivot, cmp)))
+				--right;
+			if(left != right) {
+				std::swap(*left, *right);
+				if(left == pivot)
+					pivot = right;
+				//we have swapped the less to the left, and greater to the right, move to next
+				if(left != right)
+					++left;
+				if(left != right)
+					--right;
+			}
+		}
+
+		//if right is on the less side, move back
+		if(right != pivot && less_func(*right, *pivot, cmp))
+			++right;
+		//move the pivot into place
+		stlib_internal::move_pivot(right, pivot, cmp);
+
+		if(distance(tmp.beg, right) > 1) {
+			stack_less_data dat = {
+				tmp.beg,
+				right - 1
+			};
+			stk.push_back(std::move(dat));
+		}
+		if(distance(pivot + 1, tmp.end + 1) > 1) {
+			stack_less_data dat = {
+				pivot + 1,
+				tmp.end
+			};
+			stk.push_back(std::move(dat));
+		}
+	}
+}
+
+
+template<typename Itr>
+void stack_quick_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
 	Itr left = beg;
 	Itr right = end;
 	--right;
-	Itr rend = right;
 
-	auto pivot = half_point(beg, end);
+	Itr pivot = half_point(beg, end);
 	while(left != right) {
-		//all that are equal go to the left!!
-		while(left != pivot && !cmp(*pivot, *left))
+		//all that are equal go to the right
+		while(left != right && (left != pivot && less_func(*left, *pivot)))
 			++left;
-		while(right != pivot && cmp(*pivot, *right))
+		while(left != right && (right == pivot || greater_equal_func(*right, *pivot)))
 			--right;
 		if(left != right) {
 			std::swap(*left, *right);
 			if(left == pivot)
 				pivot = right;
-			else if(right == pivot)
-				pivot = left;
+			//we have swapped the less to the left, and greater to the right, move to next
+			if(left != right)
+				++left;
+			if(left != right)
+				--right;
 		}
 	}
 
-	if(beg != left) quick_sort(beg, left, cmp);
-	if(left != rend) quick_sort(left, end, cmp);
-}
+	//if right is on the less side, move back
+	if(right != pivot && less_func(*right, *pivot))
+		++right;
+	//move the pivot into place
+	stlib_internal::move_pivot(right, pivot);
 
-template<typename Itr>
-void sweep_sort(Itr beg, Itr end) {
-	if(distance(beg, end) <= 1)
-		return;
-	auto pivot = half_point(beg, end);
-
-	//record to pivot + 1 for later use
-	Itr pivotstore = pivot + 1;
-
-	//go from the pivot to the beginning, find all of the items greater than pivot, move them past the pivot
-	size_t greater_count = 0;
-	size_t less_count = 0;
-	size_t total_less_count = 0;
-	{
-		Itr it = pivot - 1;
-		Itr moveit = pivot + 1;
-		while(it != beg - 1) {
-			//count in those less (or equal) to pivot
-			while(it != beg - 1 && !(*pivot < *it))
-				--it;
-			if(it != beg - 1) {
-				--it;
-				++greater_count;
-			}
-			//count in those greater than pivot
-			while(it != beg - 1 && *pivot < *it) {
-				--it;
-				++greater_count;
-			}
-
-			//do move
-			rotate(it + 1, it + (1 + greater_count), moveit);
-			moveit -= greater_count;
-			pivot -= greater_count;
-
-			greater_count = 0;
-			if(it != beg - 1)
-				--it;
-		}
-	}
-
-	//go from the old pivot to the end, find all of the items less than pivot, move them after the pivot
-	{
-		Itr it = pivotstore;
-		while(it != end) {
-			//count in those greater (or equal) to pivot
-			while(it != end && !(*it < *pivot))
-				++it;
-			if(it != end) {
-				++it;
-				++less_count;
-				++total_less_count;
-			}
-			//count in those less than pivot
-			while(it != end && *it < *pivot) {
-				++it;
-				++less_count;
-				++total_less_count;
-			}
-
-			//do move
-			rotate(pivotstore, it - less_count, it);
-			pivotstore += less_count;
-
-			less_count = 0;
-			if(it != end)
-				++it;
-		}
-	}
-
-	//do a final rotate to reorder pivot
-	rotate(pivot, pivotstore - total_less_count, pivotstore);
-	pivot += distance(pivotstore - total_less_count, pivotstore);
-
-	sweep_sort(beg, pivot);
-	sweep_sort(pivot + 1, end);
+	stack_quick_sort(beg, right);
+	stack_quick_sort(pivot + 1, end);
 }
 
 
 template<typename Itr, typename Comp>
-void sweep_sort(Itr beg, Itr end, Comp cmp) {
+void stack_quick_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
-	auto pivot = half_point(beg, end);
+	Itr left = beg;
+	Itr right = end;
+	--right;
 
+	Itr pivot = half_point(beg, end);
+	while(left != right) {
+		//all that are equal go to the right
+		while(left != right && (left != pivot && less_func(*left, *pivot, cmp)))
+			++left;
+		while(left != right && (right == pivot || greater_equal_func(*right, *pivot, cmp)))
+			--right;
+		if(left != right) {
+			std::swap(*left, *right);
+			if(left == pivot)
+				pivot = right;
+			//we have swapped the less to the left, and greater to the right, move to next
+			if(left != right)
+				++left;
+			if(left != right)
+				--right;
+		}
+	}
+
+	//if right is on the less side, move back
+	if(right != pivot && less_func(*right, *pivot, cmp))
+		++right;
+	//move the pivot into place
+	stlib_internal::move_pivot(right, pivot, cmp);
+
+	stack_quick_sort(beg, right, cmp);
+	stack_quick_sort(pivot + 1, end, cmp);
+}
+
+namespace stlib_internal {
+template<typename Itr>
+void sweep_sort_internal(Itr& pivot, Itr beg, Itr end) {
 	//record to pivot + 1 for later use
 	Itr pivotstore = pivot + 1;
 
@@ -224,20 +386,20 @@ void sweep_sort(Itr beg, Itr end, Comp cmp) {
 		Itr moveit = pivot + 1;
 		while(it != beg - 1) {
 			//count in those less (or equal) to pivot
-			while(it != beg - 1 && !cmp(*pivot, *it))
+			while(it != beg - 1 && less_equal_func(*it, *pivot))
 				--it;
 			if(it != beg - 1) {
 				--it;
 				++greater_count;
 			}
 			//count in those greater than pivot
-			while(it != beg - 1 && cmp(*pivot, *it)) {
+			while(it != beg - 1 && greater_func(*it, *pivot)) {
 				--it;
 				++greater_count;
 			}
 
 			//do move
-			rotate(it + 1, it + (1 + greater_count), moveit);
+			stlib::rotate(it + 1, it + (1 + greater_count), moveit);
 			moveit -= greater_count;
 			pivot -= greater_count;
 
@@ -252,7 +414,7 @@ void sweep_sort(Itr beg, Itr end, Comp cmp) {
 		Itr it = pivotstore;
 		while(it != end) {
 			//count in those greater (or equal) to pivot
-			while(it != end && !cmp(*it, *pivot))
+			while(it != end && greater_equal_func(*it, *pivot))
 				++it;
 			if(it != end) {
 				++it;
@@ -260,14 +422,14 @@ void sweep_sort(Itr beg, Itr end, Comp cmp) {
 				++total_less_count;
 			}
 			//count in those less than pivot
-			while(it != end && cmp(*it, *pivot)) {
+			while(it != end && less_func(*it, *pivot)) {
 				++it;
 				++less_count;
 				++total_less_count;
 			}
 
-			//do move
-			rotate(pivotstore, it - less_count, it);
+			//do moveg
+			stlib::rotate(pivotstore, it - less_count, it);
 			pivotstore += less_count;
 
 			less_count = 0;
@@ -277,13 +439,183 @@ void sweep_sort(Itr beg, Itr end, Comp cmp) {
 	}
 
 	//do a final rotate to reorder pivot
-	rotate(pivot, pivotstore - total_less_count, pivotstore);
+	stlib::rotate(pivot, pivotstore - total_less_count, pivotstore);
 	pivot += distance(pivotstore - total_less_count, pivotstore);
+}
+}
+template<typename Itr>
+void stack_sweep_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
+	Itr pivot = half_point(beg, end);
 
-	sweep_sort(beg, pivot, cmp);
-	sweep_sort(pivot + 1, end, cmp);
+	stlib_internal::sweep_sort_internal(pivot, beg, end);
+
+	stack_sweep_sort(beg, pivot);
+	stack_sweep_sort(pivot + 1, end);
+}
+template<typename Itr>
+void sweep_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
+	//add a stack item
+	struct stack_less_data {
+		Itr beg;
+		Itr end;
+	};
+	vector<stack_less_data> stk;
+	stack_less_data dat = {
+		beg,
+		end
+	};
+	stk.push_back(std::move(dat));
+	while(stk.size() > 0) {
+		stack_less_data item = stk.back();
+		stk.pop_back();
+
+		Itr pivot = half_point(item.beg, item.end);
+
+		stlib_internal::sweep_sort_internal(pivot, item.beg, item.end);
+
+		if(distance(item.beg, pivot) > 1) {
+			stack_less_data dat = {
+				item.beg,
+				pivot
+			};
+			stk.push_back(std::move(dat));
+		}
+		if(distance(pivot + 1, item.end) > 1) {
+			stack_less_data dat = {
+				pivot + 1,
+				item.end
+			};
+			stk.push_back(std::move(dat));
+		}
+	}
 }
 
+namespace stlib_internal {
+template<typename Itr, typename Comp>
+void sweep_sort_internal(Itr& pivot, Itr beg, Itr end, Comp cmp) {
+	//record to pivot + 1 for later use
+	Itr pivotstore = pivot + 1;
+
+	//go from the pivot to the beginning, find all of the items greater than pivot, move them past the pivot
+	size_t greater_count = 0;
+	size_t less_count = 0;
+	size_t total_less_count = 0;
+	{
+		Itr it = pivot - 1;
+		Itr moveit = pivot + 1;
+		while(it != beg - 1) {
+			//count in those less (or equal) to pivot
+			while(it != beg - 1 && less_equal_func(*it, *pivot, cmp))
+				--it;
+			if(it != beg - 1) {
+				--it;
+				++greater_count;
+			}
+			//count in those greater than pivot
+			while(it != beg - 1 && greater_func(*it, *pivot, cmp)) {
+				--it;
+				++greater_count;
+			}
+
+			//do move
+			stlib::rotate(it + 1, it + (1 + greater_count), moveit);
+			moveit -= greater_count;
+			pivot -= greater_count;
+
+			greater_count = 0;
+			if(it != beg - 1)
+				--it;
+		}
+	}
+
+	//go from the old pivot to the end, find all of the items less than pivot, move them after the pivot
+	{
+		Itr it = pivotstore;
+		while(it != end) {
+			//count in those greater (or equal) to pivot
+			while(it != end && greater_equal_func(*it, *pivot, cmp))
+				++it;
+			if(it != end) {
+				++it;
+				++less_count;
+				++total_less_count;
+			}
+			//count in those less than pivot
+			while(it != end && less_func(*it, *pivot, cmp)) {
+				++it;
+				++less_count;
+				++total_less_count;
+			}
+
+			//do move
+			stlib::rotate(pivotstore, it - less_count, it);
+			pivotstore += less_count;
+
+			less_count = 0;
+			if(it != end)
+				++it;
+		}
+	}
+
+	//do a final rotate to reorder pivot
+	stlib::rotate(pivot, pivotstore - total_less_count, pivotstore);
+	pivot += distance(pivotstore - total_less_count, pivotstore);
+}
+}
+template<typename Itr, typename Comp>
+void stack_sweep_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	Itr pivot = half_point(beg, end);
+
+	stlib_internal::sweep_sort_internal(pivot, beg, end, cmp);
+
+	stack_sweep_sort(beg, pivot);
+	stack_sweep_sort(pivot + 1, end);
+}
+template<typename Itr, typename Comp>
+void sweep_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	//add a stack item
+	struct stack_less_data {
+		Itr beg;
+		Itr end;
+	};
+	vector<stack_less_data> stk;
+	stack_less_data dat = {
+		beg,
+		end
+	};
+	stk.push_back(std::move(dat));
+	while(stk.size() > 0) {
+		stack_less_data item = stk.back();
+		stk.pop_back();
+
+		Itr pivot = half_point(item.beg, item.end);
+
+		stlib_internal::sweep_sort_internal(pivot, item.beg, item.end, cmp);
+
+		if(distance(item.beg, pivot) > 1) {
+			stack_less_data dat = {
+				item.beg,
+				pivot
+			};
+			stk.push_back(std::move(dat));
+		}
+		if(distance(pivot + 1, item.end) > 1) {
+			stack_less_data dat = {
+				pivot + 1,
+				item.end
+			};
+			stk.push_back(std::move(dat));
+		}
+	}
+}
 
 namespace stlib_internal {
 template<typename Itr>
@@ -294,7 +626,7 @@ void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf) {
 	}
 	if(distance(beg, end) == 1) {
 		nhalf = beg;
-		if(*nhalf < *pivot)
+		if(less_func(*nhalf, *pivot))
 			++nhalf;
 		return;
 	}
@@ -308,7 +640,7 @@ void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf) {
 
 	//do rotate to combine the halfs
 	//swap the greater of the first with the less of the second
-	rotate(nhalf1, half, nhalf2);
+	stlib::rotate(nhalf1, half, nhalf2);
 	//keep track of pivot, pivot moves lesser up
 	if(pivot >= nhalf1 && pivot < half)
 		pivot += distance(half, nhalf2);
@@ -318,45 +650,60 @@ void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf) {
 }
 }
 template<typename Itr>
-void merge_sweep_sort(Itr beg, Itr end) {
+void stack_merge_sweep_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
-	auto pivot = half_point(beg, end);
+	Itr pivot = half_point(beg, end);
 
 	Itr nhalf;
 	stlib_internal::merge_sweep_sort_recurse(pivot, beg, end, nhalf);
 
-	size_t greater_count = 0;
-	{
-		Itr it = pivot - 1;
-		Itr moveit = pivot + 1;
-		while(it != nhalf - 1) {
-			//count in those less (or equal) to pivot
-			while(it != nhalf - 1 && !(*pivot < *it))
-				--it;
-			if(it != nhalf - 1) {
-				--it;
-				++greater_count;
-			}
-			//count in those greater than pivot
-			while(it != nhalf - 1 && *pivot < *it) {
-				--it;
-				++greater_count;
-			}
-
-			//do move
-			rotate(it + 1, it + (1 + greater_count), moveit);
-			moveit -= greater_count;
-			pivot -= greater_count;
-
-			greater_count = 0;
-			if(it != nhalf - 1)
-				--it;
-		}
-	}
+	stlib_internal::move_pivot(nhalf, pivot);
 
 	merge_sweep_sort(beg, nhalf);
 	merge_sweep_sort(pivot + 1, end);
+}
+template<typename Itr>
+void merge_sweep_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
+	//add a stack item
+	struct stack_less_data {
+		Itr beg;
+		Itr end;
+	};
+	vector<stack_less_data> stk;
+	stack_less_data dat = {
+		beg,
+		end
+	};
+	stk.push_back(std::move(dat));
+	while(stk.size() > 0) {
+		stack_less_data item = stk.back();
+		stk.pop_back();
+
+		Itr pivot = half_point(item.beg, item.end);
+
+		Itr nhalf;
+		stlib_internal::merge_sweep_sort_recurse(pivot, item.beg, item.end, nhalf);
+
+		stlib_internal::move_pivot(nhalf, pivot);
+
+		if(distance(item.beg, nhalf) > 1) {
+			stack_less_data dat = {
+				item.beg,
+				nhalf
+			};
+			stk.push_back(std::move(dat));
+		}
+		if(distance(pivot + 1, item.end) > 1) {
+			stack_less_data dat = {
+				pivot + 1,
+				item.end
+			};
+			stk.push_back(std::move(dat));
+		}
+	}
 }
 namespace stlib_internal {
 template<typename Itr, typename Comp>
@@ -367,7 +714,7 @@ void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf, Comp cmp
 	}
 	if(distance(beg, end) == 1) {
 		nhalf = beg;
-		if(cmp(*nhalf, *pivot))
+		if(less_func(*nhalf, *pivot, cmp))
 			++nhalf;
 		return;
 	}
@@ -381,7 +728,7 @@ void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf, Comp cmp
 
 	//do rotate to combine the halfs
 	//swap the greater of the first with the less of the second
-	rotate(nhalf1, half, nhalf2);
+	stlib::rotate(nhalf1, half, nhalf2);
 	//keep track of pivot, pivot moves lesser up
 	if(pivot >= nhalf1 && pivot < half)
 		pivot += distance(half, nhalf2);
@@ -391,45 +738,60 @@ void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf, Comp cmp
 }
 }
 template<typename Itr, typename Comp>
-void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
+void stack_merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
-	auto pivot = half_point(beg, end);
+	Itr pivot = half_point(beg, end);
 
 	Itr nhalf;
 	stlib_internal::merge_sweep_sort_recurse(pivot, beg, end, nhalf, cmp);
 
-	size_t greater_count = 0;
-	{
-		Itr it = pivot - 1;
-		Itr moveit = pivot + 1;
-		while(it != nhalf - 1) {
-			//count in those less (or equal) to pivot
-			while(it != nhalf - 1 && !cmp(*pivot, *it))
-				--it;
-			if(it != nhalf - 1) {
-				--it;
-				++greater_count;
-			}
-			//count in those greater than pivot
-			while(it != nhalf - 1 && cmp(*pivot, *it)) {
-				--it;
-				++greater_count;
-			}
-
-			//do move
-			rotate(it + 1, it + (1 + greater_count), moveit);
-			moveit -= greater_count;
-			pivot -= greater_count;
-
-			greater_count = 0;
-			if(it != nhalf - 1)
-				--it;
-		}
-	}
+	stlib_internal::move_pivot(nhalf, pivot, cmp);
 
 	merge_sweep_sort(beg, nhalf, cmp);
 	merge_sweep_sort(pivot + 1, end, cmp);
+}
+template<typename Itr, typename Comp>
+void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	//add a stack item
+	struct stack_less_data {
+		Itr beg;
+		Itr end;
+	};
+	vector<stack_less_data> stk;
+	stack_less_data dat = {
+		beg,
+		end
+	};
+	stk.push_back(std::move(dat));
+	while(stk.size() > 0) {
+		stack_less_data item = stk.back();
+		stk.pop_back();
+
+		Itr pivot = half_point(item.beg, item.end);
+
+		Itr nhalf;
+		stlib_internal::merge_sweep_sort_recurse(pivot, item.beg, item.end, nhalf, cmp);
+
+		stlib_internal::move_pivot(nhalf, pivot, cmp);
+
+		if(distance(item.beg, nhalf) > 1) {
+			stack_less_data dat = {
+				item.beg,
+				nhalf
+			};
+			stk.push_back(std::move(dat));
+		}
+		if(distance(pivot + 1, item.end) > 1) {
+			stack_less_data dat = {
+				pivot + 1,
+				item.end
+			};
+			stk.push_back(std::move(dat));
+		}
+	}
 }
 
 
@@ -442,7 +804,7 @@ void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, char* buf) {
 
 	//go through both lists, build the sorted list
 	for(; beg1 != end1 && beg2 != end2; ++tmp) {
-		if(*beg2 < *beg1) {
+		if(less_func(*beg2, *beg1)) {
 			construct(*tmp, std::move(*beg2));
 			++beg2;
 		} else {
@@ -499,7 +861,7 @@ void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, char* buf, Comp cmp)
 
 	//go through both lists, build the sorted list
 	for(; beg1 != end1 && beg2 != end2; ++tmp) {
-		if(cmp(*beg2, *beg1)) {
+		if(less_func(*beg2, *beg1, cmp)) {
 			construct(*tmp, std::move(*beg2));
 			++beg2;
 		} else {
@@ -547,6 +909,41 @@ bool merge_sort(Itr beg, Itr end, Comp cmp) {
 }
 
 template<typename Itr>
+void bubble_sort(Itr beg, Itr end) {
+	bool sorted = false;
+	Itr ed = end; --ed;
+	while(!sorted) {
+		sorted = true;
+		for(Itr bg = beg; bg != ed; ++bg) {
+			Itr nxt = bg;
+			++nxt;
+			if(less_func(*nxt, *bg)) {
+				std::swap(*bg, *nxt);
+				sorted = false;
+			}
+		}
+		--ed;
+	}
+}
+template<typename Itr, typename Comp>
+void bubble_sort(Itr beg, Itr end, Comp cmp) {
+	bool sorted = false;
+	Itr ed = end; --ed;
+	while(!sorted) {
+		sorted = true;
+		for(Itr bg = beg; bg != ed; ++bg) {
+			Itr nxt = bg;
+			++nxt;
+			if(less_func(*nxt, *bg, cmp)) {
+				std::swap(*bg, *nxt);
+				sorted = false;
+			}
+		}
+		--ed;
+	}
+}
+
+template<typename Itr>
 inline void stable_sort(Itr beg, Itr end) {
 	merge_sort(beg, end);
 }
@@ -566,14 +963,14 @@ inline void sort(Itr beg, Itr end, Comp cmp) {
 template<typename Itr>
 bool is_sorted(Itr beg, Itr end) {
 	for(; beg != end - 1; ++beg)
-		if(*(beg + 1) < *beg)
+		if(less_func(*(beg + 1), *beg))
 			return false;
 	return true;
 }
 template<typename Itr>
 bool is_reverse_sorted(Itr beg, Itr end) {
 	for(; beg != end - 1; ++beg)
-		if(*(beg + 1) > *beg)
+		if(greater_func(*(beg + 1), *beg))
 			return false;
 	return true;
 }
