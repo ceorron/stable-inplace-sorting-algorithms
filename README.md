@@ -6,11 +6,11 @@ They have the following characteristics.
 
 | Name | Inplace | Stable | Average Complexity (Big O) | Worst Case Complexity (Big O) | Additional memeory | speed sorting 1000 random numbers (microseconds) (MSVC compiler in release x64) |
 | --- | --- | --- | --- | --- | --- | --- |
-| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 143 |
+| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 141 |
 | merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 57 |
-| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 577 |
-| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 354 |
-| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 1075 |
+| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 284 |
+| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 339 |
+| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 1026 |
 
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
 
