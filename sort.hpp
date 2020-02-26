@@ -51,6 +51,10 @@ void construct(T& lhs, T&& rhs) {
 
 //some function abstractions, only use less than operator
 template<typename T>
+inline bool equal_func(const T& lhs, const T& rhs) {
+	return !(lhs < rhs) & !(rhs < lhs);
+}
+template<typename T>
 inline bool less_func(const T& lhs, const T& rhs) {
 	return lhs < rhs;
 }
@@ -65,6 +69,10 @@ inline bool less_equal_func(const T& lhs, const T& rhs) {
 template<typename T>
 inline bool greater_equal_func(const T& lhs, const T& rhs) {
 	return !(lhs < rhs);
+}
+template<typename T, typename Comp>
+inline bool equal_func(const T& lhs, const T& rhs, Comp cmp) {
+	return !cmp(lhs, rhs) & !cmp(rhs, lhs);
 }
 template<typename T, typename Comp>
 inline bool less_func(const T& lhs, const T& rhs, Comp cmp) {
@@ -385,13 +393,17 @@ void sweep_sort_internal(Itr& pivot, Itr beg, Itr end) {
 	//go forwards move those less than pivot to right side of pivot
 	Itr moveright = begright;
 	Itr tmpright = begright;
-	size_t right_total = 0;
 	for(; begright != end; ++begright) {
 		if(less_func(*begright, *pivot)) {
-			if(moveright != begright)
+			if(moveright != begright) {
+				//swap the inbetween values that are equal to maintain stable orderering
+				Itr moveequal = moveright + 1;
+				for(; moveequal != begright; ++moveequal)
+					if(equal_func(*moveequal, *moveright))
+						std::swap(*moveequal, *moveright);
 				std::swap(*moveright, *begright);
+			}
 			++moveright;
-			++right_total;
 		}
 	}
 	//go backwards move those greater than pivot to left side of pivot
@@ -400,8 +412,14 @@ void sweep_sort_internal(Itr& pivot, Itr beg, Itr end) {
 		do {
 			--begleft;
 			if(greater_func(*begleft, *pivot)) {
-				if(moveleft != begleft)
+				if(moveleft != begleft) {
+					//swap the inbetween values that are equal to maintain stable orderering
+					Itr moveequal = moveleft - 1;
+					for(; moveequal != begleft; --moveequal)
+						if(equal_func(*moveequal, *moveleft))
+							std::swap(*moveequal, *moveleft);
 					std::swap(*moveleft, *begleft);
+				}
 				--moveleft;
 			}
 		} while(begleft != (beg - 1));
@@ -480,13 +498,17 @@ void sweep_sort_internal(Itr& pivot, Itr beg, Itr end, Comp cmp) {
 	//go forwards move those less than pivot to right side of pivot
 	Itr moveright = begright;
 	Itr tmpright = begright;
-	size_t right_total = 0;
 	for(; begright != end; ++begright) {
 		if(less_func(*begright, *pivot, cmp)) {
-			if(moveright != begright)
+			if(moveright != begright) {
+				//swap the inbetween values that are equal to maintain stable orderering
+				Itr moveequal = moveright + 1;
+				for(; moveequal != begright; ++moveequal)
+					if(equal_func(*moveequal, *moveright, cmp))
+						std::swap(*moveequal, *moveright);
 				std::swap(*moveright, *begright);
+			}
 			++moveright;
-			++right_total;
 		}
 	}
 	//go backwards move those greater than pivot to left side of pivot
@@ -495,8 +517,14 @@ void sweep_sort_internal(Itr& pivot, Itr beg, Itr end, Comp cmp) {
 		do {
 			--begleft;
 			if(greater_func(*begleft, *pivot, cmp)) {
-				if(moveleft != begleft)
+				if(moveleft != begleft) {
+					//swap the inbetween values that are equal to maintain stable orderering
+					Itr moveequal = moveleft - 1;
+					for(; moveequal != begleft; --moveequal)
+						if(equal_func(*moveequal, *moveleft, cmp))
+							std::swap(*moveequal, *moveleft);
 					std::swap(*moveleft, *begleft);
+				}
 				--moveleft;
 			}
 		} while(begleft != (beg - 1));
