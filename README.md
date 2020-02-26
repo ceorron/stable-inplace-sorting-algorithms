@@ -144,7 +144,7 @@ int main() {
         //test sweep merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 1000; ++i)
-            vec.push_back(gen.rand());
+            vec.push_back(rand());
 
         {
             timer tmr;
