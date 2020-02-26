@@ -142,7 +142,7 @@ int main() {
     {
         std::cout << "test bubble sort" << std::endl;
         //test sweep merge sort
-        vector<uint32_t> vec;
+        std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 1000; ++i)
             vec.push_back(gen.rand());
 
