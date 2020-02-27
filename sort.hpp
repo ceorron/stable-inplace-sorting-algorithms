@@ -358,7 +358,7 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stk.resize(50);
 	size_t idx = 0;
 	stack_less_data dat = {
@@ -425,7 +425,7 @@ template<typename Itr>
 void stable_quick_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
-	vector<size_t> idxs;
+	std::vector<size_t> idxs;
 	idxs.resize(distance(beg, end));
 	for(size_t i = 0; i < idxs.size(); ++i)
 		idxs[i] = i;
@@ -461,7 +461,7 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stk.resize(50);
 	size_t idx = 0;
 	stack_less_data dat = {
@@ -528,7 +528,7 @@ template<typename Itr, typename Comp>
 void stable_quick_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
-	vector<size_t> idxs;
+	std::vector<size_t> idxs;
 	idxs.resize(distance(beg, end));
 	for(size_t i = 0; i < idxs.size(); ++i)
 		idxs[i] = i;
