@@ -161,6 +161,78 @@ int main() {
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
+	{
+        std::cout << "test insertion sort" << std::endl;
+        //test sweep merge sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            insertion_sort(vec.begin(), vec.end());
+        }
+
+        if(verbose) {
+            std::cout << "[" << std::endl;
+            for(uint32_t i = 0; i < count; ++i) {
+                std::cout << "[ " << vec[i] << "], ";
+                if(i > 0 && i % 5 == 0)
+                    std::cout << std::endl;
+            }
+            std::cout << "]" << std::endl;
+        }
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test std::sort" << std::endl;
+        //test sweep merge sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            std::sort(&*vec.begin(), &*vec.end());
+        }
+
+        if(verbose) {
+            std::cout << "[" << std::endl;
+            for(uint32_t i = 0; i < count; ++i) {
+                std::cout << "[ " << vec[i] << "], ";
+                if(i > 0 && i % 5 == 0)
+                    std::cout << std::endl;
+            }
+            std::cout << "]" << std::endl;
+        }
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test std::stable_sort" << std::endl;
+        //test sweep merge sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            std::stable_sort(&*vec.begin(), &*vec.end());
+        }
+
+        if(verbose) {
+            std::cout << "[" << std::endl;
+            for(uint32_t i = 0; i < count; ++i) {
+                std::cout << "[ " << vec[i] << "], ";
+                if(i > 0 && i % 5 == 0)
+                    std::cout << std::endl;
+            }
+            std::cout << "]" << std::endl;
+        }
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
 
 	return 0;
 }
