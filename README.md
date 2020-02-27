@@ -1,12 +1,13 @@
 # stable-in place-sorting-algorithms
 
-Included are implementations of quick_sort and merge_sort as well as new sorting algorithms sweep_sort and merge_sweep_sort.
+Included are implementations of common sorting algorithms as well as new sorting algorithms sweep_sort and merge_sweep_sort.
 
 They have the following characteristics.
 
 | Name | Inplace | Stable | Average Complexity (Big O) | Worst Case Complexity (Big O) | Additional memeory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 59 | 6230 |
+| stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | (N) | 59 | 7049 |
 | merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 58 | 7252 |
 | sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 198 | 749901 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 243 | 33321 |
@@ -101,6 +102,28 @@ int main() {
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
+        std::cout << "test stable quick sort" << std::endl;
+        //test quick sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < count; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stable_quick_sort(vec.begin(), vec.end());
+        }
+
+		std::cout << "[" << std::endl;
+		for(uint32_t i = 0; i < count; ++i) {
+			std::cout << "[ " << vec[i] << "], ";
+			if(i > 0 && i % 5 == 0)
+				std::cout << std::endl;
+		}
+		std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
         std::cout << "test sweep sort" << std::endl;
         //test stable quick sort
         std::vector<uint32_t> vec;
@@ -178,15 +201,13 @@ int main() {
             insertion_sort(vec.begin(), vec.end());
         }
 
-        if(verbose) {
-            std::cout << "[" << std::endl;
-            for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
-                if(i > 0 && i % 5 == 0)
-                    std::cout << std::endl;
-            }
-            std::cout << "]" << std::endl;
-        }
+		std::cout << "[" << std::endl;
+		for(uint32_t i = 0; i < count; ++i) {
+			std::cout << "[ " << vec[i] << "], ";
+			if(i > 0 && i % 5 == 0)
+				std::cout << std::endl;
+		}
+		std::cout << "]" << std::endl;
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -202,15 +223,13 @@ int main() {
             std::sort(&*vec.begin(), &*vec.end());
         }
 
-        if(verbose) {
-            std::cout << "[" << std::endl;
-            for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
-                if(i > 0 && i % 5 == 0)
-                    std::cout << std::endl;
-            }
-            std::cout << "]" << std::endl;
-        }
+		std::cout << "[" << std::endl;
+		for(uint32_t i = 0; i < count; ++i) {
+			std::cout << "[ " << vec[i] << "], ";
+			if(i > 0 && i % 5 == 0)
+				std::cout << std::endl;
+		}
+		std::cout << "]" << std::endl;
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -226,15 +245,13 @@ int main() {
             std::stable_sort(&*vec.begin(), &*vec.end());
         }
 
-        if(verbose) {
-            std::cout << "[" << std::endl;
-            for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
-                if(i > 0 && i % 5 == 0)
-                    std::cout << std::endl;
-            }
-            std::cout << "]" << std::endl;
-        }
+		std::cout << "[" << std::endl;
+		for(uint32_t i = 0; i < count; ++i) {
+			std::cout << "[ " << vec[i] << "], ";
+			if(i > 0 && i % 5 == 0)
+				std::cout << std::endl;
+		}
+		std::cout << "]" << std::endl;
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
