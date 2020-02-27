@@ -320,6 +320,221 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 	}
 }
 
+namespace stlib_internal {
+template<typename Itr, typename IdxItr>
+void stable_quick_sort_swap(Itr beg, Itr left, Itr right, IdxItr begidx) {
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+
+	std::swap(*left, *right);
+	std::swap(*(begidx + lidx), *(begidx + ridx));
+}
+template<typename Itr, typename IdxItr>
+bool stable_quick_sort_less_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
+	if(less_func(*left, *right))
+		return true;
+	if(greater_func(*left, *right))
+		return false;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	return *(begidx + lidx) < *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr>
+bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
+	if(less_func(*left, *right))
+		return false;
+	if(greater_func(*left, *right))
+		return true;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	return *(begidx + lidx) == *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr>
+void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
+	if(distance(beg, end) <= 1)
+		return;
+	//add a stack item
+	struct stack_less_data {
+		Itr beg;
+		Itr end;
+	};
+	vector<stack_less_data> stk;
+	stk.resize(50);
+	size_t idx = 0;
+	stack_less_data dat = {
+		beg,
+		end - 1
+	};
+	stk[idx++] = std::move(dat);
+
+	while(idx > 0) {
+		stack_less_data tmp = stk[--idx];
+		Itr left = tmp.beg - 1;
+		Itr right = tmp.end + 1;
+		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end);
+
+		do {
+			++left;
+			--right;
+			//pivot goes to the right!!
+			while(left != right && left != pivot && stable_quick_sort_less_func(beg, left, pivot, begidx))
+				++left;
+			while(left != right && stable_quick_sort_greater_equal_func(beg, right, pivot, begidx))
+				--right;
+			if(left == right)
+				break;
+
+			stable_quick_sort_swap(beg, left, right, begidx);
+			if(left == pivot)
+				pivot = right;
+		} while(left + 1 != right);
+
+		//if right is on the less side, move back
+		if(right != pivot) {
+			if(stable_quick_sort_less_func(beg, right, pivot, begidx))
+				++right;
+			//move the pivot into place
+			if(right != pivot) {
+				stable_quick_sort_swap(beg, right, pivot, begidx);
+				pivot = right;
+			}
+		}
+
+		if(distance(pivot + 1, tmp.end + 1) > 1) {
+			stack_less_data dat = {
+				pivot + 1,
+				tmp.end
+			};
+			stk[idx++] = std::move(dat);
+			if(idx == stk.size())
+				stk.resize(stk.size() * 2);
+		}
+		if(distance(tmp.beg, pivot) > 1) {
+			stack_less_data dat = {
+				tmp.beg,
+				pivot
+			};
+			stk[idx++] = std::move(dat);
+			if(idx == stk.size())
+				stk.resize(stk.size() * 2);
+		}
+	}
+}
+}
+template<typename Itr>
+void stable_quick_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
+	vector<size_t> idxs;
+	idxs.resize(distance(beg, end));
+	for(size_t i = 0; i < idxs.size(); ++i)
+		idxs[i] = i;
+	stlib_internal::stable_quick_sort_internal(beg, end, idxs.begin());
+}
+namespace stlib_internal {
+template<typename Itr, typename IdxItr, typename Comp>
+bool stable_quick_sort_less_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
+	if(less_func(*left, *right, cmp))
+		return true;
+	if(greater_func(*left, *right, cmp))
+		return false;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	return *(begidx + lidx) < *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr, typename Comp>
+bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
+	if(less_func(*left, *right, cmp))
+		return false;
+	if(greater_func(*left, *right, cmp))
+		return true;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	return *(begidx + lidx) == *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr, typename Comp>
+void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	//add a stack item
+	struct stack_less_data {
+		Itr beg;
+		Itr end;
+	};
+	vector<stack_less_data> stk;
+	stk.resize(50);
+	size_t idx = 0;
+	stack_less_data dat = {
+		beg,
+		end - 1
+	};
+	stk[idx++] = std::move(dat);
+
+	while(idx > 0) {
+		stack_less_data tmp = stk[--idx];
+		Itr left = tmp.beg - 1;
+		Itr right = tmp.end + 1;
+		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end);
+
+		do {
+			++left;
+			--right;
+			//pivot goes to the right!!
+			while(left != right && left != pivot && stable_quick_sort_less_func(beg, left, pivot, begidx, cmp))
+				++left;
+			while(left != right && stable_quick_sort_greater_equal_func(beg, right, pivot, begidx, cmp))
+				--right;
+			if(left == right)
+				break;
+
+			stable_quick_sort_swap(beg, left, right, begidx);
+			if(left == pivot)
+				pivot = right;
+		} while(left + 1 != right);
+
+		//if right is on the less side, move back
+		if(right != pivot) {
+			if(stable_quick_sort_less_func(beg, right, pivot, begidx, cmp))
+				++right;
+			//move the pivot into place
+			if(right != pivot) {
+				stable_quick_sort_swap(beg, right, pivot, begidx);
+				pivot = right;
+			}
+		}
+
+		if(distance(pivot + 1, tmp.end + 1) > 1) {
+			stack_less_data dat = {
+				pivot + 1,
+				tmp.end
+			};
+			stk[idx++] = std::move(dat);
+			if(idx == stk.size())
+				stk.resize(stk.size() * 2);
+		}
+		if(distance(tmp.beg, pivot) > 1) {
+			stack_less_data dat = {
+				tmp.beg,
+				pivot
+			};
+			stk[idx++] = std::move(dat);
+			if(idx == stk.size())
+				stk.resize(stk.size() * 2);
+		}
+	}
+}
+}
+template<typename Itr, typename Comp>
+void stable_quick_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	vector<size_t> idxs;
+	idxs.resize(distance(beg, end));
+	for(size_t i = 0; i < idxs.size(); ++i)
+		idxs[i] = i;
+	stlib_internal::stable_quick_sort_internal(beg, end, idxs.begin(), cmp);
+}
+
 
 template<typename Itr>
 bool stack_quick_sort(Itr beg, Itr end, uint32_t limit = 100) {
