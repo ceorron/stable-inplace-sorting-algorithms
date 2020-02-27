@@ -645,8 +645,8 @@ void stack_merge_sweep_sort(Itr beg, Itr end) {
 
 	stlib_internal::move_pivot(nhalf, pivot);
 
-	merge_sweep_sort(beg, nhalf);
-	merge_sweep_sort(pivot + 1, end);
+	stack_merge_sweep_sort(beg, nhalf);
+	stack_merge_sweep_sort(pivot + 1, end);
 }
 template<typename Itr>
 void merge_sweep_sort(Itr beg, Itr end) {
@@ -734,8 +734,8 @@ void stack_merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 
 	stlib_internal::move_pivot(nhalf, pivot, cmp);
 
-	merge_sweep_sort(beg, nhalf, cmp);
-	merge_sweep_sort(pivot + 1, end, cmp);
+	stack_merge_sweep_sort(beg, nhalf, cmp);
+	stack_merge_sweep_sort(pivot + 1, end, cmp);
 }
 template<typename Itr, typename Comp>
 void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
