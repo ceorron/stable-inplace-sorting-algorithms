@@ -5,15 +5,15 @@ Included are implementations of common sorting algorithms as well as new sorting
 They have the following characteristics.
 
 | Name | Inplace | Stable | Average Complexity (Big O) | Worst Case Complexity (Big O) | Additional memeory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 59 | 6230 |
-| stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | (N) | 83 | 7049 |
+| --- | --- | --- | --- | --- | --- | ---: | ---: |
+| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | - | 1095 | 9576891 |
+| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | - | 211 | 1102282 |
+| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | - | 198 | 749901 |
+| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | - | 243 | 33321 |
 | merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 58 | 7252 |
-| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 198 | 749901 |
-| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 243 | 33321 |
-| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 1095 | 9576891 |
-| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 211 | 1102282 |
-| std::sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 43 | 5523 |
+| stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | (N) | 83 | 7049 |
+| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | - | 59 | 6230 |
+| std::sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | - | 43 | 5523 |
 | std::stable_sort | No | Yes | O(n log n) | O(n log n) | (N) | 35 | 5067 |
 
 (All tests with MSVC compiler in release x64)
