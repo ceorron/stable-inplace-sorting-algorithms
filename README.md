@@ -6,11 +6,13 @@ They have the following characteristics.
 
 | Name | Inplace | Stable | Average Complexity (Big O) | Worst Case Complexity (Big O) | Additional memeory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 66 | 6711 |
-| merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 73 | 8410 |
-| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 269 | 764063 |
-| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 336 | 33625 |
-| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 1349 | 9616464 |
+| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 59 | 6230 |
+| merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 58 | 7252 |
+| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 198 | 749901 |
+| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 243 | 33321 |
+| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 1095 | 6842 |
+| std::sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 43 | 5523 |
+| std::stable_sort | No | Yes | O(n log n) | O(n log n) | (N) | 35 | 5067 |
 
 (All tests with MSVC compiler in release x64)
 (times in microseconds)
@@ -18,6 +20,8 @@ They have the following characteristics.
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
 
 The idea for sweep_sort and merge_sweep_sort came from the idea of using std::rotate as part of a recursive decent sorting algorithm, and so both sweep_sort and merge_sweep_sort make use of the rotate function.
+
+merge_sweep_sort gives the best overall performance for an in-place and stable sorting algorithm.
 
 # Example use - C++
 
