@@ -224,8 +224,10 @@ void quick_sort(Itr beg, Itr end) {
 			if(less_func(*right, *pivot))
 				++right;
 			//move the pivot into place
-			if(right != pivot)
+			if(right != pivot) {
 				std::swap(*right, *pivot);
+				pivot = right;
+			}
 		}
 
 		if(distance(pivot + 1, tmp.end + 1) > 1) {
@@ -291,8 +293,10 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 			if(less_func(*right, *pivot, cmp))
 				++right;
 			//move the pivot into place
-			if(right != pivot)
+			if(right != pivot) {
 				std::swap(*right, *pivot);
+				pivot = right;
+			}
 		}
 
 		if(distance(pivot + 1, tmp.end + 1) > 1) {
