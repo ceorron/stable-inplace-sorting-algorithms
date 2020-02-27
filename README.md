@@ -171,7 +171,7 @@ int main() {
         //test sweep merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
-            vec.push_back(gen.rand());
+            vec.push_back(rand());
 
         {
             timer tmr;
@@ -188,14 +188,14 @@ int main() {
             std::cout << "]" << std::endl;
         }
 
-        std::cout << "sorted : " << is_sorted(vec.begin(), vec.end()) << std::endl;
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
         std::cout << "test std::sort" << std::endl;
         //test sweep merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
-            vec.push_back(gen.rand());
+            vec.push_back(rand());
 
         {
             timer tmr;
@@ -212,14 +212,14 @@ int main() {
             std::cout << "]" << std::endl;
         }
 
-        std::cout << "sorted : " << is_sorted(vec.begin(), vec.end()) << std::endl;
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
         std::cout << "test std::stable_sort" << std::endl;
         //test sweep merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
-            vec.push_back(gen.rand());
+            vec.push_back(rand());
 
         {
             timer tmr;
@@ -236,7 +236,7 @@ int main() {
             std::cout << "]" << std::endl;
         }
 
-        std::cout << "sorted : " << is_sorted(vec.begin(), vec.end()) << std::endl;
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
 
     return 0;
