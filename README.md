@@ -113,13 +113,13 @@ int main() {
             stable_quick_sort(vec.begin(), vec.end());
         }
 
-		std::cout << "[" << std::endl;
-		for(uint32_t i = 0; i < count; ++i) {
-			std::cout << "[ " << vec[i] << "], ";
-			if(i > 0 && i % 5 == 0)
-				std::cout << std::endl;
-		}
-		std::cout << "]" << std::endl;
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -201,13 +201,13 @@ int main() {
             insertion_sort(vec.begin(), vec.end());
         }
 
-		std::cout << "[" << std::endl;
-		for(uint32_t i = 0; i < count; ++i) {
-			std::cout << "[ " << vec[i] << "], ";
-			if(i > 0 && i % 5 == 0)
-				std::cout << std::endl;
-		}
-		std::cout << "]" << std::endl;
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -223,13 +223,13 @@ int main() {
             std::sort(&*vec.begin(), &*vec.end());
         }
 
-		std::cout << "[" << std::endl;
-		for(uint32_t i = 0; i < count; ++i) {
-			std::cout << "[ " << vec[i] << "], ";
-			if(i > 0 && i % 5 == 0)
-				std::cout << std::endl;
-		}
-		std::cout << "]" << std::endl;
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -245,13 +245,13 @@ int main() {
             std::stable_sort(&*vec.begin(), &*vec.end());
         }
 
-		std::cout << "[" << std::endl;
-		for(uint32_t i = 0; i < count; ++i) {
-			std::cout << "[ " << vec[i] << "], ";
-			if(i > 0 && i % 5 == 0)
-				std::cout << std::endl;
-		}
-		std::cout << "]" << std::endl;
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
