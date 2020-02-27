@@ -10,7 +10,8 @@ They have the following characteristics.
 | merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 58 | 7252 |
 | sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 198 | 749901 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 243 | 33321 |
-| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 1095 | 6842 |
+| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 1095 | 9576891 |
+| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 211 | 1102282 |
 | std::sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 43 | 5523 |
 | std::stable_sort | No | Yes | O(n log n) | O(n log n) | (N) | 35 | 5067 |
 
@@ -146,7 +147,7 @@ int main() {
     {
         std::cout << "test bubble sort" << std::endl;
         //test sweep merge sort
-        std::vector<uint32_t> vec;
+        vvector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
             vec.push_back(rand());
 
@@ -164,6 +165,78 @@ int main() {
         std::cout << "]" << std::endl;
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test insertion sort" << std::endl;
+        //test sweep merge sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(gen.rand());
+
+        {
+            timer tmr;
+            insertion_sort(vec.begin(), vec.end());
+        }
+
+        if(verbose) {
+            std::cout << "[" << std::endl;
+            for(uint32_t i = 0; i < count; ++i) {
+                std::cout << "[ " << vec[i] << "], ";
+                if(i > 0 && i % 5 == 0)
+                    std::cout << std::endl;
+            }
+            std::cout << "]" << std::endl;
+        }
+
+        std::cout << "sorted : " << is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test std::sort" << std::endl;
+        //test sweep merge sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(gen.rand());
+
+        {
+            timer tmr;
+            std::sort(&*vec.begin(), &*vec.end());
+        }
+
+        if(verbose) {
+            std::cout << "[" << std::endl;
+            for(uint32_t i = 0; i < count; ++i) {
+                std::cout << "[ " << vec[i] << "], ";
+                if(i > 0 && i % 5 == 0)
+                    std::cout << std::endl;
+            }
+            std::cout << "]" << std::endl;
+        }
+
+        std::cout << "sorted : " << is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test std::stable_sort" << std::endl;
+        //test sweep merge sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(gen.rand());
+
+        {
+            timer tmr;
+            std::stable_sort(&*vec.begin(), &*vec.end());
+        }
+
+        if(verbose) {
+            std::cout << "[" << std::endl;
+            for(uint32_t i = 0; i < count; ++i) {
+                std::cout << "[ " << vec[i] << "], ";
+                if(i > 0 && i % 5 == 0)
+                    std::cout << std::endl;
+            }
+            std::cout << "]" << std::endl;
+        }
+
+        std::cout << "sorted : " << is_sorted(vec.begin(), vec.end()) << std::endl;
     }
 
     return 0;
