@@ -6,11 +6,11 @@ They have the following characteristics.
 
 | Name | Inplace | Stable | Average Complexity (Big O) | Worst Case Complexity (Big O) | Additional memeory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 119 | 10128 |
-| merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 57 | 7848 |
-| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 284 | 769621 |
-| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 339 | 41920 |
-| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 1026 | 9596190 |
+| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 66 | 6711 |
+| merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 73 | 8410 |
+| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 269 | 764063 |
+| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 336 | 33625 |
+| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | No | 1349 | 9616464 |
 
 (All tests with MSVC compiler in release x64)
 (times in microseconds)
