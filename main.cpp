@@ -74,15 +74,15 @@ int main() {
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
-        std::cout << "test merge sort" << std::endl;
-        //test merge sort
+        std::cout << "test stable quick sort" << std::endl;
+        //test quick sort
         std::vector<uint32_t> vec;
-        for(uint32_t i = 0; i < 700; ++i)
+        for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
 
         {
             timer tmr;
-            stlib::merge_sort(vec.begin(), vec.end());
+            stable_quick_sort(vec.begin(), vec.end());
         }
 
         std::cout << "[" << std::endl;
@@ -96,15 +96,15 @@ int main() {
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
-        std::cout << "test stable quick sort" << std::endl;
-        //test quick sort
+        std::cout << "test merge sort" << std::endl;
+        //test merge sort
         std::vector<uint32_t> vec;
-        for(uint32_t i = 0; i < count; ++i)
+        for(uint32_t i = 0; i < 700; ++i)
             vec.push_back(rand());
 
         {
             timer tmr;
-            stable_quick_sort(vec.begin(), vec.end());
+            stlib::merge_sort(vec.begin(), vec.end());
         }
 
         std::cout << "[" << std::endl;
