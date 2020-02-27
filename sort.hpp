@@ -186,7 +186,7 @@ void quick_sort(Itr beg, Itr end) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stk.resize(50);
 	size_t idx = 0;
 	stack_less_data dat = {
@@ -257,7 +257,7 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stk.resize(50);
 	size_t idx = 0;
 	stack_less_data dat = {
@@ -461,7 +461,7 @@ void sweep_sort(Itr beg, Itr end) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stk.resize(50);
 	size_t idx = 0;
 	stack_less_data dat = {
@@ -571,7 +571,7 @@ void sweep_sort(Itr beg, Itr end, Comp cmp) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stk.resize(50);
 	size_t idx = 0;
 	stack_less_data dat = {
@@ -663,7 +663,7 @@ void merge_sweep_sort(Itr beg, Itr end) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stk.resize(50);
 	size_t idx = 0;
 	stack_less_data dat = {
@@ -757,7 +757,7 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 		Itr beg;
 		Itr end;
 	};
-	vector<stack_less_data> stk;
+	std::vector<stack_less_data> stk;
 	stk.resize(50);
 	size_t idx = 0;
 	stack_less_data dat = {
