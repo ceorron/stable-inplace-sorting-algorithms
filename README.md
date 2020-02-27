@@ -6,7 +6,7 @@ They have the following characteristics.
 
 | Name | Inplace | Stable | Average Complexity (Big O) | Worst Case Complexity (Big O) | Additional memeory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 114 | 8114 |
+| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | No | 119 | 10128 |
 | merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 57 | 7848 |
 | sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 284 | 769621 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | No | 339 | 41920 |
