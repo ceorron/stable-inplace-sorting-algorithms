@@ -237,10 +237,10 @@ void quick_sort(Itr beg, Itr end) {
 			if(idx == stk.size())
 				stk.resize(stk.size() * 2);
 		}
-		if(distance(tmp.beg, pivot) > 1) {
+		if(distance(tmp.beg, pivot - 1) > 1) {
 			stack_less_data dat = {
 				tmp.beg,
-				pivot
+				pivot - 1
 			};
 			stk[idx++] = std::move(dat);
 			if(idx == stk.size())
@@ -308,10 +308,10 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 			if(idx == stk.size())
 				stk.resize(stk.size() * 2);
 		}
-		if(distance(tmp.beg, pivot) > 1) {
+		if(distance(tmp.beg, pivot - 1) > 1) {
 			stack_less_data dat = {
 				tmp.beg,
-				pivot
+				pivot - 1
 			};
 			stk[idx++] = std::move(dat);
 			if(idx == stk.size())
@@ -409,10 +409,10 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 			if(idx == stk.size())
 				stk.resize(stk.size() * 2);
 		}
-		if(distance(tmp.beg, pivot) > 1) {
+		if(distance(tmp.beg, pivot - 1) > 1) {
 			stack_less_data dat = {
 				tmp.beg,
-				pivot
+				pivot - 1
 			};
 			stk[idx++] = std::move(dat);
 			if(idx == stk.size())
@@ -512,10 +512,10 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
 			if(idx == stk.size())
 				stk.resize(stk.size() * 2);
 		}
-		if(distance(tmp.beg, pivot) > 1) {
+		if(distance(tmp.beg, pivot - 1) > 1) {
 			stack_less_data dat = {
 				tmp.beg,
-				pivot
+				pivot - 1
 			};
 			stk[idx++] = std::move(dat);
 			if(idx == stk.size())
