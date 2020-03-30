@@ -82,7 +82,7 @@ int main() {
 
         {
             timer tmr;
-            stable_quick_sort(vec.begin(), vec.end());
+            stlib::stable_quick_sort(vec.begin(), vec.end());
         }
 
         std::cout << "[" << std::endl;
@@ -192,7 +192,7 @@ int main() {
 
         {
             timer tmr;
-            insertion_sort(vec.begin(), vec.end());
+            stlib::insertion_sort(vec.begin(), vec.end());
         }
 
         std::cout << "[" << std::endl;
