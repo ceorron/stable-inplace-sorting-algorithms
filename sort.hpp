@@ -237,7 +237,7 @@ void quick_sort(Itr beg, Itr end) {
 			if(idx == stk.size())
 				stk.resize(stk.size() * 2);
 		}
-		if(distance(tmp.beg, pivot - 1) > 1) {
+		if(distance(tmp.beg, pivot) > 1) {
 			stack_less_data dat = {
 				tmp.beg,
 				pivot - 1
@@ -308,7 +308,7 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 			if(idx == stk.size())
 				stk.resize(stk.size() * 2);
 		}
-		if(distance(tmp.beg, pivot - 1) > 1) {
+		if(distance(tmp.beg, pivot) > 1) {
 			stack_less_data dat = {
 				tmp.beg,
 				pivot - 1
@@ -409,7 +409,7 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 			if(idx == stk.size())
 				stk.resize(stk.size() * 2);
 		}
-		if(distance(tmp.beg, pivot - 1) > 1) {
+		if(distance(tmp.beg, pivot) > 1) {
 			stack_less_data dat = {
 				tmp.beg,
 				pivot - 1
@@ -512,7 +512,7 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
 			if(idx == stk.size())
 				stk.resize(stk.size() * 2);
 		}
-		if(distance(tmp.beg, pivot - 1) > 1) {
+		if(distance(tmp.beg, pivot) > 1) {
 			stack_less_data dat = {
 				tmp.beg,
 				pivot - 1
