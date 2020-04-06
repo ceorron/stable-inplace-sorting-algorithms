@@ -276,7 +276,7 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 			++left;
 			--right;
 			//pivot goes to the right!!
-			while(left != right && left != pivot && less_equal_func(*left, *pivot, cmp))
+			while(left != right && left != pivot && less_func(*left, *pivot, cmp))
 				++left;
 			while(left != right && greater_equal_func(*right, *pivot, cmp))
 				--right;
