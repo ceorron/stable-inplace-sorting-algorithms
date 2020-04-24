@@ -77,7 +77,7 @@ int main() {
         std::cout << "test stable quick sort" << std::endl;
         //test quick sort
         std::vector<uint32_t> vec;
-        for(uint32_t i = 0; i < count; ++i)
+        for(uint32_t i = 0; i < 700; ++i)
             vec.push_back(rand());
 
         {
