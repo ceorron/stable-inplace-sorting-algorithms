@@ -1128,6 +1128,8 @@ bool merge_sort(Itr beg, Itr end, Comp cmp) {
 
 template<typename Itr>
 void bubble_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
 	bool sorted = false;
 	Itr ed = end; --ed;
 	while(!sorted) {
@@ -1145,6 +1147,8 @@ void bubble_sort(Itr beg, Itr end) {
 }
 template<typename Itr, typename Comp>
 void bubble_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
 	bool sorted = false;
 	Itr ed = end; --ed;
 	while(!sorted) {
