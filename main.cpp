@@ -75,7 +75,7 @@ int main() {
     }
     {
         std::cout << "test stable quick sort" << std::endl;
-        //test quick sort
+        //test stable quick sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
             vec.push_back(rand());
@@ -119,7 +119,7 @@ int main() {
     }
     {
         std::cout << "test sweep sort" << std::endl;
-        //test stable quick sort
+        //test sweep sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
             vec.push_back(rand());
@@ -140,8 +140,30 @@ int main() {
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
+        std::cout << "test zip sort" << std::endl;
+        //test zip sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::zip_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
         std::cout << "test merge sweep sort" << std::endl;
-        //test sweep merge sort
+        //test merge sweep sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
             vec.push_back(rand());
@@ -163,7 +185,7 @@ int main() {
     }
     {
         std::cout << "test bubble sort" << std::endl;
-        //test sweep merge sort
+        //test bubble sort
         vvector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
             vec.push_back(rand());
@@ -185,7 +207,7 @@ int main() {
     }
     {
         std::cout << "test insertion sort" << std::endl;
-        //test sweep merge sort
+        //test insertion sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
             vec.push_back(rand());
@@ -207,7 +229,7 @@ int main() {
     }
     {
         std::cout << "test std::sort" << std::endl;
-        //test sweep merge sort
+        //test std::sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
             vec.push_back(rand());
@@ -229,7 +251,7 @@ int main() {
     }
     {
         std::cout << "test std::stable_sort" << std::endl;
-        //test sweep merge sort
+        //test std::stable_sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
             vec.push_back(rand());
