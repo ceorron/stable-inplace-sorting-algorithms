@@ -1126,6 +1126,276 @@ bool merge_sort(Itr beg, Itr end, Comp cmp) {
 	return false;
 }
 
+
+namespace stlib_internal {
+template<typename Itr>
+struct zip_sort_stk_data {
+	bool complete = false;
+	Itr beg;
+	Itr end;
+};
+template<typename Itr>
+void zip_merge(Itr left, Itr right, Itr end) {
+	//all of the middle sections
+	Itr mdlstart = right;
+	Itr mdltop = right;
+
+	while((left != right) & (right != end)) {
+		if(mdltop != right) {
+			//if we have a middle section test the middle against the right
+			if(less_func(*right, *mdltop)) {
+				std::swap(*left, *right);
+
+				if(mdltop != mdlstart) {
+					//move the new smallest into the correct place in the middle section
+					Itr nend = right;
+					while(nend != mdltop) {
+						Itr tmp = nend - 1;
+						std::swap(*nend, *tmp);
+						nend = tmp;
+					}
+					++mdltop;
+				}
+
+				++right;
+			} else {
+				std::swap(*left, *mdltop);
+				++mdltop;
+				if(mdltop == right)
+					mdltop = mdlstart;
+			}
+		} else {
+			//test the right against the left
+			if(less_func(*right, *left)) {
+				std::swap(*left, *right);
+				++right;
+			}
+		}
+
+		++left;
+		if(left == mdlstart) {
+			//if the left reaches the middle, re-order the middle section so smallest first
+			stdlib::rotate(mdlstart, mdltop, right);
+			mdlstart = right;
+			mdltop = right;
+		}
+	}
+
+	if((left != right) & (right == end)) {
+		//if the right has reached the end before the left
+		stdlib::rotate(mdlstart, mdltop, right);
+		stdlib::rotate(left, mdlstart, right);
+	}
+}
+}
+
+template<typename Itr>
+void zip_sort(Itr beg, Itr end) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//go through all of the lengths starting at 2 doubling
+	uint64_t len = 1;
+	while(len <= sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = cleft + (len * 2);
+			if(cend > end) cend = end;
+
+			//do zip merge
+			stlib_internal::zip_merge(cleft, cright, cend);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+template<typename Itr>
+void zip_sort_rec(Itr beg, Itr end) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	sze /= 2;
+
+	zip_sort_rec(beg, beg + sze);
+	zip_sort_rec(beg + sze, end);
+
+	stlib_internal::zip_merge(beg, beg + sze, end);
+}
+template<typename Itr>
+void zip_sort_rec2(Itr beg, Itr end) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	size_t idx = 0;
+	std::vector<stlib_internal::zip_sort_stk_data<Itr>> stk;
+	stk.resize(20);
+	stk[idx++] = stlib_internal::zip_sort_stk_data<Itr>{false, beg, end};
+
+	while(idx > 0) {
+		stlib_internal::zip_sort_stk_data<Itr>& tmp = stk[idx - 1];
+		sze = distance(tmp.beg, tmp.end);
+		if(sze < 2) {
+			--idx;
+			continue;
+		}
+		if(tmp.complete || sze <= 2) {
+			stlib_internal::zip_merge(tmp.beg, tmp.beg + (sze/2), tmp.end);
+			--idx;
+		} else {
+			//split this
+			tmp.complete = true;
+
+			if(idx == stk.size())
+				stk.resize(stk.size() * 2);
+			stk[idx++] = stlib_internal::zip_sort_stk_data<Itr>{false, tmp.beg + (sze/2), tmp.end};
+
+			if(idx == stk.size())
+				stk.resize(stk.size() * 2);
+			stk[idx++] = stlib_internal::zip_sort_stk_data<Itr>{false, tmp.beg, tmp.beg + (sze/2)};
+		}
+	}
+}
+
+
+namespace stlib_internal {
+template<typename Itr, typename Comp>
+void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
+	//all of the middle sections
+	Itr mdlstart = right;
+	Itr mdltop = right;
+
+	while((left != right) & (right != end)) {
+		if(mdltop != right) {
+			//if we have a middle section test the middle against the right
+			if(less_func(*right, *mdltop, cmp)) {
+				std::swap(*left, *right);
+
+				if(mdltop != mdlstart) {
+					//move the new smallest into the correct place in the middle section
+					Itr nend = right;
+					while(nend != mdltop) {
+						Itr tmp = nend - 1;
+						std::swap(*nend, *tmp);
+						nend = tmp;
+					}
+					++mdltop;
+				}
+
+				++right;
+			} else {
+				std::swap(*left, *mdltop);
+				++mdltop;
+				if(mdltop == right)
+					mdltop = mdlstart;
+			}
+		} else {
+			//test the right against the left
+			if(less_func(*right, *left, cmp)) {
+				std::swap(*left, *right);
+				++right;
+			}
+		}
+
+		++left;
+		if(left == mdlstart) {
+			//if the left reaches the middle, re-order the middle section so smallest first
+			stdlib::rotate(mdlstart, mdltop, right);
+			mdlstart = right;
+			mdltop = right;
+		}
+	}
+
+	if((left != right) & (right == end)) {
+		//if the right has reached the end before the left
+		stdlib::rotate(mdlstart, mdltop, right);
+		stdlib::rotate(left, mdlstart, right);
+	}
+}
+}
+
+template<typename Itr, typename Comp>
+void zip_sort(Itr beg, Itr end, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//go through all of the lengths starting at 2 doubling
+	uint64_t len = 1;
+	while(len <= sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = cleft + (len * 2);
+			if(cend > end) cend = end;
+
+			//do zip merge
+			stlib_internal::zip_merge(cleft, cright, cend, cmp);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+template<typename Itr, typename Comp>
+void zip_sort_rec(Itr beg, Itr end, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	sze /= 2;
+
+	zip_sort_rec(beg, beg + sze, cmp);
+	zip_sort_rec(beg + sze, end, cmp);
+
+	stlib_internal::zip_merge(beg, beg + sze, end, cmp);
+}
+
+template<typename Itr, typename Comp>
+void zip_sort_rec2(Itr beg, Itr end, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	size_t idx = 0;
+	std::vector<stlib_internal::zip_sort_stk_data<Itr>> stk;
+	stk.resize(20);
+	stk[idx++] = stlib_internal::zip_sort_stk_data<Itr>{false, beg, end};
+
+	while(idx > 0) {
+		stlib_internal::zip_sort_stk_data<Itr>& tmp = stk[idx - 1];
+		sze = distance(tmp.beg, tmp.end);
+		if(sze < 2) {
+			--idx;
+			continue;
+		}
+		if(tmp.complete || sze <= 2) {
+			stlib_internal::zip_merge(tmp.beg, tmp.beg + (sze/2), tmp.end, cmp);
+			--idx;
+		} else {
+			//split this
+			tmp.complete = true;
+
+			if(idx == stk.size())
+				stk.resize(stk.size() * 2);
+			stk[idx++] = stlib_internal::zip_sort_stk_data<Itr>{false, tmp.beg + (sze/2), tmp.end};
+
+			if(idx == stk.size())
+				stk.resize(stk.size() * 2);
+			stk[idx++] = stlib_internal::zip_sort_stk_data<Itr>{false, tmp.beg, tmp.beg + (sze/2)};
+		}
+	}
+}
+
+
 template<typename Itr>
 void bubble_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
