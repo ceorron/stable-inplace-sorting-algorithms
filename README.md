@@ -39,6 +39,7 @@ zip_sort is a merge_sort like algorithm. It's merge function does everything in-
 #include <iostream>
 #include <chrono>
 #include <stdlib.h>
+#include <algorithm>
 
 #include "sort.hpp"
 
@@ -198,7 +199,7 @@ int main() {
     {
         std::cout << "test bubble sort" << std::endl;
         //test bubble sort
-        vvector<uint32_t> vec;
+        std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
             vec.push_back(rand());
 
