@@ -52,7 +52,7 @@ void construct(T& lhs, T&& rhs) {
 //some function abstractions, only use less than operator
 template<typename T>
 inline bool equal_func(const T& lhs, const T& rhs) {
-	return !(lhs < rhs) & !(rhs < lhs);
+	return !(lhs < rhs) && !(rhs < lhs);
 }
 template<typename T>
 inline bool less_func(const T& lhs, const T& rhs) {
@@ -72,7 +72,7 @@ inline bool greater_equal_func(const T& lhs, const T& rhs) {
 }
 template<typename T, typename Comp>
 inline bool equal_func(const T& lhs, const T& rhs, Comp cmp) {
-	return !cmp(lhs, rhs) & !cmp(rhs, lhs);
+	return !cmp(lhs, rhs) && !cmp(rhs, lhs);
 }
 template<typename T, typename Comp>
 inline bool less_func(const T& lhs, const T& rhs, Comp cmp) {
@@ -108,6 +108,38 @@ template<typename Itr>
 inline Itr half_point(Itr first, Itr last) {
 	auto tmp = distance(first, last);
 	return first + (tmp/2);
+}
+template<typename Itr>
+Itr middle_of_three(Itr first, Itr middle, Itr last) {
+	if(less_func(*middle, *first)) {
+		if(less_func(*last, *middle))
+			return middle;
+		else if(less_func(*last, *first))
+			return last;
+		return first;
+	} else {
+		if(less_func(*middle, *last))
+			return middle;
+		else if(less_func(*last, *first))
+			return first;
+		return last;
+	}
+}
+template<typename Itr, typename Comp>
+Itr middle_of_three(Itr first, Itr middle, Itr last, Comp cmp) {
+	if(less_func(*middle, *first, cmp)) {
+		if(less_func(*last, *middle, cmp))
+			return middle;
+		else if(less_func(*last, *first, cmp))
+			return last;
+		return first;
+	} else {
+		if(less_func(*middle, *last, cmp))
+			return middle;
+		else if(less_func(*last, *first, cmp))
+			return first;
+		return last;
+	}
 }
 
 namespace stlib_internal {
@@ -1014,10 +1046,10 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 
 
 namespace stlib_internal {
-template<typename Itr>
-void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, char* buf) {
+template<typename Itr, typename T>
+void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, T* buf) {
 	Itr begrng = beg1;
-	typename stlib::value_for<Itr>::value_type* tmp = (typename stlib::value_for<Itr>::value_type*)buf;
+	typename stlib::value_for<Itr>::value_type* tmp = buf;
 	typename stlib::value_for<Itr>::value_type* tmpbeg = tmp;
 
 	//go through both lists, build the sorted list
@@ -1041,8 +1073,8 @@ void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, char* buf) {
 		construct(*begrng, std::move(*tmpbeg));
 	return;
 }
-template<typename Itr>
-void merge_sort_internal(Itr beg, Itr end, char* buf) {
+template<typename Itr, typename T>
+void merge_sort_internal(Itr beg, Itr end, T* buf) {
 	auto sze = distance(beg, end);
 	if(sze <= 1)
 		return;
@@ -1059,7 +1091,7 @@ bool merge_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return true;
 	using valueof = typename stlib::value_for<Itr>::value_type;
-	char* buf = (char*)malloc(distance(beg, end) * sizeof(valueof));
+	valueof* buf = (valueof*)malloc(distance(beg, end) * sizeof(valueof));
 	if(buf) {
 		stlib_internal::merge_sort_internal(beg, end, buf);
 
@@ -1071,10 +1103,10 @@ bool merge_sort(Itr beg, Itr end) {
 
 
 namespace stlib_internal {
-template<typename Itr, typename Comp>
-void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, char* buf, Comp cmp) {
+template<typename Itr, typename Comp, typename T>
+void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, T* buf, Comp cmp) {
 	Itr begrng = beg1;
-	typename stlib::value_for<Itr>::value_type* tmp = (typename stlib::value_for<Itr>::value_type*)buf;
+	typename stlib::value_for<Itr>::value_type* tmp = buf;
 	typename stlib::value_for<Itr>::value_type* tmpbeg = tmp;
 
 	//go through both lists, build the sorted list
@@ -1098,8 +1130,8 @@ void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, char* buf, Comp cmp)
 		construct(*begrng, std::move(*tmpbeg));
 	return;
 }
-template<typename Itr, typename Comp>
-void merge_sort_internal(Itr beg, Itr end, char* buf, Comp cmp) {
+template<typename Itr, typename Comp, typename T>
+void merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 	auto sze = distance(beg, end);
 	if(sze <= 1)
 		return;
@@ -1116,7 +1148,7 @@ bool merge_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return true;
 	using valueof = typename stlib::value_for<Itr>::value_type;
-	char* buf = (char*)malloc(distance(beg, end) * sizeof(valueof));
+	valueof* buf = (valueof*)malloc(distance(beg, end) * sizeof(valueof));
 	if(buf) {
 		stlib_internal::merge_sort_internal(beg, end, buf, cmp);
 
