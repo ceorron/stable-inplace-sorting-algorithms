@@ -28,7 +28,7 @@ merge_sweep_sort gives the best overall performance for an in-place, stable sort
 zip_sort gives the best overall performance for an in-place, stable sorting algorithm that uses no additional memory, as well as giving O(n log n) worst case performance.
 
 sweep_sort and merge_sweep_sort could be said to be quick_sort like algorithms.
-zip_sort is a merge_sort like algorithm. It's merge function does everything in-place unlike merge_sort while also providing excellent speed (minimal moves).
+zip_sort is a merge_sort like algorithm. It's merge function does everything in-place, unlike merge_sort, while also providing excellent speed (minimal moves).
 
 # Example use - C++
 
