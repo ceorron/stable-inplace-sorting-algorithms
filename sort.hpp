@@ -1237,7 +1237,7 @@ void zip_sort(Itr beg, Itr end) {
 			Itr cleft = beg + pos;
 			Itr cright = cleft + len;
 			Itr cend = cleft + (len * 2);
-			if(cend > end) cend = end;
+			if(pos + (len * 2) > sze) cend = end;
 
 			//do zip merge
 			stlib_internal::zip_merge(cleft, cright, cend);
@@ -1368,7 +1368,7 @@ void zip_sort(Itr beg, Itr end, Comp cmp) {
 			Itr cleft = beg + pos;
 			Itr cright = cleft + len;
 			Itr cend = cleft + (len * 2);
-			if(cend > end) cend = end;
+			if(pos + (len * 2) > sze) cend = end;
 
 			//do zip merge
 			stlib_internal::zip_merge(cleft, cright, cend, cmp);
