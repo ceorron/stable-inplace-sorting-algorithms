@@ -22,7 +22,7 @@ They have the following characteristics.
 
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
 
-The idea for sweep_sort, merge_sweep_sort and zip_sort came from the idea of using std::rotate as part of a recursive decent sorting algorithm, and so both sweep_sort, merge_sweep_sort and zip_sort make use of the rotate function. zip_sort came later and was added in May 2020.
+The idea for sweep_sort, merge_sweep_sort and zip_sort came from the idea of using std::rotate as part of a recursive decent sorting algorithm, and so sweep_sort, merge_sweep_sort and zip_sort make use of the rotate function. zip_sort came later and was added in May 2020.
 
 merge_sweep_sort gives the best overall performance for an in-place, stable sorting algorithm that uses no additional memory.
 zip_sort gives the best overall performance for an in-place, stable sorting algorithm that uses no additional memory, as well as giving O(n log n) worst case performance.
