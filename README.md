@@ -14,7 +14,7 @@ They have the following characteristics.
 | stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | (N) | 63 | 8837 |
 | merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 56 | 7033 |
 | quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | - | 50 | 5892 |
-| std::sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | - | 43 | 5463 |
+| std::sort | Yes | No | O(n log n) | O(n log n) | - | 43 | 5463 |
 | std::stable_sort | No | Yes | O(n log n) | O(n log n) | (N) | 36 | 4943 |
 
 (All tests with MSVC compiler in release x64)
