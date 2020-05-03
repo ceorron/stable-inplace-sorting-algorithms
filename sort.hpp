@@ -1177,6 +1177,7 @@ struct zip_sort_stk_data {
 template<typename Itr>
 void zip_merge(Itr left, Itr right, Itr end) {
 	//all of the middle sections
+	using valueof = typename stlib::value_for<Itr>::value_type;
 	Itr mdlstart = right;
 	Itr mdltop = right;
 
@@ -1189,11 +1190,14 @@ void zip_merge(Itr left, Itr right, Itr end) {
 				if(mdltop != mdlstart) {
 					//move the new smallest into the correct place in the middle section
 					Itr nend = right;
+					valueof tmp = std::move(*right);
 					while(nend != mdltop) {
-						Itr tmp = nend - 1;
-						std::swap(*nend, *tmp);
+						Itr tmp = nend;
+						--tmp;
+						construct(*nend, std::move(*tmp));
 						nend = tmp;
 					}
+					construct(*mdltop, std::move(tmp));
 					++mdltop;
 				}
 
@@ -1221,7 +1225,7 @@ void zip_merge(Itr left, Itr right, Itr end) {
 		}
 	}
 
-	if((left != right) & (right == end)) {
+	if(left != right) {
 		//if the right has reached the end before the left
 		stlib::rotate(mdlstart, mdltop, right);
 		stlib::rotate(left, mdlstart, right);
@@ -1308,6 +1312,7 @@ namespace stlib_internal {
 template<typename Itr, typename Comp>
 void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 	//all of the middle sections
+	using valueof = typename stdlib::value_for<Itr>::value_type;
 	Itr mdlstart = right;
 	Itr mdltop = right;
 
@@ -1320,11 +1325,14 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 				if(mdltop != mdlstart) {
 					//move the new smallest into the correct place in the middle section
 					Itr nend = right;
+					valueof tmp = std::move(*right);
 					while(nend != mdltop) {
-						Itr tmp = nend - 1;
-						std::swap(*nend, *tmp);
+						Itr tmp = nend;
+						--tmp;
+						construct(*nend, std::move(*tmp));
 						nend = tmp;
 					}
+					construct(*mdltop, std::move(tmp));
 					++mdltop;
 				}
 
@@ -1346,16 +1354,16 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 		++left;
 		if(left == mdlstart) {
 			//if the left reaches the middle, re-order the middle section so smallest first
-			stlib::rotate(mdlstart, mdltop, right);
+			stdlib::rotate(mdlstart, mdltop, right);
 			mdlstart = right;
 			mdltop = right;
 		}
 	}
 
-	if((left != right) & (right == end)) {
+	if(left != right) {
 		//if the right has reached the end before the left
-		stlib::rotate(mdlstart, mdltop, right);
-		stlib::rotate(left, mdlstart, right);
+		stdlib::rotate(mdlstart, mdltop, right);
+		stdlib::rotate(left, mdlstart, right);
 	}
 }
 }
