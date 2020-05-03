@@ -506,7 +506,7 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
 		stack_less_data tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
-		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end);
+		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, cmp);
 
 		do {
 			++left;
