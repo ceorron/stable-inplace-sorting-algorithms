@@ -680,11 +680,11 @@ void sweep_sort_internal(Itr& pivot, Itr beg, Itr end) {
 
 	//do two rotates here,
 	//put the pivot in place (at beginning of left, could be at end of right)
-	stdlib::rotate(moveleft + 1, pivot, pivot + 1);
+	stlib::rotate(moveleft + 1, pivot, pivot + 1);
 	pivot -= distance(moveleft + 1, pivot);
 
 	//rotate the right side over
-	stdlib::rotate(moveleft + 1, tmpright, moveright);
+	stlib::rotate(moveleft + 1, tmpright, moveright);
 	pivot += distance(tmpright, moveright);
 }
 }
@@ -790,11 +790,11 @@ void sweep_sort_internal(Itr& pivot, Itr beg, Itr end, Comp cmp) {
 
 	//do two rotates here,
 	//put the pivot in place (at beginning of left, could be at end of right)
-	stdlib::rotate(moveleft + 1, pivot, pivot + 1);
+	stlib::rotate(moveleft + 1, pivot, pivot + 1);
 	pivot -= distance(moveleft + 1, pivot);
 
 	//rotate the right side over
-	stdlib::rotate(moveleft + 1, tmpright, moveright);
+	stlib::rotate(moveleft + 1, tmpright, moveright);
 	pivot += distance(tmpright, moveright);
 }
 }
@@ -1207,7 +1207,7 @@ void zip_merge(Itr left, Itr right, Itr end) {
 		++left;
 		if(left == mdlstart) {
 			//if the left reaches the middle, re-order the middle section so smallest first
-			stdlib::rotate(mdlstart, mdltop, right);
+			stlib::rotate(mdlstart, mdltop, right);
 			mdlstart = right;
 			mdltop = right;
 		}
@@ -1215,8 +1215,8 @@ void zip_merge(Itr left, Itr right, Itr end) {
 
 	if((left != right) & (right == end)) {
 		//if the right has reached the end before the left
-		stdlib::rotate(mdlstart, mdltop, right);
-		stdlib::rotate(left, mdlstart, right);
+		stlib::rotate(mdlstart, mdltop, right);
+		stlib::rotate(left, mdlstart, right);
 	}
 }
 }
@@ -1338,7 +1338,7 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 		++left;
 		if(left == mdlstart) {
 			//if the left reaches the middle, re-order the middle section so smallest first
-			stdlib::rotate(mdlstart, mdltop, right);
+			stlib::rotate(mdlstart, mdltop, right);
 			mdlstart = right;
 			mdltop = right;
 		}
@@ -1346,8 +1346,8 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 
 	if((left != right) & (right == end)) {
 		//if the right has reached the end before the left
-		stdlib::rotate(mdlstart, mdltop, right);
-		stdlib::rotate(left, mdlstart, right);
+		stlib::rotate(mdlstart, mdltop, right);
+		stlib::rotate(left, mdlstart, right);
 	}
 }
 }
