@@ -4,7 +4,7 @@ Included are implementations of common sorting algorithms as well as new sorting
 
 They have the following characteristics.
 
-| Name | Inplace | Stable | Average Complexity (Big O) | Worst Case Complexity (Big O) | Additional memeory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
+| Name | Inplace | Stable | Average Complexity (Big O) | Worst Case Complexity (Big O) | Additional memory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
 | --- | --- | --- | --- | --- | --- | ---: | ---: |
 | bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | - | 1039 | 9387560 |
 | insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | - | 203 | 1068614 |
