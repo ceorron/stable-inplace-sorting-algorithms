@@ -19,6 +19,7 @@ They have the following characteristics.
 
 (All tests with MSVC compiler in release x64)
 (times in microseconds)
+
 NOTE: as default zip_sort and merge_sort use the optimised constant stack memory algorithm (1).
 
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
