@@ -1082,16 +1082,56 @@ void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, T* buf) {
 	return;
 }
 template<typename Itr, typename T>
-void merge_sort_internal(Itr beg, Itr end, T* buf) {
+void merge_sort_internal_rec(Itr beg, Itr end, T* buf) {
 	auto sze = distance(beg, end);
 	if(sze <= 1)
 		return;
 
 	sze /= 2;
-	merge_sort_internal(beg, beg + sze, buf);
-	merge_sort_internal(beg + sze, end, buf);
+	merge_sort_internal_rec(beg, beg + sze, buf);
+	merge_sort_internal_rec(beg + sze, end, buf);
 
 	merge_internal(beg, beg + sze, beg + sze, end, buf);
+}
+}
+template<typename Itr>
+bool merge_sort_rec(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return true;
+	using valueof = typename stlib::value_for<Itr>::value_type;
+	valueof* buf = (valueof*)aligned_storage_new(distance(beg, end) * sizeof(valueof));
+	if(buf) {
+		stlib_internal::merge_sort_internal_rec(beg, end, buf);
+
+		aligned_storage_delete(distance(beg, end) * sizeof(valueof), buf);
+		return true;
+	}
+	return false;
+}
+namespace stlib_internal {
+template<typename Itr, typename T>
+void merge_sort_internal(Itr beg, Itr end, T* buf) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = 1;
+	while(len <= sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do zip merge
+			merge_internal(cleft, cright, cright, cend, buf);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
 }
 }
 template<typename Itr>
@@ -1108,6 +1148,7 @@ bool merge_sort(Itr beg, Itr end) {
 	}
 	return false;
 }
+
 
 
 namespace stlib_internal {
@@ -1139,16 +1180,56 @@ void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, T* buf, Comp cmp) {
 	return;
 }
 template<typename Itr, typename Comp, typename T>
-void merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
+void merge_sort_internal_rec(Itr beg, Itr end, T* buf, Comp cmp) {
 	auto sze = distance(beg, end);
 	if(sze <= 1)
 		return;
 
 	sze /= 2;
-	merge_sort_internal(beg, beg + sze, buf, cmp);
-	merge_sort_internal(beg + sze, end, buf, cmp);
+	merge_sort_internal_rec(beg, beg + sze, buf, cmp);
+	merge_sort_internal_rec(beg + sze, end, buf, cmp);
 
 	merge_internal(beg, beg + sze, beg + sze, end, buf, cmp);
+}
+}
+template<typename Itr, typename Comp>
+bool merge_sort_rec(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return true;
+	using valueof = typename stlib::value_for<Itr>::value_type;
+	valueof* buf = (valueof*)aligned_storage_new(distance(beg, end) * sizeof(valueof));
+	if(buf) {
+		stlib_internal::merge_sort_internal_rec(beg, end, buf, cmp);
+
+		aligned_storage_delete(distance(beg, end) * sizeof(valueof), buf);
+		return true;
+	}
+	return false;
+}
+namespace stlib_internal {
+template<typename Itr, typename T, typename Comp>
+void merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = 1;
+	while(len <= sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do zip merge
+			merge_internal(cleft, cright, cright, cend, buf, cmp);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
 }
 }
 template<typename Itr, typename Comp>
