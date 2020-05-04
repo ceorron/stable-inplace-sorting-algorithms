@@ -1176,32 +1176,48 @@ struct zip_sort_stk_data {
 };
 template<typename Itr>
 void zip_merge(Itr left, Itr right, Itr end) {
-	//all of the middle sections
+	//the swap beffer, uninitialised memory buffer
 	using valueof = typename stlib::value_for<Itr>::value_type;
+	constexpr uint16_t buffer_count = (2048/sizeof(valueof) > 0 ? 2048/sizeof(valueof) : 1);
+	alignas(valueof) char bufr[buffer_count * sizeof(valueof)];
+	valueof* swapbufr = (valueof*)bufr;
+
+	//all of the middle sections
 	Itr mdlstart = right;
 	Itr mdltop = right;
 
 	while((left != right) & (right != end)) {
 		if(mdltop != right) {
-			//if we have a middle section test the middle against the right
+			//if we have a middle section test the middle against the right - long run optimisation
 			if(less_func(*right, *mdltop)) {
-				std::swap(*left, *right);
-
 				if(mdltop != mdlstart) {
-					//move the new smallest into the correct place in the middle section
-					Itr nend = right;
-					valueof tmp = std::move(*right);
-					while(nend != mdltop) {
-						Itr tmp = nend;
-						--tmp;
-						construct(*nend, std::move(*tmp));
-						nend = tmp;
-					}
-					construct(*mdltop, std::move(tmp));
-					++mdltop;
-				}
+					//move in a buffers worth at a time
+					uint16_t count = 0;
+					do {
+						construct(swapbufr[count++], std::move(*left));
+						construct(*left, std::move(*right));
+						++right;
+						++left;
+					} while(((count < buffer_count) & (left != mdlstart) & (right != end)) && less_func(*right, *mdltop));
 
-				++right;
+					//move the new smallest into the correct place in the middle section
+					//move the middle section right
+					Itr mdlend = right;
+					Itr mdl = mdlend - count;
+					do {
+						--mdlend;
+						--mdl;
+						construct(*mdlend, *mdl);
+					} while(mdl != mdltop);
+
+					//move in the new data
+					for(uint16_t i = 0; i < count; ++i, ++mdltop)
+						construct(*mdltop, swapbufr[i]);
+					--left;
+				} else {
+					std::swap(*left, *right);
+					++right;
+				}
 			} else {
 				std::swap(*left, *mdltop);
 				++mdltop;
@@ -1311,32 +1327,48 @@ void zip_sort_rec2(Itr beg, Itr end) {
 namespace stlib_internal {
 template<typename Itr, typename Comp>
 void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
+	//the swap beffer, uninitialised memory buffer
+	using valueof = typename stlib::value_for<Itr>::value_type;
+	constexpr uint16_t buffer_count = (2048/sizeof(valueof) > 0 ? 2048/sizeof(valueof) : 1);
+	alignas(valueof) char bufr[buffer_count * sizeof(valueof)];
+	valueof* swapbufr = (valueof*)bufr;
+
 	//all of the middle sections
-	using valueof = typename stdlib::value_for<Itr>::value_type;
 	Itr mdlstart = right;
 	Itr mdltop = right;
 
 	while((left != right) & (right != end)) {
 		if(mdltop != right) {
-			//if we have a middle section test the middle against the right
+			//if we have a middle section test the middle against the right - long run optimisation
 			if(less_func(*right, *mdltop, cmp)) {
-				std::swap(*left, *right);
-
 				if(mdltop != mdlstart) {
-					//move the new smallest into the correct place in the middle section
-					Itr nend = right;
-					valueof tmp = std::move(*right);
-					while(nend != mdltop) {
-						Itr tmp = nend;
-						--tmp;
-						construct(*nend, std::move(*tmp));
-						nend = tmp;
-					}
-					construct(*mdltop, std::move(tmp));
-					++mdltop;
-				}
+					//move in a buffers worth at a time
+					uint16_t count = 0;
+					do {
+						construct(swapbufr[count++], std::move(*left));
+						construct(*left, std::move(*right));
+						++right;
+						++left;
+					} while(((count < buffer_count) & (left != mdlstart) & (right != end)) && less_func(*right, *mdltop));
 
-				++right;
+					//move the new smallest into the correct place in the middle section
+					//move the middle section right
+					Itr mdlend = right;
+					Itr mdl = mdlend - count;
+					do {
+						--mdlend;
+						--mdl;
+						construct(*mdlend, *mdl);
+					} while(mdl != mdltop);
+
+					//move in the new data
+					for(uint16_t i = 0; i < count; ++i, ++mdltop)
+						construct(*mdltop, swapbufr[i]);
+					--left;
+				} else {
+					std::swap(*left, *right);
+					++right;
+				}
 			} else {
 				std::swap(*left, *mdltop);
 				++mdltop;
@@ -1354,7 +1386,7 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 		++left;
 		if(left == mdlstart) {
 			//if the left reaches the middle, re-order the middle section so smallest first
-			stdlib::rotate(mdlstart, mdltop, right);
+			stlib::rotate(mdlstart, mdltop, right);
 			mdlstart = right;
 			mdltop = right;
 		}
@@ -1362,8 +1394,8 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 
 	if(left != right) {
 		//if the right has reached the end before the left
-		stdlib::rotate(mdlstart, mdltop, right);
-		stdlib::rotate(left, mdlstart, right);
+		stlib::rotate(mdlstart, mdltop, right);
+		stlib::rotate(left, mdlstart, right);
 	}
 }
 }
