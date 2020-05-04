@@ -1126,7 +1126,7 @@ void merge_sort_internal(Itr beg, Itr end, T* buf) {
 			Itr cright = cleft + len;
 			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
 
-			//do zip merge
+			//do merge
 			merge_internal(cleft, cright, cright, cend, buf);
 			pos += (len * 2);
 		}
@@ -1224,7 +1224,7 @@ void merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 			Itr cright = cleft + len;
 			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
 
-			//do zip merge
+			//do merge
 			merge_internal(cleft, cright, cright, cend, buf, cmp);
 			pos += (len * 2);
 		}
