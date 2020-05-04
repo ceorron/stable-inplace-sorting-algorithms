@@ -9,7 +9,7 @@ They have the following characteristics.
 | bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | - | 1039 | 9387560 |
 | insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | - | 203 | 1068614 |
 | sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | - | 195 | 744087 |
-| zip_sort | Yes | Yes | O(n log n) | O(n log n) | - | 91 | 69319 |
+| zip_sort | Yes | Yes | O(n log n) | O(n log n) | - | 91 | 52272 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | - | 230 | 31555 |
 | stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | (N) | 63 | 8837 |
 | merge_sort | No | Yes | O(n log n) | O(n log n) | (N) | 56 | 7033 |
