@@ -12,7 +12,7 @@ They have the following characteristics.
 | zip_sort | Yes | Yes | O(n log n) | O(n log n) | (log N) optimised (1) | - | 91 | 52272 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 230 | 31555 |
 | stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 63 | 8837 |
-| merge_sort | No | Yes | O(n log n) | O(n log n) | (log N) optimised (1) | (N) | 56 | 7033 |
+| merge_sort | No | Yes | O(n log n) | O(n log n) | (log N) optimised (1) | (N) | 52 | 5932 |
 | quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 50 | 5892 |
 | std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 43 | 5463 |
 | std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 36 | 4943 |
