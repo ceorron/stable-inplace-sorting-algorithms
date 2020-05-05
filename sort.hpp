@@ -1321,7 +1321,7 @@ void zip_sort(Itr beg, Itr end) {
 
 	//go through all of the lengths starting at 2 doubling
 	uint64_t len = 1;
-	while(len <= sze) {
+	while(len < sze) {
 		uint64_t pos = 0;
 		//go through all of the sorted sublists, zip them together
 		while(pos + len < sze) {
@@ -1472,7 +1472,7 @@ void zip_sort(Itr beg, Itr end, Comp cmp) {
 
 	//go through all of the lengths starting at 2 doubling
 	uint64_t len = 1;
-	while(len <= sze) {
+	while(len < sze) {
 		uint64_t pos = 0;
 		//go through all of the sorted sublists, zip them together
 		while(pos + len < sze) {
