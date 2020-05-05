@@ -1054,182 +1054,77 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 
 
 namespace stlib_internal {
-template<typename Itr, typename T>
-void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, T* buf) {
-	Itr begrng = beg1;
-	typename stlib::value_for<Itr>::value_type* tmp = buf;
-	typename stlib::value_for<Itr>::value_type* tmpbeg = tmp;
+template<typename Itr1, typename Itr2, typename Comp>
+void merge_internal(Itr1 beg1, Itr1 beg2, Itr1 end2, Itr2& begout, Comp cmp) {
+	Itr1 end1 = beg2;
 
 	//go through both lists, build the sorted list
-	for(; beg1 != end1 && beg2 != end2; ++tmp) {
-		if(less_func(*beg2, *beg1)) {
-			construct(*tmp, std::move(*beg2));
-			++beg2;
-		} else {
-			construct(*tmp, std::move(*beg1));
-			++beg1;
-		}
-	}
-
-	Itr begrng2 = beg1 + (distance(beg1, end2) - distance(beg1, end1));
-	//finish off copy back of lists
-	for(; beg1 != end1; ++begrng2, ++beg1)
-		construct(*begrng2, std::move(*beg1));
-
-	//copy the new list back
-	for(; tmpbeg != tmp; ++tmpbeg, ++begrng)
-		construct(*begrng, std::move(*tmpbeg));
-	return;
-}
-template<typename Itr, typename T>
-void merge_sort_internal_rec(Itr beg, Itr end, T* buf) {
-	auto sze = distance(beg, end);
-	if(sze <= 1)
-		return;
-
-	sze /= 2;
-	merge_sort_internal_rec(beg, beg + sze, buf);
-	merge_sort_internal_rec(beg + sze, end, buf);
-
-	merge_internal(beg, beg + sze, beg + sze, end, buf);
-}
-}
-template<typename Itr>
-bool merge_sort_rec(Itr beg, Itr end) {
-	if(distance(beg, end) <= 1)
-		return true;
-	using valueof = typename stlib::value_for<Itr>::value_type;
-	valueof* buf = (valueof*)aligned_storage_new(distance(beg, end) * sizeof(valueof));
-	if(buf) {
-		stlib_internal::merge_sort_internal_rec(beg, end, buf);
-
-		aligned_storage_delete(distance(beg, end) * sizeof(valueof), buf);
-		return true;
-	}
-	return false;
-}
-namespace stlib_internal {
-template<typename Itr, typename T>
-void merge_sort_internal(Itr beg, Itr end, T* buf) {
-	uint64_t sze = distance(beg, end);
-	if(sze <= 1)
-		return;
-
-	//go through all of the lengths starting at 1 doubling
-	uint64_t len = 1;
-	while(len <= sze) {
-		uint64_t pos = 0;
-		//go through all of the sorted sublists, zip them together
-		while(pos + len < sze) {
-			//make the two halves
-			Itr cleft = beg + pos;
-			Itr cright = cleft + len;
-			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
-
-			//do merge
-			merge_internal(cleft, cright, cright, cend, buf);
-			pos += (len * 2);
-		}
-		len *= 2;
-	}
-}
-}
-template<typename Itr>
-bool merge_sort(Itr beg, Itr end) {
-	if(distance(beg, end) <= 1)
-		return true;
-	using valueof = typename stlib::value_for<Itr>::value_type;
-	valueof* buf = (valueof*)aligned_storage_new(distance(beg, end) * sizeof(valueof));
-	if(buf) {
-		stlib_internal::merge_sort_internal(beg, end, buf);
-
-		aligned_storage_delete(distance(beg, end) * sizeof(valueof), buf);
-		return true;
-	}
-	return false;
-}
-
-
-
-namespace stlib_internal {
-template<typename Itr, typename Comp, typename T>
-void merge_internal(Itr beg1, Itr end1, Itr beg2, Itr end2, T* buf, Comp cmp) {
-	Itr begrng = beg1;
-	typename stlib::value_for<Itr>::value_type* tmp = buf;
-	typename stlib::value_for<Itr>::value_type* tmpbeg = tmp;
-
-	//go through both lists, build the sorted list
-	for(; beg1 != end1 && beg2 != end2; ++tmp) {
+	for(; beg1 != end1 && beg2 != end2; ++begout)
 		if(less_func(*beg2, *beg1, cmp)) {
-			construct(*tmp, std::move(*beg2));
+			construct(*begout, std::move(*beg2));
 			++beg2;
 		} else {
-			construct(*tmp, std::move(*beg1));
+			construct(*begout, std::move(*beg1));
 			++beg1;
 		}
-	}
 
-	Itr begrng2 = beg1 + (distance(beg1, end2) - distance(beg1, end1));
-	//finish off copy back of lists
-	for(; beg1 != end1; ++begrng2, ++beg1)
-		construct(*begrng2, std::move(*beg1));
-
-	//copy the new list back
-	for(; tmpbeg != tmp; ++tmpbeg, ++begrng)
-		construct(*begrng, std::move(*tmpbeg));
+	//finish off copy back of remaining lists (if any)
+	for(; beg1 != end1; ++beg1, ++begout)
+		construct(*begout, std::move(*beg1));
+	for(; beg2 != end2; ++beg2, ++begout)
+		construct(*begout, std::move(*beg2));
 	return;
 }
-template<typename Itr, typename Comp, typename T>
-void merge_sort_internal_rec(Itr beg, Itr end, T* buf, Comp cmp) {
-	auto sze = distance(beg, end);
-	if(sze <= 1)
-		return;
-
-	sze /= 2;
-	merge_sort_internal_rec(beg, beg + sze, buf, cmp);
-	merge_sort_internal_rec(beg + sze, end, buf, cmp);
-
-	merge_internal(beg, beg + sze, beg + sze, end, buf, cmp);
-}
-}
-template<typename Itr, typename Comp>
-bool merge_sort_rec(Itr beg, Itr end, Comp cmp) {
-	if(distance(beg, end) <= 1)
-		return true;
-	using valueof = typename stlib::value_for<Itr>::value_type;
-	valueof* buf = (valueof*)aligned_storage_new(distance(beg, end) * sizeof(valueof));
-	if(buf) {
-		stlib_internal::merge_sort_internal_rec(beg, end, buf, cmp);
-
-		aligned_storage_delete(distance(beg, end) * sizeof(valueof), buf);
-		return true;
-	}
-	return false;
-}
-namespace stlib_internal {
 template<typename Itr, typename T, typename Comp>
 void merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 	uint64_t sze = distance(beg, end);
 	if(sze <= 1)
 		return;
+	T* bfrend = buf + sze;
 
 	//go through all of the lengths starting at 1 doubling
 	uint64_t len = 1;
-	while(len <= sze) {
+	bool first = true;
+	while(len < sze) {
 		uint64_t pos = 0;
 		//go through all of the sorted sublists, zip them together
-		while(pos + len < sze) {
-			//make the two halves
-			Itr cleft = beg + pos;
-			Itr cright = cleft + len;
-			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+		//which way are we copying this?
+		if(first) {
+			T* bufbeg = buf;
+			T* bufend = bfrend;
+			while(pos + len < sze) {
+				//make the two halves
+				Itr cleft = beg + pos;
+				Itr cright = cleft + len;
+				Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
 
-			//do merge
-			merge_internal(cleft, cright, cright, cend, buf, cmp);
-			pos += (len * 2);
+				//do merge
+				merge_internal(cleft, cright, cend, bufbeg, cmp);
+				pos += (len * 2);
+			}
+		} else {
+			Itr bufbeg = beg;
+			Itr bufend = end;
+			while(pos + len < sze) {
+				//make the two halves
+				T* cleft = buf + pos;
+				T* cright = cleft + len;
+				T* cend = (pos + (len * 2) > sze ? bfrend : cleft + (len * 2));
+
+				//do merge
+				merge_internal(cleft, cright, cend, bufbeg, cmp);
+				pos += (len * 2);
+			}
 		}
+
 		len *= 2;
+		first = !first;
 	}
+
+	//ensure we copy this back at the original buffer if needed
+	if(!first)
+		for(; buf != bfrend; ++buf, ++beg)
+			construct(*beg, std::move(*buf));
 }
 }
 template<typename Itr, typename Comp>
@@ -1247,6 +1142,94 @@ bool merge_sort(Itr beg, Itr end, Comp cmp) {
 	return false;
 }
 
+stlib_internal {
+template<typename Itr1, typename Itr2>
+void merge_internal(Itr1 beg1, Itr1 beg2, Itr1 end2, Itr2& begout) {
+	Itr1 end1 = beg2;
+
+	//go through both lists, build the sorted list
+	for(; beg1 != end1 && beg2 != end2; ++begout)
+		if(less_func(*beg2, *beg1)) {
+			construct(*begout, std::move(*beg2));
+			++beg2;
+		} else {
+			construct(*begout, std::move(*beg1));
+			++beg1;
+		}
+
+	//finish off copy back of remaining lists (if any)
+	for(; beg1 != end1; ++beg1, ++begout)
+		construct(*begout, std::move(*beg1));
+	for(; beg2 != end2; ++beg2, ++begout)
+		construct(*begout, std::move(*beg2));
+	return;
+}
+template<typename Itr, typename T>
+void merge_sort_internal(Itr beg, Itr end, T* buf) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+	T* bfrend = buf + sze;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = 1;
+	bool first = true;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		//which way are we copying this?
+		if(first) {
+			T* bufbeg = buf;
+			T* bufend = bfrend;
+			while(pos + len < sze) {
+				//make the two halves
+				Itr cleft = beg + pos;
+				Itr cright = cleft + len;
+				Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+				//do merge
+				merge_internal(cleft, cright, cend, bufbeg);
+				pos += (len * 2);
+			}
+		} else {
+			Itr bufbeg = beg;
+			Itr bufend = end;
+			while(pos + len < sze) {
+				//make the two halves
+				T* cleft = buf + pos;
+				T* cright = cleft + len;
+				T* cend = (pos + (len * 2) > sze ? bfrend : cleft + (len * 2));
+
+				//do merge
+				merge_internal(cleft, cright, cend, bufbeg);
+				pos += (len * 2);
+			}
+		}
+
+		len *= 2;
+		first = !first;
+	}
+
+	//ensure we copy this back at the original buffer if needed
+	if(!first)
+		for(; buf != bfrend; ++buf, ++beg)
+			construct(*beg, std::move(*buf));
+}
+}
+template<typename Itr>
+bool merge_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return true;
+	using valueof = typename stlib::value_for<Itr>::value_type;
+	valueof* buf = (valueof*)aligned_storage_new(distance(beg, end) * sizeof(valueof));
+	if(buf) {
+		stlib_internal::merge_sort_internal(beg, end, buf);
+
+		aligned_storage_delete(distance(beg, end) * sizeof(valueof), buf);
+		return true;
+	}
+	return false;
+}
 
 namespace stlib_internal {
 template<typename Itr>
