@@ -1617,7 +1617,7 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 						construct(*left, std::move(*right));
 						++right;
 						++left;
-					} while(((count < buffer_count) & (left != mdlstart) & (right != end)) && less_func(*right, *mdltop));
+					} while(((count < buffer_count) & (left != mdlstart) & (right != end)) && less_func(*right, *mdltop, cmp));
 
 					//move the new smallest into the correct place in the middle section
 					//move the middle section right
