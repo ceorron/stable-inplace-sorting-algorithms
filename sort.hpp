@@ -111,6 +111,11 @@ void rotate(Itr first, Itr middle, Itr last) {
 	}
 }
 
+template<typename Itr>
+struct stack_less_data {
+	Itr beg;
+	Itr end;
+};
 
 template<typename Itr>
 inline Itr half_point(Itr first, Itr last) {
@@ -221,22 +226,17 @@ template<typename Itr>
 void quick_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
-	//add a stack item
-	struct stack_less_data {
-		Itr beg;
-		Itr end;
-	};
-	std::vector<stack_less_data> stk;
+	std::vector<stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stack_less_data dat = {
+	stack_less_data<Itr> dat = {
 		beg,
 		end - 1
 	};
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stack_less_data tmp = stk[--idx];
+		stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end);
@@ -269,7 +269,7 @@ void quick_sort(Itr beg, Itr end) {
 		}
 
 		if(distance(pivot + 1, tmp.end + 1) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				pivot + 1,
 				tmp.end
 			};
@@ -278,7 +278,7 @@ void quick_sort(Itr beg, Itr end) {
 				stk.resize(stk.size() * 2);
 		}
 		if(distance(tmp.beg, pivot) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				tmp.beg,
 				pivot - 1
 			};
@@ -292,22 +292,17 @@ template<typename Itr, typename Comp>
 void quick_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
-	//add a stack item
-	struct stack_less_data {
-		Itr beg;
-		Itr end;
-	};
-	std::vector<stack_less_data> stk;
+	std::vector<stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stack_less_data dat = {
+	stack_less_data<Itr> dat = {
 		beg,
 		end - 1
 	};
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stack_less_data tmp = stk[--idx];
+		stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, cmp);
@@ -340,7 +335,7 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 		}
 
 		if(distance(pivot + 1, tmp.end + 1) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				pivot + 1,
 				tmp.end
 			};
@@ -349,7 +344,7 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 				stk.resize(stk.size() * 2);
 		}
 		if(distance(tmp.beg, pivot) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				tmp.beg,
 				pivot - 1
 			};
@@ -393,22 +388,17 @@ template<typename Itr, typename IdxItr>
 void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 	if(distance(beg, end) <= 1)
 		return;
-	//add a stack item
-	struct stack_less_data {
-		Itr beg;
-		Itr end;
-	};
-	std::vector<stack_less_data> stk;
+	std::vector<stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stack_less_data dat = {
+	stack_less_data<Itr> dat = {
 		beg,
 		end - 1
 	};
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stack_less_data tmp = stk[--idx];
+		stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end);
@@ -441,7 +431,7 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		}
 
 		if(distance(pivot + 1, tmp.end + 1) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				pivot + 1,
 				tmp.end
 			};
@@ -450,7 +440,7 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 				stk.resize(stk.size() * 2);
 		}
 		if(distance(tmp.beg, pivot) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				tmp.beg,
 				pivot - 1
 			};
@@ -496,22 +486,17 @@ template<typename Itr, typename IdxItr, typename Comp>
 void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
-	//add a stack item
-	struct stack_less_data {
-		Itr beg;
-		Itr end;
-	};
-	std::vector<stack_less_data> stk;
+	std::vector<stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stack_less_data dat = {
+	stack_less_data<Itr> dat = {
 		beg,
 		end - 1
 	};
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stack_less_data tmp = stk[--idx];
+		stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, cmp);
@@ -544,7 +529,7 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
 		}
 
 		if(distance(pivot + 1, tmp.end + 1) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				pivot + 1,
 				tmp.end
 			};
@@ -553,7 +538,7 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
 				stk.resize(stk.size() * 2);
 		}
 		if(distance(tmp.beg, pivot) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				tmp.beg,
 				pivot - 1
 			};
@@ -711,29 +696,24 @@ template<typename Itr>
 void sweep_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
-	//add a stack item
-	struct stack_less_data {
-		Itr beg;
-		Itr end;
-	};
-	std::vector<stack_less_data> stk;
+	std::vector<stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stack_less_data dat = {
+	stack_less_data<Itr> dat = {
 		beg,
 		end
 	};
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stack_less_data item = stk[--idx];
+		stack_less_data<Itr> item = stk[--idx];
 
 		Itr pivot = half_point(item.beg, item.end);
 
 		sweep_sort_internal(pivot, item.beg, item.end);
 
 		if(distance(pivot + 1, item.end) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				pivot + 1,
 				item.end
 			};
@@ -742,7 +722,7 @@ void sweep_sort(Itr beg, Itr end) {
 				stk.resize(stk.size() * 2);
 		}
 		if(distance(item.beg, pivot) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				item.beg,
 				pivot
 			};
@@ -821,29 +801,24 @@ template<typename Itr, typename Comp>
 void sweep_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
-	//add a stack item
-	struct stack_less_data {
-		Itr beg;
-		Itr end;
-	};
-	std::vector<stack_less_data> stk;
+	std::vector<stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stack_less_data dat = {
+	stack_less_data<Itr> dat = {
 		beg,
 		end
 	};
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stack_less_data item = stk[--idx];
+		stack_less_data<Itr> item = stk[--idx];
 
 		Itr pivot = half_point(item.beg, item.end);
 
 		sweep_sort_internal(pivot, item.beg, item.end, cmp);
 
 		if(distance(pivot + 1, item.end) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				pivot + 1,
 				item.end
 			};
@@ -852,7 +827,7 @@ void sweep_sort(Itr beg, Itr end, Comp cmp) {
 				stk.resize(stk.size() * 2);
 		}
 		if(distance(item.beg, pivot) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				item.beg,
 				pivot
 			};
@@ -1026,22 +1001,17 @@ template<typename Itr>
 void merge_sweep_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
-	//add a stack item
-	struct stack_less_data {
-		Itr beg;
-		Itr end;
-	};
-	std::vector<stack_less_data> stk;
+	std::vector<stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stack_less_data dat = {
+	stack_less_data<Itr> dat = {
 		beg,
 		end
 	};
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stack_less_data item = stk[--idx];
+		stack_less_data<Itr> item = stk[--idx];
 
 		Itr pivot = middle_of_three(item.beg, half_point(item.beg, item.end), item.end - 1);
 
@@ -1051,7 +1021,7 @@ void merge_sweep_sort(Itr beg, Itr end) {
 		move_pivot(nhalf, pivot);
 
 		if(distance(pivot + 1, item.end) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				pivot + 1,
 				item.end
 			};
@@ -1060,7 +1030,7 @@ void merge_sweep_sort(Itr beg, Itr end) {
 				stk.resize(stk.size() * 2);
 		}
 		if(distance(item.beg, nhalf) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				item.beg,
 				nhalf
 			};
@@ -1211,22 +1181,17 @@ template<typename Itr, typename Comp>
 void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
-	//add a stack item
-	struct stack_less_data {
-		Itr beg;
-		Itr end;
-	};
-	std::vector<stack_less_data> stk;
+	std::vector<stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stack_less_data dat = {
+	stack_less_data<Itr> dat = {
 		beg,
 		end
 	};
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stack_less_data item = stk[--idx];
+		stack_less_data<Itr> item = stk[--idx];
 
 		Itr pivot = middle_of_three(item.beg, half_point(item.beg, item.end), item.end - 1, cmp);
 
@@ -1236,7 +1201,7 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 		move_pivot(nhalf, pivot, cmp);
 
 		if(distance(pivot + 1, item.end) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				pivot + 1,
 				item.end
 			};
@@ -1245,7 +1210,7 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 				stk.resize(stk.size() * 2);
 		}
 		if(distance(item.beg, nhalf) > 1) {
-			stack_less_data dat = {
+			stack_less_data<Itr> dat = {
 				item.beg,
 				nhalf
 			};
