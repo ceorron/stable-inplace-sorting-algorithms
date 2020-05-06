@@ -10,7 +10,7 @@ They have the following characteristics.
 | insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 349 | 1053448 |
 | sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 501 | 744087 |
 | zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 89 | 54148 |
-| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 245 | 31216 |
+| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 257 | 30569 |
 | stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 137 | 6501 |
 | quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 54 | 5842 |
 | merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 46 | 5477 |
