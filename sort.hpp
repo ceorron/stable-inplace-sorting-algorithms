@@ -1788,7 +1788,6 @@ template<typename Itr>
 void insertion_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
-	std::cout << "insert sort" << std::endl;
 	Itr strt = beg + 1;
 	for(; strt != end; ++strt) {
 		Itr crnt = strt;
