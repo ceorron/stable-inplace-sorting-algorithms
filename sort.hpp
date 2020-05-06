@@ -227,7 +227,7 @@ void quick_sort(Itr beg, Itr end) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
-	stk.resize(50);
+	stk.resize(15);
 	size_t idx = 0;
 	stack_less_data dat = {
 		beg,
@@ -298,7 +298,7 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
-	stk.resize(50);
+	stk.resize(15);
 	size_t idx = 0;
 	stack_less_data dat = {
 		beg,
@@ -399,7 +399,7 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
-	stk.resize(50);
+	stk.resize(15);
 	size_t idx = 0;
 	stack_less_data dat = {
 		beg,
@@ -502,7 +502,7 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
-	stk.resize(50);
+	stk.resize(15);
 	size_t idx = 0;
 	stack_less_data dat = {
 		beg,
@@ -717,7 +717,7 @@ void sweep_sort(Itr beg, Itr end) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
-	stk.resize(50);
+	stk.resize(15);
 	size_t idx = 0;
 	stack_less_data dat = {
 		beg,
@@ -827,7 +827,7 @@ void sweep_sort(Itr beg, Itr end, Comp cmp) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
-	stk.resize(50);
+	stk.resize(15);
 	size_t idx = 0;
 	stack_less_data dat = {
 		beg,
@@ -864,6 +864,119 @@ void sweep_sort(Itr beg, Itr end, Comp cmp) {
 }
 
 namespace stlib_internal {
+template<typename Itr>
+struct merge_sweep_stack_less_data {
+	Itr beg;
+	Itr end;
+	Itr nhalf;
+};
+template<typename Itr>
+void do_merge_sweep(merge_sweep_stack_less_data<Itr>& lhs, merge_sweep_stack_less_data<Itr>& rhs, Itr& pivot) {
+	//NOTE end of lhs == beg of rhs
+
+	//do rotate to combine the halfs
+	//swap the greater of the first with the less of the second
+	stdlib::rotate(lhs.nhalf, lhs.end, rhs.nhalf);
+
+	//keep track of pivot, pivot moves with greater
+	if(pivot >= lhs.nhalf && pivot < lhs.end)
+		pivot += distance(rhs.beg, rhs.nhalf);
+
+	//update this to be the merged region
+	lhs.end = rhs.end;
+	lhs.nhalf += distance(rhs.beg, rhs.nhalf);
+}
+template<typename Itr>
+void comp_swap(Itr left, Itr right, Itr& pivot) {
+	if(less_func(*right, *left)) {
+		std::swap(*left, *right);
+		if(pivot == right)
+			pivot = left;
+		else if(pivot == left)
+			pivot = right;
+	}
+}
+template<typename Itr>
+void merge_sweep_sort_add_item(Itr& bg, Itr end, Itr& pivot, vector<merge_sweep_stack_less_data<Itr>>& stk, size_t& idx) {
+	auto tmp = bg;
+	++tmp;
+	if(tmp == end) {
+		merge_sweep_stack_less_data<Itr> sld{ bg, end, bg };
+
+		//record the half way point for each
+		if(less_func(*bg, *pivot))
+			++sld.nhalf;
+
+		stk[idx++] = sld;
+		if(idx == stk.size())
+			stk.resize(stk.size() * 2);
+		++bg;
+	} else {
+		//ensure correct ordering of pairs
+		comp_swap(bg, bg + 1, pivot);
+		merge_sweep_stack_less_data<Itr> sld{ bg, bg + 2, bg };
+
+		//record the half way point for each
+		if(less_func(*bg, *pivot)) {
+			++sld.nhalf;
+			if(less_func(*(bg + 1), *pivot))
+				++sld.nhalf;
+		}
+
+		stk[idx++] = sld;
+		if(idx == stk.size())
+			stk.resize(stk.size() * 2);
+		bg += 2;
+	}
+}
+template<typename Itr>
+void merge_sweep_sort_iterative(Itr& pivot, Itr beg, Itr end, Itr& nhalf) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 0) {
+		nhalf = beg;
+		return;
+	}
+	if(sze <= 1) {
+		if(less_func(*beg, *pivot))
+			nhalf = end;
+		else
+			nhalf = beg;
+		return;
+	}
+	if(sze <= 2) {
+		comp_swap(beg, beg + 1, pivot);
+
+		//record the half way point for each
+		nhalf = beg;
+		if(less_func(*beg, *pivot)) {
+			++nhalf;
+			if(less_func(*(beg + 1), *pivot))
+				++nhalf;
+		}
+		return;
+	}
+
+	Itr bg = beg;
+	vector<merge_sweep_stack_less_data<Itr>> stk;
+	stk.resize(15);
+	size_t idx = 0;
+
+	merge_sweep_sort_add_item(bg, end, pivot, stk, idx);
+
+	do {
+		if(bg != end)
+			//add another item
+			merge_sweep_sort_add_item(bg, end, pivot, stk, idx);
+
+		//merge the last two items in the list together if they are the same size
+		while(idx > 1 && (bg == end || distance(stk[idx - 2].beg, stk[idx - 2].end) == distance(stk[idx - 1].beg, stk[idx - 1].end))) {
+			do_merge_sweep(stk[idx - 2], stk[idx - 1], pivot);
+			--idx;
+		}
+	} while((bg != end) | (idx > 1));
+
+	nhalf = stk.front().nhalf;
+}
 template<typename Itr>
 void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf) {
 	if(distance(beg, end) == 0) {
@@ -902,7 +1015,7 @@ void stack_merge_sweep_sort(Itr beg, Itr end) {
 	Itr pivot = half_point(beg, end);
 
 	Itr nhalf;
-	stlib_internal::merge_sweep_sort_recurse(pivot, beg, end, nhalf);
+	stlib_internal::merge_sweep_sort_iterative(pivot, beg, end, nhalf);
 
 	stlib_internal::move_pivot(nhalf, pivot);
 
@@ -919,7 +1032,7 @@ void merge_sweep_sort(Itr beg, Itr end) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
-	stk.resize(50);
+	stk.resize(15);
 	size_t idx = 0;
 	stack_less_data dat = {
 		beg,
@@ -933,7 +1046,7 @@ void merge_sweep_sort(Itr beg, Itr end) {
 		Itr pivot = middle_of_three(item.beg, half_point(item.beg, item.end), item.end - 1);
 
 		Itr nhalf;
-		merge_sweep_sort_recurse(pivot, item.beg, item.end, nhalf);
+		merge_sweep_sort_iterative(pivot, item.beg, item.end, nhalf);
 
 		move_pivot(nhalf, pivot);
 
@@ -958,6 +1071,97 @@ void merge_sweep_sort(Itr beg, Itr end) {
 	}
 }
 namespace stlib_internal {
+template<typename Itr, typename Comp>
+void comp_swap(Itr left, Itr right, Itr& pivot, Comp cmp) {
+	if(less_func(*right, *left, cmp)) {
+		std::swap(*left, *right);
+		if(pivot == right)
+			pivot = left;
+		else if(pivot == left)
+			pivot = right;
+	}
+}
+template<typename Itr, typename Comp>
+void merge_sweep_sort_add_item(Itr& bg, Itr end, Itr& pivot, vector<merge_sweep_stack_less_data<Itr>>& stk, size_t& idx, Comp cmp) {
+	auto tmp = bg;
+	++tmp;
+	if(tmp == end) {
+		merge_sweep_stack_less_data<Itr> sld{ bg, end, bg };
+
+		//record the half way point for each
+		if(less_func(*bg, *pivot, cmp))
+			++sld.nhalf;
+
+		stk[idx++] = sld;
+		if(idx == stk.size())
+			stk.resize(stk.size() * 2);
+		++bg;
+	} else {
+		//ensure correct ordering of pairs
+		comp_swap(bg, bg + 1, pivot, cmp);
+		merge_sweep_stack_less_data<Itr> sld{ bg, bg + 2, bg };
+
+		//record the half way point for each
+		if(less_func(*bg, *pivot, cmp)) {
+			++sld.nhalf;
+			if(less_func(*(bg + 1), *pivot, cmp))
+				++sld.nhalf;
+		}
+
+		stk[idx++] = sld;
+		if(idx == stk.size())
+			stk.resize(stk.size() * 2);
+		bg += 2;
+	}
+}
+template<typename Itr, typename Comp>
+void merge_sweep_sort_iterative(Itr& pivot, Itr beg, Itr end, Itr& nhalf, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 0) {
+		nhalf = beg;
+		return;
+	}
+	if(sze <= 1) {
+		if(less_func(*beg, *pivot, cmp))
+			nhalf = end;
+		else
+			nhalf = beg;
+		return;
+	}
+	if(sze <= 2) {
+		comp_swap(beg, beg + 1, pivot, cmp);
+
+		//record the half way point for each
+		nhalf = beg;
+		if(less_func(*beg, *pivot, cmp)) {
+			++nhalf;
+			if(less_func(*(beg + 1), *pivot, cmp))
+				++nhalf;
+		}
+		return;
+	}
+
+	Itr bg = beg;
+	vector<merge_sweep_stack_less_data<Itr>> stk;
+	stk.resize(15);
+	size_t idx = 0;
+
+	merge_sweep_sort_add_item(bg, end, pivot, stk, idx, cmp);
+
+	do {
+		if(bg != end)
+			//add another item
+			merge_sweep_sort_add_item(bg, end, pivot, stk, idx, cmp);
+
+		//merge the last two items in the list together if they are the same size
+		while(idx > 1 && (bg == end || distance(stk[idx - 2].beg, stk[idx - 2].end) == distance(stk[idx - 1].beg, stk[idx - 1].end))) {
+			do_merge_sweep(stk[idx - 2], stk[idx - 1], pivot);
+			--idx;
+		}
+	} while((bg != end) | (idx > 1));
+
+	nhalf = stk.front().nhalf;
+}
 template<typename Itr, typename Comp>
 void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf, Comp cmp) {
 	if(distance(beg, end) == 0) {
@@ -996,7 +1200,7 @@ void stack_merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 	Itr pivot = half_point(beg, end);
 
 	Itr nhalf;
-	stlib_internal::merge_sweep_sort_recurse(pivot, beg, end, nhalf, cmp);
+	stlib_internal::merge_sweep_sort_iterative(pivot, beg, end, nhalf, cmp);
 
 	stlib_internal::move_pivot(nhalf, pivot, cmp);
 
@@ -1013,7 +1217,7 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 		Itr end;
 	};
 	std::vector<stack_less_data> stk;
-	stk.resize(50);
+	stk.resize(15);
 	size_t idx = 0;
 	stack_less_data dat = {
 		beg,
@@ -1027,7 +1231,7 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 		Itr pivot = middle_of_three(item.beg, half_point(item.beg, item.end), item.end - 1, cmp);
 
 		Itr nhalf;
-		merge_sweep_sort_recurse(pivot, item.beg, item.end, nhalf, cmp);
+		merge_sweep_sort_iterative(pivot, item.beg, item.end, nhalf, cmp);
 
 		move_pivot(nhalf, pivot, cmp);
 
@@ -1142,7 +1346,7 @@ bool merge_sort(Itr beg, Itr end, Comp cmp) {
 	return false;
 }
 
-stlib_internal {
+namesapce stlib_internal {
 template<typename Itr1, typename Itr2>
 void merge_internal(Itr1 beg1, Itr1 beg2, Itr1 end2, Itr2& begout) {
 	Itr1 end1 = beg2;
