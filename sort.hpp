@@ -1236,12 +1236,12 @@ void zip_merge(Itr left, Itr right, Itr end) {
 					do {
 						--mdlend;
 						--mdl;
-						construct(*mdlend, *mdl);
+						construct(*mdlend, std::move(*mdl));
 					} while(mdl != mdltop);
 
 					//move in the new data
 					for(uint16_t i = 0; i < count; ++i, ++mdltop)
-						construct(*mdltop, swapbufr[i]);
+						construct(*mdltop, std::move(swapbufr[i]));
 					--left;
 				} else {
 					std::swap(*left, *right);
@@ -1387,12 +1387,12 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 					do {
 						--mdlend;
 						--mdl;
-						construct(*mdlend, *mdl);
+						construct(*mdlend, std::move(*mdl));
 					} while(mdl != mdltop);
 
 					//move in the new data
 					for(uint16_t i = 0; i < count; ++i, ++mdltop)
-						construct(*mdltop, swapbufr[i]);
+						construct(*mdltop, std::move(swapbufr[i]));
 					--left;
 				} else {
 					std::swap(*left, *right);
