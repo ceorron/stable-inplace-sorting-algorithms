@@ -1,36 +1,40 @@
 # stable-in place-sorting-algorithms
 
-Included are implementations of common sorting algorithms as well as new sorting algorithms sweep_sort, merge_sweep_sort and zip_sort.
+Included are implementations of common sorting algorithms as well as new sorting algorithms merge_sweep_sort and zip_sort.
 
 They have the following characteristics.
 
 | Name | Inplace | Stable | Average complexity (Big O) | Worst case complexity (Big O) | Stack memory | Additional memory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: |
-| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1042 | 9400604 |
-| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 349 | 1053448 |
-| sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 501 | 744087 |
-| zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 89 | 54148 |
-| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 257 | 30569 |
-| stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 137 | 6501 |
-| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 54 | 5842 |
-| merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 46 | 5477 |
-| std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 44 | 5399 |
-| std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 36 | 4821 |
+| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1042 | 9383652 |
+| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 349 | 1038194 |
+| zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 89 | 55025 |
+| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 257 | 30865 |
+| stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 137 | 7522 |
+| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 54 | 5824 |
+| merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 46 | 5799 |
+| std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 44 | 5626 |
+| std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 36 | 4921 |
+| intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 44 | 4756 |
 
 (All tests with MSVC compiler in release x64)
 (times in microseconds)
 
 NOTE: as default zip_sort and merge_sort use the optimised constant stack memory algorithm (1).
+Also sweep_sort as since been removed entirely due to redundancy (slower than both zip_sort and merge_sweep_sort).
 
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
 
-The idea for sweep_sort, merge_sweep_sort and zip_sort came from the idea of using std::rotate as part of a recursive decent sorting algorithm, and so sweep_sort, merge_sweep_sort and zip_sort make use of the rotate function. zip_sort came later and was added in May 2020.
+The idea for merge_sweep_sort and zip_sort came from the idea of using std::rotate as part of a recursive decent sorting algorithm, and so merge_sweep_sort and zip_sort make use of the rotate function. zip_sort came later and was added in May 2020.
 
 merge_sweep_sort gives the best overall performance for an in-place, stable sorting algorithm that uses no additional memory.
 zip_sort gives the best overall performance for an in-place, stable sorting algorithm that uses no additional memory, as well as giving O(n log n) worst case performance.
 
-sweep_sort and merge_sweep_sort could be said to be quick_sort like algorithms.
+merge_sweep_sort could be said to be quick_sort like algorithms.
+
 zip_sort is a merge_sort like algorithm. It's merge function does everything in-place, unlike merge_sort, while also providing excellent speed (minimal moves).
+
+As of May 2020 we introduced intro_sort, this is an implementation similar to std::sort. However our into_sort algorithm is commonly faster than both std::sort and std::stable_sort in our tests. See table above. (NOTE intro_sort is not a stable sorting algorithm as it builds from quick_sort.)
 
 # Example use - C++
 
@@ -87,7 +91,6 @@ int main() {
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
-
     {
         std::cout << "test stable quick sort" << std::endl;
         //test stable quick sort
@@ -155,28 +158,6 @@ int main() {
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
-        std::cout << "test sweep sort" << std::endl;
-        //test sweep sort
-        std::vector<uint32_t> vec;
-        for(uint32_t i = 0; i < 700; ++i)
-            vec.push_back(rand());
-
-        {
-            timer tmr;
-            stlib::sweep_sort(vec.begin(), vec.end());
-        }
-
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < 700; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
-
-        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
-    }
-    {
         std::cout << "test merge sweep sort" << std::endl;
         //test merge sweep sort
         std::vector<uint32_t> vec;
@@ -230,6 +211,28 @@ int main() {
         {
             timer tmr;
             stlib::insertion_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test intro sort" << std::endl;
+        //test intro sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::intro_sort(vec.begin(), vec.end());
         }
 
         std::cout << "[" << std::endl;
