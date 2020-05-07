@@ -110,12 +110,31 @@ void rotate(Itr first, Itr middle, Itr last) {
 		else if(first == middle) middle = next;
 	}
 }
+template<typename Itr1, typename Itr2>
+void copy_buffers(Itr1 beg, Itr1 end, Itr2& out) {
+	//found to be faster then memcpy!!!
+	for(; beg != end; ++beg, ++out)
+		construct(*out, std::move(*beg));
+}
 
+namespace stlib_internal {
 template<typename Itr>
 struct stack_less_data {
 	Itr beg;
 	Itr end;
 };
+template<typename Itr>
+void add_stack_item(Itr beg1, Itr end1,
+					std::vector<stack_less_data<Itr>>& stk, size_t& idx) {
+	stack_less_data<Itr> dat = {
+		beg1,
+		end1
+	};
+	stk[idx++] = std::move(dat);
+	if(idx == stk.size())
+		stk.resize(stk.size() * 2);
+}
+}
 
 template<typename Itr>
 inline Itr half_point(Itr first, Itr last) {
@@ -226,17 +245,17 @@ template<typename Itr>
 void quick_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
-	std::vector<stack_less_data<Itr>> stk;
+	std::vector<stlib_internal::stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stack_less_data<Itr> dat = {
+	stlib_internal::stack_less_data<Itr> dat = {
 		beg,
 		end - 1
 	};
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stack_less_data<Itr> tmp = stk[--idx];
+		stlib_internal::stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end);
@@ -268,23 +287,19 @@ void quick_sort(Itr beg, Itr end) {
 			}
 		}
 
-		if(distance(pivot + 1, tmp.end + 1) > 1) {
-			stack_less_data<Itr> dat = {
-				pivot + 1,
-				tmp.end
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
-		}
-		if(distance(tmp.beg, pivot) > 1) {
-			stack_less_data<Itr> dat = {
-				tmp.beg,
-				pivot - 1
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
+		auto dist1 = distance(pivot + 1, tmp.end + 1);
+		auto dist2 = distance(tmp.beg, pivot);
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 1)
+				stlib_internal::add_stack_item(tmp.beg, pivot - 1, stk, idx);
+			if(dist1 > 1)
+				stlib_internal::add_stack_item(pivot + 1, tmp.end, stk, idx);
+		} else {
+			if(dist1 > 1)
+				stlib_internal::add_stack_item(pivot + 1, tmp.end, stk, idx);
+			if(dist2 > 1)
+				stlib_internal::add_stack_item(tmp.beg, pivot - 1, stk, idx);
 		}
 	}
 }
@@ -292,17 +307,17 @@ template<typename Itr, typename Comp>
 void quick_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
-	std::vector<stack_less_data<Itr>> stk;
+	std::vector<stlib_internal::stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stack_less_data<Itr> dat = {
+	stlib_internal::stack_less_data<Itr> dat = {
 		beg,
 		end - 1
 	};
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stack_less_data<Itr> tmp = stk[--idx];
+		stlib_internal::stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, cmp);
@@ -334,23 +349,19 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 			}
 		}
 
-		if(distance(pivot + 1, tmp.end + 1) > 1) {
-			stack_less_data<Itr> dat = {
-				pivot + 1,
-				tmp.end
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
-		}
-		if(distance(tmp.beg, pivot) > 1) {
-			stack_less_data<Itr> dat = {
-				tmp.beg,
-				pivot - 1
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
+		auto dist1 = distance(pivot + 1, tmp.end + 1);
+		auto dist2 = distance(tmp.beg, pivot);
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 1)
+				stlib_internal::add_stack_item(tmp.beg, pivot - 1, stk, idx);
+			if(dist1 > 1)
+				stlib_internal::add_stack_item(pivot + 1, tmp.end, stk, idx);
+		} else {
+			if(dist1 > 1)
+				stlib_internal::add_stack_item(pivot + 1, tmp.end, stk, idx);
+			if(dist2 > 1)
+				stlib_internal::add_stack_item(tmp.beg, pivot - 1, stk, idx);
 		}
 	}
 }
@@ -430,23 +441,19 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 			}
 		}
 
-		if(distance(pivot + 1, tmp.end + 1) > 1) {
-			stack_less_data<Itr> dat = {
-				pivot + 1,
-				tmp.end
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
-		}
-		if(distance(tmp.beg, pivot) > 1) {
-			stack_less_data<Itr> dat = {
-				tmp.beg,
-				pivot - 1
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
+		auto dist1 = distance(pivot + 1, tmp.end + 1);
+		auto dist2 = distance(tmp.beg, pivot);
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 1)
+				add_stack_item(tmp.beg, pivot - 1, stk, idx);
+			if(dist1 > 1)
+				add_stack_item(pivot + 1, tmp.end, stk, idx);
+		} else {
+			if(dist1 > 1)
+				add_stack_item(pivot + 1, tmp.end, stk, idx);
+			if(dist2 > 1)
+				add_stack_item(tmp.beg, pivot - 1, stk, idx);
 		}
 	}
 }
@@ -528,23 +535,19 @@ void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
 			}
 		}
 
-		if(distance(pivot + 1, tmp.end + 1) > 1) {
-			stack_less_data<Itr> dat = {
-				pivot + 1,
-				tmp.end
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
-		}
-		if(distance(tmp.beg, pivot) > 1) {
-			stack_less_data<Itr> dat = {
-				tmp.beg,
-				pivot - 1
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
+		auto dist1 = distance(pivot + 1, tmp.end + 1);
+		auto dist2 = distance(tmp.beg, pivot);
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 1)
+				add_stack_item(tmp.beg, pivot - 1, stk, idx);
+			if(dist1 > 1)
+				add_stack_item(pivot + 1, tmp.end, stk, idx);
+		} else {
+			if(dist1 > 1)
+				add_stack_item(pivot + 1, tmp.end, stk, idx);
+			if(dist2 > 1)
+				add_stack_item(tmp.beg, pivot - 1, stk, idx);
 		}
 	}
 }
@@ -589,8 +592,16 @@ bool stack_quick_sort(Itr beg, Itr end, uint32_t limit = 100) {
 	}
 
 	bool rtn = true;
-	if(beg != left) rtn &= stack_quick_sort(beg, left, limit - 1);
-	if(left != rend) rtn &= stack_quick_sort(left, end, limit - 1);
+	auto dist1 = distance(left, end);
+	auto dist2 = distance(beg, left);
+	//implements sort shorter first optimisation
+	if(dist1 < dist2) {
+		if(left != rend) rtn &= stack_quick_sort(left, end, limit - 1);
+		if(beg != left) rtn &= stack_quick_sort(beg, left, limit - 1);
+	} else {
+		if(beg != left) rtn &= stack_quick_sort(beg, left, limit - 1);
+		if(left != rend) rtn &= stack_quick_sort(left, end, limit - 1);
+	}
 	return rtn;
 }
 
@@ -623,220 +634,19 @@ bool stack_quick_sort(Itr beg, Itr end, Comp cmp, uint32_t limit = 100) {
 	}
 
 	bool rtn = true;
-	if(beg != left) rtn &= stack_quick_sort(beg, left, cmp, limit - 1);
-	if(left != rend) rtn &= stack_quick_sort(left, end, cmp, limit - 1);
+	auto dist1 = distance(left, end);
+	auto dist2 = distance(beg, left);
+	//implements sort shorter first optimisation
+	if(dist1 < dist2) {
+		if(left != rend) rtn &= stack_quick_sort(left, end, limit - 1);
+		if(beg != left) rtn &= stack_quick_sort(beg, left, limit - 1);
+	} else {
+		if(beg != left) rtn &= stack_quick_sort(beg, left, limit - 1);
+		if(left != rend) rtn &= stack_quick_sort(left, end, limit - 1);
+	}
 	return rtn;
 }
 
-namespace stlib_internal {
-template<typename Itr>
-void sweep_sort_internal(Itr& pivot, Itr beg, Itr end) {
-	//record to pivot + 1 for later use
-	Itr pivotstore = pivot;
-	Itr begleft = pivot;
-	Itr begright = pivot + 1;
-
-	//go forwards move those less than pivot to right side of pivot
-	Itr moveright = begright;
-	Itr tmpright = begright;
-	for(; begright != end; ++begright) {
-		if(less_func(*begright, *pivot)) {
-			if(moveright != begright) {
-				//swap the inbetween values that are equal to maintain stable orderering
-				Itr moveequal = moveright + 1;
-				for(; moveequal != begright; ++moveequal)
-					if(equal_func(*moveequal, *moveright))
-						std::swap(*moveequal, *moveright);
-				std::swap(*moveright, *begright);
-			}
-			++moveright;
-		}
-	}
-	//go backwards move those greater than pivot to left side of pivot
-	Itr moveleft = begleft - 1;
-	if(pivot != beg) {
-		do {
-			--begleft;
-			if(greater_func(*begleft, *pivot)) {
-				if(moveleft != begleft) {
-					//swap the inbetween values that are equal to maintain stable orderering
-					Itr moveequal = moveleft - 1;
-					for(; moveequal != begleft; --moveequal)
-						if(equal_func(*moveequal, *moveleft))
-							std::swap(*moveequal, *moveleft);
-					std::swap(*moveleft, *begleft);
-				}
-				--moveleft;
-			}
-		} while(begleft != (beg - 1));
-	}
-
-	//do two rotates here,
-	//put the pivot in place (at beginning of left, could be at end of right)
-	stlib::rotate(moveleft + 1, pivot, pivot + 1);
-	pivot -= distance(moveleft + 1, pivot);
-
-	//rotate the right side over
-	stlib::rotate(moveleft + 1, tmpright, moveright);
-	pivot += distance(tmpright, moveright);
-}
-}
-template<typename Itr>
-void stack_sweep_sort(Itr beg, Itr end) {
-	if(distance(beg, end) <= 1)
-		return;
-	Itr pivot = half_point(beg, end);
-
-	stlib_internal::sweep_sort_internal(pivot, beg, end);
-
-	stack_sweep_sort(beg, pivot);
-	stack_sweep_sort(pivot + 1, end);
-}
-template<typename Itr>
-void sweep_sort(Itr beg, Itr end) {
-	if(distance(beg, end) <= 1)
-		return;
-	std::vector<stack_less_data<Itr>> stk;
-	stk.resize(15);
-	size_t idx = 0;
-	stack_less_data<Itr> dat = {
-		beg,
-		end
-	};
-	stk[idx++] = std::move(dat);
-
-	while(idx > 0) {
-		stack_less_data<Itr> item = stk[--idx];
-
-		Itr pivot = half_point(item.beg, item.end);
-
-		sweep_sort_internal(pivot, item.beg, item.end);
-
-		if(distance(pivot + 1, item.end) > 1) {
-			stack_less_data<Itr> dat = {
-				pivot + 1,
-				item.end
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
-		}
-		if(distance(item.beg, pivot) > 1) {
-			stack_less_data<Itr> dat = {
-				item.beg,
-				pivot
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
-		}
-	}
-}
-
-namespace stlib_internal {
-template<typename Itr, typename Comp>
-void sweep_sort_internal(Itr& pivot, Itr beg, Itr end, Comp cmp) {
-	//record to pivot + 1 for later use
-	Itr pivotstore = pivot;
-	Itr begleft = pivot;
-	Itr begright = pivot + 1;
-
-	//go forwards move those less than pivot to right side of pivot
-	Itr moveright = begright;
-	Itr tmpright = begright;
-	for(; begright != end; ++begright) {
-		if(less_func(*begright, *pivot, cmp)) {
-			if(moveright != begright) {
-				//swap the inbetween values that are equal to maintain stable orderering
-				Itr moveequal = moveright + 1;
-				for(; moveequal != begright; ++moveequal)
-					if(equal_func(*moveequal, *moveright, cmp))
-						std::swap(*moveequal, *moveright);
-				std::swap(*moveright, *begright);
-			}
-			++moveright;
-		}
-	}
-	//go backwards move those greater than pivot to left side of pivot
-	Itr moveleft = begleft - 1;
-	if(pivot != beg) {
-		do {
-			--begleft;
-			if(greater_func(*begleft, *pivot, cmp)) {
-				if(moveleft != begleft) {
-					//swap the inbetween values that are equal to maintain stable orderering
-					Itr moveequal = moveleft - 1;
-					for(; moveequal != begleft; --moveequal)
-						if(equal_func(*moveequal, *moveleft, cmp))
-							std::swap(*moveequal, *moveleft);
-					std::swap(*moveleft, *begleft);
-				}
-				--moveleft;
-			}
-		} while(begleft != (beg - 1));
-	}
-
-	//do two rotates here,
-	//put the pivot in place (at beginning of left, could be at end of right)
-	stlib::rotate(moveleft + 1, pivot, pivot + 1);
-	pivot -= distance(moveleft + 1, pivot);
-
-	//rotate the right side over
-	stlib::rotate(moveleft + 1, tmpright, moveright);
-	pivot += distance(tmpright, moveright);
-}
-}
-template<typename Itr, typename Comp>
-void stack_sweep_sort(Itr beg, Itr end, Comp cmp) {
-	if(distance(beg, end) <= 1)
-		return;
-	Itr pivot = half_point(beg, end);
-
-	stlib_internal::sweep_sort_internal(pivot, beg, end, cmp);
-
-	stack_sweep_sort(beg, pivot);
-	stack_sweep_sort(pivot + 1, end);
-}
-template<typename Itr, typename Comp>
-void sweep_sort(Itr beg, Itr end, Comp cmp) {
-	if(distance(beg, end) <= 1)
-		return;
-	std::vector<stack_less_data<Itr>> stk;
-	stk.resize(15);
-	size_t idx = 0;
-	stack_less_data<Itr> dat = {
-		beg,
-		end
-	};
-	stk[idx++] = std::move(dat);
-
-	while(idx > 0) {
-		stack_less_data<Itr> item = stk[--idx];
-
-		Itr pivot = half_point(item.beg, item.end);
-
-		sweep_sort_internal(pivot, item.beg, item.end, cmp);
-
-		if(distance(pivot + 1, item.end) > 1) {
-			stack_less_data<Itr> dat = {
-				pivot + 1,
-				item.end
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
-		}
-		if(distance(item.beg, pivot) > 1) {
-			stack_less_data<Itr> dat = {
-				item.beg,
-				pivot
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
-		}
-	}
-}
 
 namespace stlib_internal {
 template<typename Itr>
@@ -872,7 +682,7 @@ void comp_swap(Itr left, Itr right, Itr& pivot) {
 	}
 }
 template<typename Itr>
-void merge_sweep_sort_add_item(Itr& bg, Itr end, Itr& pivot, vector<merge_sweep_stack_less_data<Itr>>& stk, size_t& idx) {
+void merge_sweep_sort_add_item(Itr& bg, Itr end, Itr& pivot, std::vector<merge_sweep_stack_less_data<Itr>>& stk, size_t& idx) {
 	auto tmp = bg;
 	++tmp;
 	if(tmp == end) {
@@ -932,7 +742,7 @@ void merge_sweep_sort_iterative(Itr& pivot, Itr beg, Itr end, Itr& nhalf) {
 	}
 
 	Itr bg = beg;
-	vector<merge_sweep_stack_less_data<Itr>> stk;
+	std::vector<merge_sweep_stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
 
@@ -1001,17 +811,17 @@ template<typename Itr>
 void merge_sweep_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
-	std::vector<stack_less_data<Itr>> stk;
+	std::vector<stlib_internal::stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stack_less_data<Itr> dat = {
+	stlib_internal::stack_less_data<Itr> dat = {
 		beg,
 		end
 	};
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stack_less_data<Itr> item = stk[--idx];
+		stlib_internal::stack_less_data<Itr> item = stk[--idx];
 
 		Itr pivot = middle_of_three(item.beg, half_point(item.beg, item.end), item.end - 1);
 
@@ -1020,23 +830,19 @@ void merge_sweep_sort(Itr beg, Itr end) {
 
 		move_pivot(nhalf, pivot);
 
-		if(distance(pivot + 1, item.end) > 1) {
-			stack_less_data<Itr> dat = {
-				pivot + 1,
-				item.end
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
-		}
-		if(distance(item.beg, nhalf) > 1) {
-			stack_less_data<Itr> dat = {
-				item.beg,
-				nhalf
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
+		auto dist1 = distance(pivot + 1, item.end);
+		auto dist2 = distance(item.beg, nhalf);
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 1)
+				stlib_internal::add_stack_item(item.beg, nhalf, stk, idx);
+			if(dist1 > 1)
+				stlib_internal::add_stack_item(pivot + 1, item.end, stk, idx);
+		} else {
+			if(dist1 > 1)
+				stlib_internal::add_stack_item(pivot + 1, item.end, stk, idx);
+			if(dist2 > 1)
+				stlib_internal::add_stack_item(item.beg, nhalf, stk, idx);
 		}
 	}
 }
@@ -1052,7 +858,7 @@ void comp_swap(Itr left, Itr right, Itr& pivot, Comp cmp) {
 	}
 }
 template<typename Itr, typename Comp>
-void merge_sweep_sort_add_item(Itr& bg, Itr end, Itr& pivot, vector<merge_sweep_stack_less_data<Itr>>& stk, size_t& idx, Comp cmp) {
+void merge_sweep_sort_add_item(Itr& bg, Itr end, Itr& pivot, std::vector<merge_sweep_stack_less_data<Itr>>& stk, size_t& idx, Comp cmp) {
 	auto tmp = bg;
 	++tmp;
 	if(tmp == end) {
@@ -1112,7 +918,7 @@ void merge_sweep_sort_iterative(Itr& pivot, Itr beg, Itr end, Itr& nhalf, Comp c
 	}
 
 	Itr bg = beg;
-	vector<merge_sweep_stack_less_data<Itr>> stk;
+	std::vector<merge_sweep_stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
 
@@ -1181,17 +987,17 @@ template<typename Itr, typename Comp>
 void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
-	std::vector<stack_less_data<Itr>> stk;
+	std::vector<stlib_internal::stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stack_less_data<Itr> dat = {
+	stlib_internal::stack_less_data<Itr> dat = {
 		beg,
 		end
 	};
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stack_less_data<Itr> item = stk[--idx];
+		stlib_internal::stack_less_data<Itr> item = stk[--idx];
 
 		Itr pivot = middle_of_three(item.beg, half_point(item.beg, item.end), item.end - 1, cmp);
 
@@ -1200,23 +1006,19 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 
 		move_pivot(nhalf, pivot, cmp);
 
-		if(distance(pivot + 1, item.end) > 1) {
-			stack_less_data<Itr> dat = {
-				pivot + 1,
-				item.end
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
-		}
-		if(distance(item.beg, nhalf) > 1) {
-			stack_less_data<Itr> dat = {
-				item.beg,
-				nhalf
-			};
-			stk[idx++] = std::move(dat);
-			if(idx == stk.size())
-				stk.resize(stk.size() * 2);
+		auto dist1 = distance(pivot + 1, item.end);
+		auto dist2 = distance(item.beg, nhalf);
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 1)
+				stlib_internal::add_stack_item(item.beg, nhalf, stk, idx);
+			if(dist1 > 1)
+				stlib_internal::add_stack_item(pivot + 1, item.end, stk, idx);
+		} else {
+			if(dist1 > 1)
+				stlib_internal::add_stack_item(pivot + 1, item.end, stk, idx);
+			if(dist2 > 1)
+				stlib_internal::add_stack_item(item.beg, nhalf, stk, idx);
 		}
 	}
 }
@@ -1238,10 +1040,8 @@ void merge_internal(Itr1 beg1, Itr1 beg2, Itr1 end2, Itr2& begout, Comp cmp) {
 		}
 
 	//finish off copy back of remaining lists (if any)
-	for(; beg1 != end1; ++beg1, ++begout)
-		construct(*begout, std::move(*beg1));
-	for(; beg2 != end2; ++beg2, ++begout)
-		construct(*begout, std::move(*beg2));
+	copy_buffers(beg1, end1, begout);
+	copy_buffers(beg2, end2, begout);
 	return;
 }
 template<typename Itr, typename T, typename Comp>
@@ -1292,8 +1092,7 @@ void merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 
 	//ensure we copy this back at the original buffer if needed
 	if(!first)
-		for(; buf != bfrend; ++buf, ++beg)
-			construct(*beg, std::move(*buf));
+		copy_buffers(buf, bfrend, beg);
 }
 }
 template<typename Itr, typename Comp>
@@ -1327,10 +1126,8 @@ void merge_internal(Itr1 beg1, Itr1 beg2, Itr1 end2, Itr2& begout) {
 		}
 
 	//finish off copy back of remaining lists (if any)
-	for(; beg1 != end1; ++beg1, ++begout)
-		construct(*begout, std::move(*beg1));
-	for(; beg2 != end2; ++beg2, ++begout)
-		construct(*begout, std::move(*beg2));
+	copy_buffers(beg1, end1, begout);
+	copy_buffers(beg2, end2, begout);
 	return;
 }
 template<typename Itr, typename T>
@@ -1381,8 +1178,7 @@ void merge_sort_internal(Itr beg, Itr end, T* buf) {
 
 	//ensure we copy this back at the original buffer if needed
 	if(!first)
-		for(; buf != bfrend; ++buf, ++beg)
-			construct(*beg, std::move(*buf));
+		copy_buffers(buf, bfrend, beg);
 }
 }
 template<typename Itr>
@@ -1709,6 +1505,194 @@ void zip_sort_rec2(Itr beg, Itr end, Comp cmp) {
 }
 
 
+namespace stlib_internal {
+template<typename Itr>
+struct intro_stack_less_data {
+	CONTAINS_BASIC;
+
+	Itr beg;
+	Itr end;
+	unsigned depth;
+};
+template<typename Num>
+unsigned get_depth(Num n) {
+	//always have atleast a depth of 3
+	unsigned depth = 1;
+	while(n > 1) {
+		n /= 2;
+		++depth;
+	}
+	return depth * 2 + 1;
+}
+template<typename Itr>
+void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
+	vector<intro_stack_less_data<Itr>>& stk, size_t& idx) {
+	if(depth == 1) {
+		//do O(n log n) zip sort if we have reached the maximum depth
+		zip_sort(beg1, end1);
+	} else {
+		intro_stack_less_data<Itr> dat = {
+			beg2,
+			end2,
+			depth - 1
+		};
+		stk[idx++] = std::move(dat);
+		if(idx == stk.size())
+			stk.resize(stk.size() * 2);
+	}
+}
+template<typename Itr, typename Comp>
+void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
+	vector<intro_stack_less_data<Itr>>& stk, size_t& idx, Comp cmp) {
+	if(depth == 1) {
+		//do O(n log n) zip sort if we have reached the maximum depth
+		zip_sort(beg1, end1, cmp);
+	} else {
+		intro_stack_less_data<Itr> dat = {
+			beg2,
+			end2,
+			depth - 1
+		};
+		stk[idx++] = std::move(dat);
+		if(idx == stk.size())
+			stk.resize(stk.size() * 2);
+	}
+}
+}
+template<typename Itr>
+void intro_quick_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
+	unsigned maxdepth = stlib_internal::get_depth(distance(beg, end));
+
+	//add a stack item
+	vector<stlib_internal::intro_stack_less_data<Itr>> stk;
+	stk.resize(15);
+	size_t idx = 0;
+	stlib_internal::intro_stack_less_data<Itr> dat = {
+		beg,
+		end - 1,
+		maxdepth
+	};
+	stk[idx++] = std::move(dat);
+
+	while(idx > 0) {
+		stlib_internal::intro_stack_less_data<Itr> tmp = stk[--idx];
+		Itr left = tmp.beg - 1;
+		Itr right = tmp.end + 1;
+		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end);
+
+		do {
+			++left;
+			--right;
+			//pivot goes to the right!!
+			while(left != right && left != pivot && less_func(*left, *pivot))
+				++left;
+			while(left != right && greater_equal_func(*right, *pivot))
+				--right;
+			if(left == right)
+				break;
+
+			std::swap(*left, *right);
+			if(left == pivot)
+				pivot = right;
+		} while(left + 1 != right);
+
+		//if right is on the less side, move back
+		if(right != pivot) {
+			if(less_func(*right, *pivot))
+				++right;
+			//move the pivot into place
+			if(right != pivot) {
+				std::swap(*right, *pivot);
+				pivot = right;
+			}
+		}
+
+		auto dist1 = distance(pivot + 1, tmp.end + 1);
+		auto dist2 = distance(tmp.beg, pivot);
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 32)
+				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
+			if(dist1 > 32)
+				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
+		} else {
+			if(dist1 > 32)
+				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
+			if(dist2 > 32)
+				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
+		}
+	}
+}
+template<typename Itr, typename Comp>
+void intro_quick_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	unsigned maxdepth = stlib_internal::get_depth(distance(beg, end));
+
+	//add a stack item
+	vector<stlib_internal::intro_stack_less_data<Itr>> stk;
+	stk.resize(15);
+	size_t idx = 0;
+	stlib_internal::intro_stack_less_data<Itr> dat = {
+		beg,
+		end - 1,
+		maxdepth
+	};
+	stk[idx++] = std::move(dat);
+
+	while(idx > 0) {
+		stlib_internal::intro_stack_less_data<Itr> tmp = stk[--idx];
+		Itr left = tmp.beg - 1;
+		Itr right = tmp.end + 1;
+		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, cmp);
+
+		do {
+			++left;
+			--right;
+			//pivot goes to the right!!
+			while(left != right && left != pivot && less_func(*left, *pivot, cmp))
+				++left;
+			while(left != right && greater_equal_func(*right, *pivot, cmp))
+				--right;
+			if(left == right)
+				break;
+
+			std::swap(*left, *right);
+			if(left == pivot)
+				pivot = right;
+		} while(left + 1 != right);
+
+		//if right is on the less side, move back
+		if(right != pivot) {
+			if(less_func(*right, *pivot, cmp))
+				++right;
+			//move the pivot into place
+			if(right != pivot) {
+				std::swap(*right, *pivot);
+				pivot = right;
+			}
+		}
+
+		auto dist1 = distance(pivot + 1, tmp.end + 1);
+		auto dist2 = distance(tmp.beg, pivot);
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 32)
+				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
+			if(dist1 > 32)
+				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
+		} else {
+			if(dist1 > 32)
+				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
+			if(dist2 > 32)
+				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
+		}
+	}
+}
+
+
 template<typename Itr>
 void bubble_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
@@ -1776,15 +1760,18 @@ void insertion_sort(Itr beg, Itr end, Comp cmp) {
 	}
 }
 
+
 template<typename Itr>
 inline void intro_sort(Itr beg, Itr end) {
-	if(!stack_quick_sort(beg, end))
-		insertion_sort(beg, end);
+	intro_quick_sort(beg, end);
+
+	insertion_sort(beg, end);
 }
 template<typename Itr, typename Comp>
 inline void intro_sort(Itr beg, Itr end, Comp cmp) {
-	if(!stack_quick_sort(beg, end, cmp))
-		insertion_sort(beg, end, cmp);
+	intro_quick_sort(beg, end, cmp);
+
+	insertion_sort(beg, end, cmp);
 }
 
 template<typename Itr>
@@ -1797,11 +1784,11 @@ inline void stable_sort(Itr beg, Itr end, Comp cmp) {
 }
 template<typename Itr>
 inline void sort(Itr beg, Itr end) {
-	quick_sort(beg, end);
+	intro_sort(beg, end);
 }
 template<typename Itr, typename Comp>
 inline void sort(Itr beg, Itr end, Comp cmp) {
-	quick_sort(beg, end, cmp);
+	intro_sort(beg, end, cmp);
 }
 
 template<typename Itr>
