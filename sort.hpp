@@ -1242,7 +1242,17 @@ void zip_merge(Itr left, Itr right, Itr end) {
 					//move in the new data
 					for(uint16_t i = 0; i < count; ++i, ++mdltop)
 						construct(*mdltop, std::move(swapbufr[i]));
-					--left;
+
+					if((count >= buffer_count) | (left == mdlstart) | (right == end))
+						//if we exit because we reach the end of the input we can move across
+						--left;
+					else {
+						//swap the middle with the left
+						std::swap(*left, *mdltop);
+						++mdltop;
+						if(mdltop == right)
+							mdltop = mdlstart;
+					}
 				} else {
 					std::swap(*left, *right);
 					++right;
@@ -1393,7 +1403,17 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 					//move in the new data
 					for(uint16_t i = 0; i < count; ++i, ++mdltop)
 						construct(*mdltop, std::move(swapbufr[i]));
-					--left;
+
+					if((count >= buffer_count) | (left == mdlstart) | (right == end))
+						//if we exit because we reach the end of the input we can move across
+						--left;
+					else {
+						//swap the middle with the left
+						std::swap(*left, *mdltop);
+						++mdltop;
+						if(mdltop == right)
+							mdltop = mdlstart;
+					}
 				} else {
 					std::swap(*left, *right);
 					++right;
