@@ -6,16 +6,16 @@ They have the following characteristics.
 
 | Name | Inplace | Stable | Average complexity (Big O) | Worst case complexity (Big O) | Stack memory | Additional memory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: |
-| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1042 | 9383652 |
-| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 349 | 1038194 |
+| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1040 | 9383652 |
+| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 161 | 1038194 |
 | zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 89 | 55025 |
-| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 257 | 30865 |
-| stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 137 | 7522 |
-| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 54 | 5824 |
-| merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 46 | 5799 |
-| std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 44 | 5626 |
-| std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 36 | 4921 |
-| intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 44 | 4756 |
+| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 284 | 30865 |
+| stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 76 | 7522 |
+| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 52 | 5824 |
+| merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 45 | 5799 |
+| std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 41 | 5626 |
+| std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 43 | 4921 |
+| intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 49 | 4756 |
 
 (All tests with MSVC compiler in release x64)
 (times in microseconds)
