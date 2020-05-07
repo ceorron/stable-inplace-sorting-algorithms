@@ -21,7 +21,7 @@ They have the following characteristics.
 (times in microseconds)
 
 NOTE: as default zip_sort and merge_sort use the optimised constant stack memory algorithm (1).
-Also sweep_sort as since been removed entirely due to redundancy (slower than both zip_sort and merge_sweep_sort).
+Also sweep_sort has since been removed entirely due to redundancy (slower than both zip_sort and merge_sweep_sort).
 
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
 
