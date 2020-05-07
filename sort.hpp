@@ -1508,8 +1508,6 @@ void zip_sort_rec2(Itr beg, Itr end, Comp cmp) {
 namespace stlib_internal {
 template<typename Itr>
 struct intro_stack_less_data {
-	CONTAINS_BASIC;
-
 	Itr beg;
 	Itr end;
 	unsigned depth;
