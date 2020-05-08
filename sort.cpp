@@ -27,6 +27,13 @@
 #include "sort.hpp"
 
 namespace stlib_internal {
-	
-	
+
+void* aligned_storage_new(size_t sze) {
+	//use new to get some aligned data
+	return new double[sze/sizeof(double) + (sze%sizeof(double) == 0 ? 0 : 1)];
+}
+void aligned_storage_delete(size_t sze, void* ptr) {
+	delete[] (double*)ptr;
+}
+
 }
