@@ -31,6 +31,7 @@
 
 namespace stlib {
 
+namespace stlib_internal {
 template<typename T>
 struct value_for {
     //for iterators
@@ -117,7 +118,6 @@ void copy_buffers(Itr1 beg, Itr1 end, Itr2& out) {
 		construct(*out, std::move(*beg));
 }
 
-namespace stlib_internal {
 template<typename Itr>
 struct stack_less_data {
 	Itr beg;
@@ -133,7 +133,6 @@ void add_stack_item(Itr beg1, Itr end1,
 	stk[idx++] = std::move(dat);
 	if(idx == stk.size())
 		stk.resize(stk.size() * 2);
-}
 }
 
 template<typename Itr>
@@ -174,7 +173,6 @@ Itr middle_of_three(Itr first, Itr middle, Itr last, Comp cmp) {
 	}
 }
 
-namespace stlib_internal {
 template<typename Itr>
 void move_pivot(Itr nhalf, Itr& pivot) {
 	//move any that are greater than the pivot to the right of the pivot
@@ -197,7 +195,7 @@ void move_pivot(Itr nhalf, Itr& pivot) {
 			}
 
 			//do move
-			stlib::rotate(it + 1, it + (1 + greater_count), moveit);
+			rotate(it + 1, it + (1 + greater_count), moveit);
 			moveit -= greater_count;
 			pivot -= greater_count;
 
@@ -229,7 +227,7 @@ void move_pivot(Itr nhalf, Itr& pivot, Comp cmp) {
 			}
 
 			//do move
-			stlib::rotate(it + 1, it + (1 + greater_count), moveit);
+			rotate(it + 1, it + (1 + greater_count), moveit);
 			moveit -= greater_count;
 			pivot -= greater_count;
 
@@ -258,15 +256,15 @@ void quick_sort(Itr beg, Itr end) {
 		stlib_internal::stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
-		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end);
+		Itr pivot = stlib_internal::middle_of_three(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end);
 
 		do {
 			++left;
 			--right;
 			//pivot goes to the right!!
-			while(left != right && left != pivot && less_func(*left, *pivot))
+			while(left != right && left != pivot && stlib_internal::less_func(*left, *pivot))
 				++left;
-			while(left != right && greater_equal_func(*right, *pivot))
+			while(left != right && stlib_internal::greater_equal_func(*right, *pivot))
 				--right;
 			if(left == right)
 				break;
@@ -278,7 +276,7 @@ void quick_sort(Itr beg, Itr end) {
 
 		//if right is on the less side, move back
 		if(right != pivot) {
-			if(less_func(*right, *pivot))
+			if(stlib_internal::less_func(*right, *pivot))
 				++right;
 			//move the pivot into place
 			if(right != pivot) {
@@ -320,15 +318,15 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 		stlib_internal::stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
-		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, cmp);
+		Itr pivot = stlib_internal::middle_of_three(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, cmp);
 
 		do {
 			++left;
 			--right;
 			//pivot goes to the right!!
-			while(left != right && left != pivot && less_func(*left, *pivot, cmp))
+			while(left != right && left != pivot && stlib_internal::less_func(*left, *pivot, cmp))
 				++left;
-			while(left != right && greater_equal_func(*right, *pivot, cmp))
+			while(left != right && stlib_internal::greater_equal_func(*right, *pivot, cmp))
 				--right;
 			if(left == right)
 				break;
@@ -340,7 +338,7 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 
 		//if right is on the less side, move back
 		if(right != pivot) {
-			if(less_func(*right, *pivot, cmp))
+			if(stlib_internal::less_func(*right, *pivot, cmp))
 				++right;
 			//move the pivot into place
 			if(right != pivot) {
@@ -575,12 +573,12 @@ bool stack_quick_sort(Itr beg, Itr end, uint32_t limit = 100) {
 	--right;
 	Itr rend = right;
 
-	Itr pivot = middle_of_three(left, half_point(beg, end), right);
+	Itr pivot = stlib_internal::middle_of_three(left, stlib_internal::half_point(beg, end), right);
 	while(left != right) {
 		//all that are equal go to the left!!
-		while(left != pivot && less_equal_func(*left, *pivot))
+		while(left != pivot && stlib_internal::less_equal_func(*left, *pivot))
 			++left;
-		while(right != pivot && greater_func(*right, *pivot))
+		while(right != pivot && stlib_internal::greater_func(*right, *pivot))
 			--right;
 		if(left != right) {
 			std::swap(*left, *right);
@@ -617,12 +615,12 @@ bool stack_quick_sort(Itr beg, Itr end, Comp cmp, uint32_t limit = 100) {
 	--right;
 	Itr rend = right;
 
-	Itr pivot = middle_of_three(left, half_point(beg, end), right, cmp);
+	Itr pivot = stlib_internal::middle_of_three(left, stlib_internal::half_point(beg, end), right, cmp);
 	while(left != right) {
 		//all that are equal go to the left!!
-		while(left != pivot && less_equal_func(*left, *pivot, cmp))
+		while(left != pivot && stlib_internal::less_equal_func(*left, *pivot, cmp))
 			++left;
-		while(right != pivot && greater_func(*right, *pivot, cmp))
+		while(right != pivot && stlib_internal::greater_func(*right, *pivot, cmp))
 			--right;
 		if(left != right) {
 			std::swap(*left, *right);
@@ -661,7 +659,7 @@ void do_merge_sweep(merge_sweep_stack_less_data<Itr>& lhs, merge_sweep_stack_les
 
 	//do rotate to combine the halfs
 	//swap the greater of the first with the less of the second
-	stdlib::rotate(lhs.nhalf, lhs.end, rhs.nhalf);
+	rotate(lhs.nhalf, lhs.end, rhs.nhalf);
 
 	//keep track of pivot, pivot moves with greater
 	if(pivot >= lhs.nhalf && pivot < lhs.end)
@@ -784,7 +782,7 @@ void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf) {
 
 	//do rotate to combine the halfs
 	//swap the greater of the first with the less of the second
-	stlib::rotate(nhalf1, half, nhalf2);
+	rotate(nhalf1, half, nhalf2);
 	//keep track of pivot, pivot moves lesser up
 	if(pivot >= nhalf1 && pivot < half)
 		pivot += distance(half, nhalf2);
@@ -797,7 +795,7 @@ template<typename Itr>
 void stack_merge_sweep_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
-	Itr pivot = half_point(beg, end);
+	Itr pivot = stlib_internal::half_point(beg, end);
 
 	Itr nhalf;
 	stlib_internal::merge_sweep_sort_iterative(pivot, beg, end, nhalf);
@@ -823,12 +821,12 @@ void merge_sweep_sort(Itr beg, Itr end) {
 	while(idx > 0) {
 		stlib_internal::stack_less_data<Itr> item = stk[--idx];
 
-		Itr pivot = middle_of_three(item.beg, half_point(item.beg, item.end), item.end - 1);
+		Itr pivot = stlib_internal::middle_of_three(item.beg, stlib_internal::half_point(item.beg, item.end), item.end - 1);
 
 		Itr nhalf;
 		merge_sweep_sort_iterative(pivot, item.beg, item.end, nhalf);
 
-		move_pivot(nhalf, pivot);
+		stlib_internal::move_pivot(nhalf, pivot);
 
 		auto dist1 = distance(pivot + 1, item.end);
 		auto dist2 = distance(item.beg, nhalf);
@@ -960,7 +958,7 @@ void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf, Comp cmp
 
 	//do rotate to combine the halfs
 	//swap the greater of the first with the less of the second
-	stlib::rotate(nhalf1, half, nhalf2);
+	rotate(nhalf1, half, nhalf2);
 	//keep track of pivot, pivot moves lesser up
 	if(pivot >= nhalf1 && pivot < half)
 		pivot += distance(half, nhalf2);
@@ -973,7 +971,7 @@ template<typename Itr, typename Comp>
 void stack_merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
-	Itr pivot = half_point(beg, end);
+	Itr pivot = stlib_internal::half_point(beg, end);
 
 	Itr nhalf;
 	stlib_internal::merge_sweep_sort_iterative(pivot, beg, end, nhalf, cmp);
@@ -999,12 +997,12 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 	while(idx > 0) {
 		stlib_internal::stack_less_data<Itr> item = stk[--idx];
 
-		Itr pivot = middle_of_three(item.beg, half_point(item.beg, item.end), item.end - 1, cmp);
+		Itr pivot = stlib_internal::middle_of_three(item.beg, stlib_internal::half_point(item.beg, item.end), item.end - 1, cmp);
 
 		Itr nhalf;
 		merge_sweep_sort_iterative(pivot, item.beg, item.end, nhalf, cmp);
 
-		move_pivot(nhalf, pivot, cmp);
+		stlib_internal::move_pivot(nhalf, pivot, cmp);
 
 		auto dist1 = distance(pivot + 1, item.end);
 		auto dist2 = distance(item.beg, nhalf);
@@ -1099,12 +1097,12 @@ template<typename Itr, typename Comp>
 bool merge_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return true;
-	using valueof = typename stlib::value_for<Itr>::value_type;
-	valueof* buf = (valueof*)aligned_storage_new(distance(beg, end) * sizeof(valueof));
+	using valueof = typename stlib::stlib_internal::value_for<Itr>::value_type;
+	valueof* buf = (valueof*)stlib_internal::aligned_storage_new(distance(beg, end) * sizeof(valueof));
 	if(buf) {
 		stlib_internal::merge_sort_internal(beg, end, buf, cmp);
 
-		aligned_storage_delete(distance(beg, end) * sizeof(valueof), buf);
+		stlib_internal::aligned_storage_delete(distance(beg, end) * sizeof(valueof), buf);
 		return true;
 	}
 	return false;
@@ -1185,12 +1183,12 @@ template<typename Itr>
 bool merge_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return true;
-	using valueof = typename stlib::value_for<Itr>::value_type;
-	valueof* buf = (valueof*)aligned_storage_new(distance(beg, end) * sizeof(valueof));
+	using valueof = typename stlib::stlib_internal::value_for<Itr>::value_type;
+	valueof* buf = (valueof*)stlib_internal::aligned_storage_new(distance(beg, end) * sizeof(valueof));
 	if(buf) {
 		stlib_internal::merge_sort_internal(beg, end, buf);
 
-		aligned_storage_delete(distance(beg, end) * sizeof(valueof), buf);
+		stlib_internal::aligned_storage_delete(distance(beg, end) * sizeof(valueof), buf);
 		return true;
 	}
 	return false;
@@ -1206,7 +1204,7 @@ struct zip_sort_stk_data {
 template<typename Itr>
 void zip_merge(Itr left, Itr right, Itr end) {
 	//the swap beffer, uninitialised memory buffer
-	using valueof = typename stlib::value_for<Itr>::value_type;
+	using valueof = typename stlib::stlib_internal::value_for<Itr>::value_type;
 	constexpr uint16_t buffer_count = (2048/sizeof(valueof) > 0 ? 2048/sizeof(valueof) : 1);
 	alignas(valueof) char bufr[buffer_count * sizeof(valueof)];
 	valueof* swapbufr = (valueof*)bufr;
@@ -1274,7 +1272,7 @@ void zip_merge(Itr left, Itr right, Itr end) {
 		++left;
 		if(left == mdlstart) {
 			//if the left reaches the middle, re-order the middle section so smallest first
-			stlib::rotate(mdlstart, mdltop, right);
+			rotate(mdlstart, mdltop, right);
 			mdlstart = right;
 			mdltop = right;
 		}
@@ -1282,8 +1280,8 @@ void zip_merge(Itr left, Itr right, Itr end) {
 
 	if(left != right) {
 		//if the right has reached the end before the left
-		stlib::rotate(mdlstart, mdltop, right);
-		stlib::rotate(left, mdlstart, right);
+		rotate(mdlstart, mdltop, right);
+		rotate(left, mdlstart, right);
 	}
 }
 }
@@ -1367,7 +1365,7 @@ namespace stlib_internal {
 template<typename Itr, typename Comp>
 void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 	//the swap beffer, uninitialised memory buffer
-	using valueof = typename stlib::value_for<Itr>::value_type;
+	using valueof = typename stlib::stlib_internal::value_for<Itr>::value_type;
 	constexpr uint16_t buffer_count = (2048/sizeof(valueof) > 0 ? 2048/sizeof(valueof) : 1);
 	alignas(valueof) char bufr[buffer_count * sizeof(valueof)];
 	valueof* swapbufr = (valueof*)bufr;
@@ -1435,7 +1433,7 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 		++left;
 		if(left == mdlstart) {
 			//if the left reaches the middle, re-order the middle section so smallest first
-			stlib::rotate(mdlstart, mdltop, right);
+			rotate(mdlstart, mdltop, right);
 			mdlstart = right;
 			mdltop = right;
 		}
@@ -1443,8 +1441,8 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 
 	if(left != right) {
 		//if the right has reached the end before the left
-		stlib::rotate(mdlstart, mdltop, right);
-		stlib::rotate(left, mdlstart, right);
+		rotate(mdlstart, mdltop, right);
+		rotate(left, mdlstart, right);
 	}
 }
 }
@@ -1598,15 +1596,15 @@ void intro_quick_sort(Itr beg, Itr end) {
 		stlib_internal::intro_stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
-		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end);
+		Itr pivot = stlib_internal::middle_of_three(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end);
 
 		do {
 			++left;
 			--right;
 			//pivot goes to the right!!
-			while(left != right && left != pivot && less_func(*left, *pivot))
+			while(left != right && left != pivot && stlib_internal::less_func(*left, *pivot))
 				++left;
-			while(left != right && greater_equal_func(*right, *pivot))
+			while(left != right && stlib_internal::greater_equal_func(*right, *pivot))
 				--right;
 			if(left == right)
 				break;
@@ -1618,7 +1616,7 @@ void intro_quick_sort(Itr beg, Itr end) {
 
 		//if right is on the less side, move back
 		if(right != pivot) {
-			if(less_func(*right, *pivot))
+			if(stlib_internal::less_func(*right, *pivot))
 				++right;
 			//move the pivot into place
 			if(right != pivot) {
@@ -1664,15 +1662,15 @@ void intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 		stlib_internal::intro_stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
-		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, cmp);
+		Itr pivot = stlib_internal::middle_of_three(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, cmp);
 
 		do {
 			++left;
 			--right;
 			//pivot goes to the right!!
-			while(left != right && left != pivot && less_func(*left, *pivot, cmp))
+			while(left != right && left != pivot && stlib_internal::less_func(*left, *pivot, cmp))
 				++left;
-			while(left != right && greater_equal_func(*right, *pivot, cmp))
+			while(left != right && stlib_internal::greater_equal_func(*right, *pivot, cmp))
 				--right;
 			if(left == right)
 				break;
@@ -1684,7 +1682,7 @@ void intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 
 		//if right is on the less side, move back
 		if(right != pivot) {
-			if(less_func(*right, *pivot, cmp))
+			if(stlib_internal::less_func(*right, *pivot, cmp))
 				++right;
 			//move the pivot into place
 			if(right != pivot) {
@@ -1722,7 +1720,7 @@ void bubble_sort(Itr beg, Itr end) {
 		for(Itr bg = beg; bg != ed; ++bg) {
 			Itr nxt = bg;
 			++nxt;
-			if(less_func(*nxt, *bg)) {
+			if(stlib_internal::less_func(*nxt, *bg)) {
 				std::swap(*bg, *nxt);
 				sorted = false;
 			}
@@ -1741,7 +1739,7 @@ void bubble_sort(Itr beg, Itr end, Comp cmp) {
 		for(Itr bg = beg; bg != ed; ++bg) {
 			Itr nxt = bg;
 			++nxt;
-			if(less_func(*nxt, *bg, cmp)) {
+			if(stlib_internal::less_func(*nxt, *bg, cmp)) {
 				std::swap(*bg, *nxt);
 				sorted = false;
 			}
@@ -1758,7 +1756,7 @@ void insertion_sort(Itr beg, Itr end) {
 	Itr strt = beg + 1;
 	for(; strt != end; ++strt) {
 		Itr crnt = strt;
-		while(crnt != beg && greater_func(*(crnt - 1), *crnt)) {
+		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), *crnt)) {
 			std::swap(*crnt, *(crnt - 1));
 			--crnt;
 		}
@@ -1771,7 +1769,7 @@ void insertion_sort(Itr beg, Itr end, Comp cmp) {
 	Itr strt = beg + 1;
 	for(; strt != end; ++strt) {
 		Itr crnt = strt;
-		while(crnt != beg && greater_func(*(crnt - 1), *crnt, cmp)) {
+		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), *crnt, cmp)) {
 			std::swap(*crnt, *(crnt - 1));
 			--crnt;
 		}
