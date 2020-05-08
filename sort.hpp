@@ -92,13 +92,8 @@ inline bool greater_equal_func(const T& lhs, const T& rhs, Comp cmp) {
 	return !cmp(lhs, rhs);
 }
 
-inline void* aligned_storage_new(size_t sze) {
-	//use new to get some aligned data
-	return new double[sze/sizeof(double) + (sze%sizeof(double) == 0 ? 0 : 1)];
-}
-inline void aligned_storage_delete(size_t sze, void* ptr) {
-	delete[] (double*)ptr;
-}
+void* aligned_storage_new(size_t sze);
+void aligned_storage_delete(size_t sze, void* ptr);
 
 template<typename Itr>
 void rotate(Itr first, Itr middle, Itr last) {
