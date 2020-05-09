@@ -389,6 +389,10 @@ Because a well implemented algorithm needs to move items around more than 1 at a
 
 So long as the algorithm doesn't run out of scratch space (very unlikely), the algorithm achieves exactly (n log n) comparisons, the minimum possible for a comparison sorting algorithm. However the number of swaps remains high to keep all items in-place but are significantly reduced by the efficient management of the 4 buffers.
 
+zip_sort acheives an incredible O(n log n) worst case performance and constant memory use through a variety of neat tricks and while acheiving excellent runtime performance.
+
+Details for intro_sort can be found on wikipedia https://en.wikipedia.org/wiki/Introsort.
+
 Please use and let me know what you think.
 
 Thanks
