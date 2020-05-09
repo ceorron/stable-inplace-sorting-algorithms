@@ -375,11 +375,11 @@ To keep the above algorithm fast the following optimisations are needed.
 
 These mean the following optimization can be achieved:
 
-Moving items from the left buffer to the output buffer is O(1) operation (no memory copy needed).
+ - Moving items from the left buffer to the output buffer is O(1) operation (no memory copy needed).
 
-Because only left items are moved into the middle buffer the middle buffer only contains items from the left buffer, so moving the left buffer item to the middle buffer and moving the middle buffer item to the output buffer is O(1) operation. Just swap the item in the left buffer with the item in the middle buffer. This places the top of the middle buffer into the output buffer and the top of the left buffer onto the end of the middle buffer.
+ - Because only left items are moved into the middle buffer the middle buffer only contains items from the left buffer, so moving the left buffer item to the middle buffer and moving the middle buffer item to the output buffer is O(1) operation. Just swap the item in the left buffer with the item in the middle buffer. This places the top of the middle buffer into the output buffer and the top of the left buffer onto the end of the middle buffer.
 
-Moving items from the right buffer to the output buffer involves moving items on the left into the middle buffer at worst this is (1/4 n) operation. This can be optimised further by moving multiple items at once where it is possible to do so.
+ - Moving items from the right buffer to the output buffer involves moving items on the left into the middle buffer at worst this is (1/4 n) operation. This can be optimised further by moving multiple items at once where it is possible to do so.
 
 A well implemented algorithm does exactly n comparisons, and at worst approximately (1/2 n(1/4 n)) swaps.
 
