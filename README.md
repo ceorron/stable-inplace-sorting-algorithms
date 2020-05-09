@@ -383,13 +383,13 @@ Moving items from the right buffer to the output buffer involves moving items on
 
 A well implemented algorithm does exactly n comparisons, and at worst approximately (1/2 n(1/4 n)) swaps.
 
-The algorithm works very well when the input has a large number of consecutive "runs" on either the left or right sides as these operations take exactly O(n) for the length of the run. Typically this happens rarely in random data (runs are generally 2 or 3 long on average in our tests) but in real world data runs can often be much longer.
+The algorithm works very well when the input has a large number of consecutive "runs" on either the left or right sides as these operations take exactly O(n) for the length of the run. Typically this happens rarely in random data (runs are generally 2 or 3 long, on average, in our tests) but in real world data runs can often be much longer.
 
-Because a well implemented algorithm needs to move items around more than 1 at a time this means that the algorithm makes use of a smaller ammount of stack allocated "scratch space" for the efficient movement of multiple items between the buffers (specifically from the left buffer to the middle buffer). This is constant in size, as it is set at the larger of (1 x sizeof(T)) or 2048 bytes. This means the algorithm can move (trunc(2048/sizeof(T)) or 1) items in a single iteration.
+Because a well implemented zip_sort algorithm needs to move items around more than 1 item at a time this means that the algorithm makes use of a smaller ammount of stack allocated "scratch space" for the efficient movement of multiple items between the buffers (specifically from the left buffer to the middle buffer). This is constant in size, as it is set at the larger of (1 x sizeof(T)) or 2048 bytes. This means the algorithm can move (trunc(2048/sizeof(T)) or 1) items in a single iteration.
 
 So long as the algorithm doesn't run out of scratch space (very unlikely), the algorithm achieves exactly (n log n) comparisons, the minimum possible for a comparison sorting algorithm. However the number of swaps remains high to keep all items in-place but are significantly reduced by the efficient management of the 4 buffers.
 
-zip_sort acheives an incredible O(n log n) worst case performance and constant memory use through a variety of neat tricks and while acheiving excellent runtime performance.
+zip_sort acheives an incredible O(n log n) average and worst case performance with constant memory through a variety of neat tricks all while acheiving very good runtime performance.
 
 Details for intro_sort can be found on wikipedia https://en.wikipedia.org/wiki/Introsort.
 
