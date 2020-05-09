@@ -324,7 +324,7 @@ Step 5: Repeat from Step 1 for those greater than the pivot and those less than 
 Step 6: The list is sorted.
 ```
 
-Merge sweep sort is an interesting sorting algorithm as it simply resembles no other sorting algorithm. It exclusively moves items using the rotate function (instead of swap). Allowing it to be an in-place sorting algorithm that compares to both merge_sort and quick_sort in behavoir while doing the work of neither. It is possibly the fastest in-place sorting algorithm that uses only stack space (log N).
+Merge sweep sort is an interesting sorting algorithm as it simply resembles no other sorting algorithm. It exclusively moves items using the rotate function (instead of swap). Allowing it to be an in-place sorting algorithm that compares to both merge_sort and quick_sort in behavoir while doing the work of neither. It is possibly the fastest in-place, stable sorting algorithm that uses only stack space (log N).
 
 ## zip_sort
 
