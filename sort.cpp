@@ -26,6 +26,7 @@
 
 #include "sort.hpp"
 
+namespace stlib {
 namespace stlib_internal {
 
 void* aligned_storage_new(size_t sze) {
@@ -36,4 +37,5 @@ void aligned_storage_delete(size_t sze, void* ptr) {
 	delete[] (double*)ptr;
 }
 
+}
 }
