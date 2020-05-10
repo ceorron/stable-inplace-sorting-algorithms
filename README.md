@@ -33,7 +33,7 @@ This is presented for those looking to study some new sorting techniques and who
 The idea for merge_sweep_sort and zip_sort came from the idea of using std::rotate as part of a recursive decent sorting algorithm, and so merge_sweep_sort and zip_sort make use of the rotate function. zip_sort came later and was added in May 2020.
 
 merge_sweep_sort gives the best overall performance for an in-place, stable sorting algorithm that uses no additional memory.
-zip_sort gives the best overall performance for an in-place, stable sorting algorithm that uses no additional memory, as well as giving O(n log n) worst case performance.
+zip_sort gives the best overall performance for an in-place, stable sorting algorithm that uses constant memory space, as well as giving O(n log n) worst case performance.
 
 merge_sweep_sort could be said to be quick_sort like algorithms.
 
@@ -125,6 +125,28 @@ int main() {
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
+        std::cout << "test adaptive stable quick sort" << std::endl;
+        //test stable quick sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::adaptive_stable_quick_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
         std::cout << "test merge sort" << std::endl;
         //test merge sort
         std::vector<uint32_t> vec;
@@ -147,6 +169,28 @@ int main() {
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
+        std::cout << "test hybrid merge sort" << std::endl;
+        //test merge sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::hybrid_merge_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
         std::cout << "test zip sort" << std::endl;
         //test zip sort
         std::vector<uint32_t> vec;
@@ -156,6 +200,28 @@ int main() {
         {
             timer tmr;
             stlib::zip_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test hybrid zip sort" << std::endl;
+        //test zip sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::hybrid_zip_sort(vec.begin(), vec.end());
         }
 
         std::cout << "[" << std::endl;
@@ -235,7 +301,51 @@ int main() {
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
+        std::cout << "test binary insertion sort" << std::endl;
+        //test insertion sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::binary_insertion_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
         std::cout << "test intro sort" << std::endl;
+        //test intro sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::intro_quick_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test adaptive intro sort" << std::endl;
         //test intro sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < 700; ++i)
