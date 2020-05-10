@@ -37,5 +37,21 @@ void aligned_storage_delete(size_t sze, void* ptr) {
 	delete[] (double*)ptr;
 }
 
+bool equal_func_bool(const bool less, const bool& greater) {
+	return !less && !greater;
+}
+bool less_func_bool(const bool less) {
+	return less;
+}
+bool greater_func_bool(const bool greater) {
+	return greater;
+}
+bool less_equal_func_bool(const bool greater) {
+	return !greater;
+}
+bool greater_equal_func_bool(const bool less) {
+	return !less;
+}
+
 }
 }
