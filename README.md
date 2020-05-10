@@ -6,21 +6,26 @@ They have the following characteristics.
 
 | Name | Inplace | Stable | Average complexity (Big O) | Worst case complexity (Big O) | Stack memory | Additional memory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: |
-| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1040 | 9383652 |
-| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 161 | 1038194 |
+| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1040 | 9225716 |
+| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 161 | 1074187 |
+| binary_insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 161 | 1035926 |
 | zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 89 | 55025 |
+| hybrid_zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 89 | 51888 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 284 | 30865 |
-| stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 76 | 7522 |
-| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 52 | 5824 |
-| merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 45 | 5799 |
-| std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 41 | 5626 |
-| std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 43 | 4921 |
-| intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 49 | 4756 |
+| stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 76 | 7012 |
+| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 52 | 6908 |
+| adaptive_stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 76 | 6714 |
+| merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 45 | 6041 |
+| std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 41 | 5421 |
+| hybrid_merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 45 | 5228 |
+| intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 49 | 4894 |
+| adaptive_intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 49 | 4848 |
+| std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 43 | 4738 |
 
 (All tests with MSVC compiler in release x64)
 (times in microseconds)
 
-NOTE: as default zip_sort and merge_sort use the optimised constant stack memory algorithm (1).
+NOTE: as default zip_sort and merge_sort (and hybird_zip_sort, hybird_merge_sort) use the optimised constant stack memory algorithm (1).
 Also sweep_sort has since been removed entirely due to redundancy (slower than both zip_sort and merge_sweep_sort).
 
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
@@ -35,6 +40,12 @@ merge_sweep_sort could be said to be quick_sort like algorithms.
 zip_sort is a merge_sort like algorithm. It's merge function does everything in-place, unlike merge_sort, while also providing excellent speed (minimal moves).
 
 As of May 2020 we introduced intro_sort, this is an implementation similar to std::sort. However our intro_sort algorithm is commonly faster than both std::sort and std::stable_sort in our tests. See table above. (NOTE intro_sort is not a stable sorting algorithm as it builds from quick_sort.)
+
+Adaptive version of stable_quick_sort and intro_sort use a more complex function for finding a pivot, this has a minor (but non zero overhead). This is to avoid the probable worst case performance that occurs in quick_sort when the input data is flat (aka many items in the input list are equal), meaning these versions of algorithms stable_quick_sort and intro_sort perform much better in scenarios where there are some equal items in the input list, and so should be prefered, but are otherwise identical to those algorithms.
+
+hybrid_zip_sort and hybrid_merge_sort are both hybird sorting algorithms, using insertion_sort with their respective algorithms, and as a result are faster variations of zip_sort and merge_sort respectively.
+
+binary_insertion_sort is a re-thought insertion_sort that searches in the sorted part of the list using binary search to find the insertion point. The algorithm is still O(n<sup>2</sup>), best and worst case, but now only does O(n log n) comparisons and so is faster in some cases. Note binary_insertion_sort is still slower than insertion_sort when sorting a small number of items.
 
 # Example use - C++
 
