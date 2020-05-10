@@ -31,6 +31,174 @@
 
 namespace stlib {
 
+//basic binary search
+template<typename Itr, typename T>
+bool binary_search(Itr beg, Itr end, const T& item,
+				   Itr& out) {
+	//binary search return the insertion point, in both the found and not found case
+	ptrdiff_t sze = distance(beg, end);
+	if(sze == 0) {
+		out = end;
+		return false;
+	}
+
+	out = beg;
+	ptrdiff_t step = 0;
+	ptrdiff_t count = sze;
+
+	//returns first element greater than or equal to the element
+	while(count > 0) {
+		auto it = out;
+		step = count / 2;
+		it += step;
+		if(stlib_internal::less_func(*it, item)) {
+			out = ++it;
+			count -= step + 1;
+		} else
+			count = step;
+	}
+	return out != end && stlib_internal::greater_equal_func(*out, item) && stlib_internal::less_equal_func(*out, item);
+}
+template<typename Itr, typename T, typename Less>
+bool binary_search(Itr beg, Itr end, const T& item,
+				   Less comp, Itr& out) {
+	//binary search return the insertion point, in both the found and not found case
+	ptrdiff_t sze = distance(beg, end);
+	if(sze == 0) {
+		out = end;
+		return false;
+	}
+
+	out = beg;
+	ptrdiff_t step = 0;
+	ptrdiff_t count = sze;
+
+	//returns first element greater than or equal to the element
+	while(count > 0) {
+		auto it = out;
+		step = count / 2;
+		it += step;
+		if(stlib_internal::less_func(*it, item, comp)) {
+			out = ++it;
+			count -= step + 1;
+		} else
+			count = step;
+	}
+	return out != end && stlib_internal::greater_equal_func(*out, item, comp) && stlib_internal::less_equal_func(*out, item, comp);
+}
+	
+template<typename Itr>
+void bubble_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
+	bool sorted = false;
+	Itr ed = end; --ed;
+	while(!sorted) {
+		sorted = true;
+		for(Itr bg = beg; bg != ed; ++bg) {
+			Itr nxt = bg;
+			++nxt;
+			if(stlib_internal::less_func(*nxt, *bg)) {
+				std::swap(*bg, *nxt);
+				sorted = false;
+			}
+		}
+		--ed;
+	}
+}
+template<typename Itr, typename Comp>
+void bubble_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	bool sorted = false;
+	Itr ed = end; --ed;
+	while(!sorted) {
+		sorted = true;
+		for(Itr bg = beg; bg != ed; ++bg) {
+			Itr nxt = bg;
+			++nxt;
+			if(stlib_internal::less_func(*nxt, *bg, cmp)) {
+				std::swap(*bg, *nxt);
+				sorted = false;
+			}
+		}
+		--ed;
+	}
+}
+
+
+template<typename Itr>
+void insertion_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
+	Itr strt = beg + 1;
+	for(; strt != end; ++strt) {
+		Itr crnt = strt;
+		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), *crnt)) {
+			std::swap(*crnt, *(crnt - 1));
+			--crnt;
+		}
+	}
+}
+template<typename Itr, typename Comp>
+void insertion_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	Itr strt = beg + 1;
+	for(; strt != end; ++strt) {
+		Itr crnt = strt;
+		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), *crnt, cmp)) {
+			std::swap(*crnt, *(crnt - 1));
+			--crnt;
+		}
+	}
+}
+
+template<typename Itr>
+void binary_insertion_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
+
+	Itr strt = beg + 1;
+	for(; strt != end; ++strt) {
+		Itr out;
+		if(binary_search(beg, strt, *strt, out)) {
+			//we have found one equal to this, move right until we find one that isn't equal
+			++out;
+			for(; out != strt && stlib_internal::equal_func(*out, *strt); ++out);
+			--out;
+
+			for(Itr c = strt; c != out; --c)
+				std::swap(*c, *(c - 1));
+		} else if(out != strt) {
+			for(Itr c = strt; c != out; --c)
+				std::swap(*c, *(c - 1));
+		}
+	}
+}
+template<typename Itr, typename Comp>
+void binary_insertion_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+
+	Itr strt = beg + 1;
+	for(; strt != end; ++strt) {
+		Itr out;
+		if(binary_search(beg, strt, *strt, cmp, out)) {
+			//we have found one equal to this, move right until we find one that isn't equal
+			++out;
+			for(; out != strt && stlib_internal::equal_func(*out, *strt, cmp); ++out);
+			--out;
+
+			for(Itr c = strt; c != out; --c)
+				std::swap(*c, *(c - 1));
+		} else if(out != strt) {
+			for(Itr c = strt; c != out; --c)
+				std::swap(*c, *(c - 1));
+		}
+	}
+}
+
 namespace stlib_internal {
 template<typename T>
 struct value_for {
@@ -91,6 +259,12 @@ template<typename T, typename Comp>
 inline bool greater_equal_func(const T& lhs, const T& rhs, Comp cmp) {
 	return !cmp(lhs, rhs);
 }
+
+bool equal_func_bool(const bool less, const bool& greater);
+bool less_func_bool(const bool less);
+bool greater_func_bool(const bool greater);
+bool less_equal_func_bool(const bool greater);
+bool greater_equal_func_bool(const bool less);
 
 void* aligned_storage_new(size_t sze);
 void aligned_storage_delete(size_t sze, void* ptr);
@@ -165,6 +339,156 @@ Itr middle_of_three(Itr first, Itr middle, Itr last, Comp cmp) {
 		else if(less_func(*last, *first, cmp))
 			return first;
 		return last;
+	}
+}
+template<typename Itr>
+bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out) {
+	//do upfront comparison
+	bool first_middle = less_func(*first, *middle);
+	bool middle_first = less_func(*middle, *first);
+
+	bool middle_last = less_func(*middle, *last);
+	bool last_middle = less_func(*last, *middle);
+
+	bool last_first = less_func(*last, *first);
+	bool first_last = less_func(*first, *last);
+
+	//if two of them are the same then choose the other one
+	if(equal_func_bool(first_middle, middle_first) && !equal_func_bool(middle_last, last_middle)) {
+		out = last;
+		return true;
+	}
+	if(equal_func_bool(middle_last, last_middle) && !equal_func_bool(first_middle, middle_first)) {
+		out = first;
+		return true;
+	}
+	if(equal_func_bool(last_first, first_last) && !equal_func_bool(middle_last, last_middle)) {
+		out = middle;
+		return true;
+	}
+
+	//choose the middle one
+	if(less_func_bool(middle_first)) {
+		if(less_func_bool(last_middle)) {
+			out = middle;
+			return true;
+		} else if(less_func_bool(last_first)) {
+			out = last;
+			return true;
+		}
+		if(equal_func_bool(first_middle, middle_first) && equal_func_bool(middle_last, last_middle)) {
+			//break ties by selecting a new pivot - any pivot that is not equal to these
+			//must be atleast 3 big
+			if(first + 1 == last - 1)
+				//just exit only three in the list, all equal!
+				return false;
+			for(Itr beg = first + 1; beg != last; ++beg)
+				if(!equal_func(*first, *beg)) {
+					out = beg;
+					return true;
+				}
+			return false;
+		}
+		out = first;
+		return true;
+	} else {
+		if(less_func_bool(middle_last)) {
+			out = middle;
+			return true;
+		} else if(less_func_bool(last_first)) {
+			out = first;
+			return true;
+		}
+		if(equal_func_bool(first_middle, middle_first) && equal_func_bool(middle_last, last_middle)) {
+			//break ties by selecting a new pivot - any pivot that is not equal to these
+			//must be atleast 3 big
+			if(first + 1 == last - 1)
+				//just exit only three in the list, all equal!
+				return false;
+			for(Itr beg = first + 1; beg != last; ++beg)
+				if(!equal_func(*first, *beg)) {
+					out = beg;
+					return true;
+				}
+			return false;
+		}
+		out = last;
+		return true;
+	}
+}
+template<typename Itr, typename Comp>
+bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out, Comp cmp) {
+	//do upfront comparison
+	bool first_middle = less_func(*first, *middle, cmp);
+	bool middle_first = less_func(*middle, *first, cmp);
+
+	bool middle_last = less_func(*middle, *last, cmp);
+	bool last_middle = less_func(*last, *middle, cmp);
+
+	bool last_first = less_func(*last, *first, cmp);
+	bool first_last = less_func(*first, *last, cmp);
+
+	//if two of them are the same then choose the other one
+	if(equal_func_bool(first_middle, middle_first) && !equal_func_bool(middle_last, last_middle)) {
+		out = last;
+		return true;
+	}
+	if(equal_func_bool(middle_last, last_middle) && !equal_func_bool(first_middle, middle_first)) {
+		out = first;
+		return true;
+	}
+	if(equal_func_bool(last_first, first_last) && !equal_func_bool(middle_last, last_middle)) {
+		out = middle;
+		return true;
+	}
+
+	//choose the middle one
+	if(less_func_bool(middle_first)) {
+		if(less_func_bool(last_middle)) {
+			out = middle;
+			return true;
+		} else if(less_func_bool(last_first)) {
+			out = last;
+			return true;
+		}
+		if(equal_func_bool(first_middle, middle_first) && equal_func_bool(middle_last, last_middle)) {
+			//break ties by selecting a new pivot - any pivot that is not equal to these
+			//must be atleast 3 big
+			if(first + 1 == last - 1)
+				//just exit only three in the list, all equal!
+				return false;
+			for(Itr beg = first + 1; beg != last; ++beg)
+				if(!equal_func(*first, *beg, cmp)) {
+					out = beg;
+					return true;
+				}
+			return false;
+		}
+		out = first;
+		return true;
+	} else {
+		if(less_func_bool(middle_last)) {
+			out = middle;
+			return true;
+		} else if(less_func_bool(last_first)) {
+			out = first;
+			return true;
+		}
+		if(equal_func_bool(first_middle, middle_first) && equal_func_bool(middle_last, last_middle)) {
+			//break ties by selecting a new pivot - any pivot that is not equal to these
+			//must be atleast 3 big
+			if(first + 1 == last - 1)
+				//just exit only three in the list, all equal!
+				return false;
+			for(Itr beg = first + 1; beg != last; ++beg)
+				if(!equal_func(*first, *beg, cmp)) {
+					out = beg;
+					return true;
+				}
+			return false;
+		}
+		out = last;
+		return true;
 	}
 }
 
@@ -462,6 +786,83 @@ void stable_quick_sort(Itr beg, Itr end) {
 	stlib_internal::stable_quick_sort_internal(beg, end, idxs.begin());
 }
 namespace stlib_internal {
+template<typename Itr, typename IdxItr>
+void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
+	if(distance(beg, end) <= 1)
+		return;
+	//add a stack item
+	std::vector<stack_less_data<Itr>> stk;
+	stk.resize(15);
+	size_t idx = 0;
+	stack_less_data<Itr> dat = {
+		beg,
+		end - 1
+	};
+	stk[idx++] = std::move(dat);
+
+	while(idx > 0) {
+		stack_less_data<Itr> tmp = stk[--idx];
+		Itr left = tmp.beg - 1;
+		Itr right = tmp.end + 1;
+		Itr pivot;
+		bool good = middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot);
+		if(!good) continue;
+
+		do {
+			++left;
+			--right;
+			//pivot goes to the right!!
+			while(left != right && left != pivot && stable_quick_sort_less_func(beg, left, pivot, begidx))
+				++left;
+			while(left != right && stable_quick_sort_greater_equal_func(beg, right, pivot, begidx))
+				--right;
+			if(left == right)
+				break;
+
+			stable_quick_sort_swap(beg, left, right, begidx);
+			if(left == pivot)
+				pivot = right;
+		} while(left + 1 != right);
+
+		//if right is on the less side, move back
+		if(right != pivot) {
+			if(stable_quick_sort_less_func(beg, right, pivot, begidx))
+				++right;
+			//move the pivot into place
+			if(right != pivot) {
+				stable_quick_sort_swap(beg, right, pivot, begidx);
+				pivot = right;
+			}
+		}
+
+		auto dist1 = distance(pivot + 1, tmp.end + 1);
+		auto dist2 = distance(tmp.beg, pivot);
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 1)
+				add_stack_item(tmp.beg, pivot - 1, stk, idx);
+			if(dist1 > 1)
+				add_stack_item(pivot + 1, tmp.end, stk, idx);
+		} else {
+			if(dist1 > 1)
+				add_stack_item(pivot + 1, tmp.end, stk, idx);
+			if(dist2 > 1)
+				add_stack_item(tmp.beg, pivot - 1, stk, idx);
+		}
+	}
+}
+}
+template<typename Itr>
+void adaptive_stable_quick_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
+	std::vector<size_t> idxs;
+	idxs.resize(distance(beg, end));
+	for(size_t i = 0; i < idxs.size(); ++i)
+		idxs[i] = i;
+	stlib_internal::adaptive_stable_quick_sort_internal(beg, end, idxs.begin());
+}
+namespace stlib_internal {
 template<typename Itr, typename IdxItr, typename Comp>
 bool stable_quick_sort_less_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
 	if(less_func(*left, *right, cmp))
@@ -555,6 +956,83 @@ void stable_quick_sort(Itr beg, Itr end, Comp cmp) {
 		idxs[i] = i;
 	stlib_internal::stable_quick_sort_internal(beg, end, idxs.begin(), cmp);
 }
+namespace stlib_internal {
+template<typename Itr, typename IdxItr, typename Comp>
+void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	//add a stack item
+	std::vector<stack_less_data<Itr>> stk;
+	stk.resize(15);
+	size_t idx = 0;
+	stack_less_data<Itr> dat = {
+		beg,
+		end - 1
+	};
+	stk[idx++] = std::move(dat);
+
+	while(idx > 0) {
+		stack_less_data<Itr> tmp = stk[--idx];
+		Itr left = tmp.beg - 1;
+		Itr right = tmp.end + 1;
+		Itr pivot;
+		bool good = middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp);
+		if(!good) continue;
+
+		do {
+			++left;
+			--right;
+			//pivot goes to the right!!
+			while(left != right && left != pivot && stable_quick_sort_less_func(beg, left, pivot, begidx, cmp))
+				++left;
+			while(left != right && stable_quick_sort_greater_equal_func(beg, right, pivot, begidx, cmp))
+				--right;
+			if(left == right)
+				break;
+
+			stable_quick_sort_swap(beg, left, right, begidx);
+			if(left == pivot)
+				pivot = right;
+		} while(left + 1 != right);
+
+		//if right is on the less side, move back
+		if(right != pivot) {
+			if(stable_quick_sort_less_func(beg, right, pivot, begidx, cmp))
+				++right;
+			//move the pivot into place
+			if(right != pivot) {
+				stable_quick_sort_swap(beg, right, pivot, begidx);
+				pivot = right;
+			}
+		}
+
+		auto dist1 = distance(pivot + 1, tmp.end + 1);
+		auto dist2 = distance(tmp.beg, pivot);
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 1)
+				add_stack_item(tmp.beg, pivot - 1, stk, idx);
+			if(dist1 > 1)
+				add_stack_item(pivot + 1, tmp.end, stk, idx);
+		} else {
+			if(dist1 > 1)
+				add_stack_item(pivot + 1, tmp.end, stk, idx);
+			if(dist2 > 1)
+				add_stack_item(tmp.beg, pivot - 1, stk, idx);
+		}
+	}
+}
+}
+template<typename Itr, typename Comp>
+void adaptive_stable_quick_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	std::vector<size_t> idxs;
+	idxs.resize(distance(beg, end));
+	for(size_t i = 0; i < idxs.size(); ++i)
+		idxs[i] = i;
+	stlib_internal::adaptive_stable_quick_sort_internal(beg, end, idxs.begin(), cmp);
+}
 
 
 template<typename Itr>
@@ -597,8 +1075,6 @@ bool stack_quick_sort(Itr beg, Itr end, uint32_t limit = 100) {
 	}
 	return rtn;
 }
-
-
 template<typename Itr, typename Comp>
 bool stack_quick_sort(Itr beg, Itr end, Comp cmp, uint32_t limit = 100) {
 	if(distance(beg, end) <= 1)
@@ -1112,6 +1588,96 @@ bool merge_sort(Itr beg, Itr end, Comp cmp) {
 	}
 	return false;
 }
+namesapce stlib_internal {
+template<typename Itr, typename T, typename Comp>
+void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//sort small runs with insertion sort before doing merge
+	uint64_t insert_count = 16;
+	{
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			insertion_sort(bg, ed, cmp);
+			bg = ed;
+		}
+	}
+	if(sze <= insert_count)
+		return;
+
+	T* bfrend = buf + sze;
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = insert_count;
+	bool first = true;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		//which way are we copying this?
+		if(first) {
+			T* bufbeg = buf;
+			T* bufend = bfrend;
+			while(pos + len < sze) {
+				//make the two halves
+				Itr cleft = beg + pos;
+				Itr cright = cleft + len;
+				Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+				//do merge
+				merge_internal(cleft, cright, cend, bufbeg, cmp);
+				pos += (len * 2);
+			}
+			//move the rest of the buffer across (needed as we swap buffers)
+			if(pos < sze) {
+				Itr cleft = beg + pos;
+				copy_buffers(cleft, end, bufbeg);
+			}
+		} else {
+			Itr bufbeg = beg;
+			Itr bufend = end;
+			while(pos + len < sze) {
+				//make the two halves
+				T* cleft = buf + pos;
+				T* cright = cleft + len;
+				T* cend = (pos + (len * 2) > sze ? bfrend : cleft + (len * 2));
+
+				//do merge
+				merge_internal(cleft, cright, cend, bufbeg, cmp);
+				pos += (len * 2);
+			}
+			//move the rest of the buffer across (needed as we swap buffers)
+			if(pos < sze) {
+				T* cleft = buf + pos;
+				copy_buffers(cleft, bfrend, bufbeg);
+			}
+		}
+
+		len *= 2;
+		first = !first;
+	}
+
+	//ensure we copy this back at the original buffer if needed
+	if(!first)
+		copy_buffers(buf, bfrend, beg);
+}
+}
+template<typename Itr, typename Comp>
+bool hybrid_merge_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return true;
+	using valueof = typename stlib::stlib_internal::value_for<Itr>::value_type;
+	valueof* buf = (valueof*)stlib_internal::aligned_storage_new(distance(beg, end) * sizeof(valueof));
+	if(buf) {
+		stlib_internal::hybrid_merge_sort_internal(beg, end, buf, cmp);
+
+		stlib_internal::aligned_storage_delete(distance(beg, end) * sizeof(valueof), buf);
+		return true;
+	}
+	return false;
+}
 
 namesapce stlib_internal {
 template<typename Itr1, typename Itr2>
@@ -1202,6 +1768,97 @@ bool merge_sort(Itr beg, Itr end) {
 	valueof* buf = (valueof*)stlib_internal::aligned_storage_new(distance(beg, end) * sizeof(valueof));
 	if(buf) {
 		stlib_internal::merge_sort_internal(beg, end, buf);
+
+		stlib_internal::aligned_storage_delete(distance(beg, end) * sizeof(valueof), buf);
+		return true;
+	}
+	return false;
+}
+namesapce stlib_internal {
+template<typename Itr, typename T>
+void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//sort small runs with insertion sort before doing merge
+	uint64_t insert_count = 16;
+	{
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			insertion_sort(bg, ed);
+			bg = ed;
+		}
+	}
+	if(sze <= insert_count)
+		return;
+
+	T* bfrend = buf + sze;
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = insert_count;
+	bool first = true;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		//which way are we copying this?
+		if(first) {
+			T* bufbeg = buf;
+			T* bufend = bfrend;
+			while(pos + len < sze) {
+				//make the two halves
+				Itr cleft = beg + pos;
+				Itr cright = cleft + len;
+				Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+				//do merge
+				merge_internal(cleft, cright, cend, bufbeg);
+				pos += (len * 2);
+			}
+			//move the rest of the buffer across (needed as we swap buffers)
+			if(pos < sze) {
+				Itr cleft = beg + pos;
+				copy_buffers(cleft, end, bufbeg);
+			}
+		} else {
+			Itr bufbeg = beg;
+			Itr bufend = end;
+			while(pos + len < sze) {
+				//make the two halves
+				T* cleft = buf + pos;
+				T* cright = cleft + len;
+				T* cend = (pos + (len * 2) > sze ? bfrend : cleft + (len * 2));
+
+				//do merge
+				merge_internal(cleft, cright, cend, bufbeg);
+				pos += (len * 2);
+			}
+			//move the rest of the buffer across (needed as we swap buffers)
+			if(pos < sze) {
+				T* cleft = buf + pos;
+				copy_buffers(cleft, bfrend, bufbeg);
+			}
+		}
+
+		len *= 2;
+		first = !first;
+	}
+
+	//ensure we copy this back at the original buffer if needed
+	//note that we calculate the number of iterations so this doesn't happen
+	if(!first)
+		copy_buffers(buf, bfrend, beg);
+}
+}
+template<typename Itr>
+bool hybrid_merge_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return true;
+	using valueof = typename stlib::stlib_internal::value_for<Itr>::value_type;
+	valueof* buf = (valueof*)stlib_internal::aligned_storage_new(distance(beg, end) * sizeof(valueof));
+	if(buf) {
+		stlib_internal::hybrid_merge_sort_internal(beg, end, buf);
 
 		stlib_internal::aligned_storage_delete(distance(beg, end) * sizeof(valueof), buf);
 		return true;
@@ -1300,7 +1957,6 @@ void zip_merge(Itr left, Itr right, Itr end) {
 	}
 }
 }
-
 template<typename Itr>
 void zip_sort(Itr beg, Itr end) {
 	uint64_t sze = distance(beg, end);
@@ -1318,6 +1974,43 @@ void zip_sort(Itr beg, Itr end) {
 			Itr cright = cleft + len;
 			Itr cend = cleft + (len * 2);
 			if(pos + (len * 2) > sze) cend = end;
+
+			//do zip merge
+			stlib_internal::zip_merge(cleft, cright, cend);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+template<typename Itr>
+void hybrid_zip_sort(Itr beg, Itr end) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+	//sort small runs with insertion sort before doing merge
+	uint64_t insert_count = 16;
+	{
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			insertion_sort(bg, ed);
+			bg = ed;
+		}
+	}
+	if(sze <= insert_count)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = insert_count;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
 
 			//do zip merge
 			stlib_internal::zip_merge(cleft, cright, cend);
@@ -1461,7 +2154,6 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 	}
 }
 }
-
 template<typename Itr, typename Comp>
 void zip_sort(Itr beg, Itr end, Comp cmp) {
 	uint64_t sze = distance(beg, end);
@@ -1479,6 +2171,43 @@ void zip_sort(Itr beg, Itr end, Comp cmp) {
 			Itr cright = cleft + len;
 			Itr cend = cleft + (len * 2);
 			if(pos + (len * 2) > sze) cend = end;
+
+			//do zip merge
+			stlib_internal::zip_merge(cleft, cright, cend, cmp);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+template<typename Itr, typename Comp>
+void hybrid_zip_sort(Itr beg, Itr end, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+	//sort small runs with insertion sort before doing merge
+	uint64_t insert_count = 16;
+	{
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			insertion_sort(bg, ed, cmp);
+			bg = ed;
+		}
+	}
+	if(sze <= insert_count)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = insert_count;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
 
 			//do zip merge
 			stlib_internal::zip_merge(cleft, cright, cend, cmp);
@@ -1557,7 +2286,7 @@ unsigned get_depth(Num n) {
 }
 template<typename Itr>
 void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
-	vector<intro_stack_less_data<Itr>>& stk, size_t& idx) {
+					std::vector<intro_stack_less_data<Itr>>& stk, size_t& idx) {
 	if(depth == 1) {
 		//do O(n log n) zip sort if we have reached the maximum depth
 		zip_sort(beg1, end1);
@@ -1574,7 +2303,7 @@ void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
 }
 template<typename Itr, typename Comp>
 void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
-	vector<intro_stack_less_data<Itr>>& stk, size_t& idx, Comp cmp) {
+					std::vector<intro_stack_less_data<Itr>>& stk, size_t& idx, Comp cmp) {
 	if(depth == 1) {
 		//do O(n log n) zip sort if we have reached the maximum depth
 		zip_sort(beg1, end1, cmp);
@@ -1597,7 +2326,7 @@ void intro_quick_sort(Itr beg, Itr end) {
 	unsigned maxdepth = stlib_internal::get_depth(distance(beg, end));
 
 	//add a stack item
-	vector<stlib_internal::intro_stack_less_data<Itr>> stk;
+	std::vector<stlib_internal::intro_stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
 	stlib_internal::intro_stack_less_data<Itr> dat = {
@@ -1663,7 +2392,7 @@ void intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 	unsigned maxdepth = stlib_internal::get_depth(distance(beg, end));
 
 	//add a stack item
-	vector<stlib_internal::intro_stack_less_data<Itr>> stk;
+	std::vector<stlib_internal::intro_stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
 	stlib_internal::intro_stack_less_data<Itr> dat = {
@@ -1725,68 +2454,138 @@ void intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 
 
 template<typename Itr>
-void bubble_sort(Itr beg, Itr end) {
+void adaptive_intro_quick_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
-	bool sorted = false;
-	Itr ed = end; --ed;
-	while(!sorted) {
-		sorted = true;
-		for(Itr bg = beg; bg != ed; ++bg) {
-			Itr nxt = bg;
-			++nxt;
-			if(stlib_internal::less_func(*nxt, *bg)) {
-				std::swap(*bg, *nxt);
-				sorted = false;
+	unsigned maxdepth = stlib_internal::get_depth(distance(beg, end));
+
+	//add a stack item
+	std::vector<stlib_internal::intro_stack_less_data<Itr>> stk;
+	stk.resize(15);
+	size_t idx = 0;
+	stlib_internal::intro_stack_less_data<Itr> dat = {
+		beg,
+		end - 1,
+		maxdepth
+	};
+	stk[idx++] = std::move(dat);
+
+	while(idx > 0) {
+		stlib_internal::intro_stack_less_data<Itr> tmp = stk[--idx];
+		Itr left = tmp.beg - 1;
+		Itr right = tmp.end + 1;
+		Itr pivot;
+		bool good = stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot);
+		if(!good) continue;
+
+		do {
+			++left;
+			--right;
+			//pivot goes to the right!!
+			while(left != right && left != pivot && stlib_internal::less_func(*left, *pivot))
+				++left;
+			while(left != right && stlib_internal::greater_equal_func(*right, *pivot))
+				--right;
+			if(left == right)
+				break;
+
+			std::swap(*left, *right);
+			if(left == pivot)
+				pivot = right;
+		} while(left + 1 != right);
+
+		//if right is on the less side, move back
+		if(right != pivot) {
+			if(stlib_internal::less_func(*right, *pivot))
+				++right;
+			//move the pivot into place
+			if(right != pivot) {
+				std::swap(*right, *pivot);
+				pivot = right;
 			}
 		}
-		--ed;
+
+		auto dist1 = distance(pivot + 1, tmp.end + 1);
+		auto dist2 = distance(tmp.beg, pivot);
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 32)
+				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
+			if(dist1 > 32)
+				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
+		} else {
+			if(dist1 > 32)
+				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
+			if(dist2 > 32)
+				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
+		}
 	}
 }
 template<typename Itr, typename Comp>
-void bubble_sort(Itr beg, Itr end, Comp cmp) {
+void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
-	bool sorted = false;
-	Itr ed = end; --ed;
-	while(!sorted) {
-		sorted = true;
-		for(Itr bg = beg; bg != ed; ++bg) {
-			Itr nxt = bg;
-			++nxt;
-			if(stlib_internal::less_func(*nxt, *bg, cmp)) {
-				std::swap(*bg, *nxt);
-				sorted = false;
+	unsigned maxdepth = stlib_internal::get_depth(distance(beg, end));
+
+	//add a stack item
+	std::vector<stlib_internal::intro_stack_less_data<Itr>> stk;
+	stk.resize(15);
+	size_t idx = 0;
+	istlib_internal::ntro_stack_less_data<Itr> dat = {
+		beg,
+		end - 1,
+		maxdepth
+	};
+	stk[idx++] = std::move(dat);
+
+	while(idx > 0) {
+		stlib_internal::intro_stack_less_data<Itr> tmp = stk[--idx];
+		Itr left = tmp.beg - 1;
+		Itr right = tmp.end + 1;
+		Itr pivot;
+		bool good = stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp);
+		if(!good) continue;
+
+		do {
+			++left;
+			--right;
+			//pivot goes to the right!!
+			while(left != right && left != pivot && stlib_internal::less_func(*left, *pivot, cmp))
+				++left;
+			while(left != right && stlib_internal::greater_equal_func(*right, *pivot, cmp))
+				--right;
+			if(left == right)
+				break;
+
+			std::swap(*left, *right);
+			if(left == pivot)
+				pivot = right;
+		} while(left + 1 != right);
+
+		//if right is on the less side, move back
+		if(right != pivot) {
+			if(stlib_internal::less_func(*right, *pivot, cmp))
+				++right;
+			//move the pivot into place
+			if(right != pivot) {
+				std::swap(*right, *pivot);
+				pivot = right;
 			}
 		}
-		--ed;
-	}
-}
 
-
-template<typename Itr>
-void insertion_sort(Itr beg, Itr end) {
-	if(distance(beg, end) <= 1)
-		return;
-	Itr strt = beg + 1;
-	for(; strt != end; ++strt) {
-		Itr crnt = strt;
-		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), *crnt)) {
-			std::swap(*crnt, *(crnt - 1));
-			--crnt;
-		}
-	}
-}
-template<typename Itr, typename Comp>
-void insertion_sort(Itr beg, Itr end, Comp cmp) {
-	if(distance(beg, end) <= 1)
-		return;
-	Itr strt = beg + 1;
-	for(; strt != end; ++strt) {
-		Itr crnt = strt;
-		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), *crnt, cmp)) {
-			std::swap(*crnt, *(crnt - 1));
-			--crnt;
+		auto dist1 = distance(pivot + 1, tmp.end + 1);
+		auto dist2 = distance(tmp.beg, pivot);
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 32)
+				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
+			if(dist1 > 32)
+				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
+		} else {
+			if(dist1 > 32)
+				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
+			if(dist2 > 32)
+				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
 		}
 	}
 }
@@ -1794,13 +2593,13 @@ void insertion_sort(Itr beg, Itr end, Comp cmp) {
 
 template<typename Itr>
 inline void intro_sort(Itr beg, Itr end) {
-	intro_quick_sort(beg, end);
+	adaptive_intro_quick_sort(beg, end);
 
 	insertion_sort(beg, end);
 }
 template<typename Itr, typename Comp>
 inline void intro_sort(Itr beg, Itr end, Comp cmp) {
-	intro_quick_sort(beg, end, cmp);
+	adaptive_intro_quick_sort(beg, end, cmp);
 
 	insertion_sort(beg, end, cmp);
 }
