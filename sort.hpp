@@ -31,174 +31,6 @@
 
 namespace stlib {
 
-//basic binary search
-template<typename Itr, typename T>
-bool binary_search(Itr beg, Itr end, const T& item,
-				   Itr& out) {
-	//binary search return the insertion point, in both the found and not found case
-	ptrdiff_t sze = distance(beg, end);
-	if(sze == 0) {
-		out = end;
-		return false;
-	}
-
-	out = beg;
-	ptrdiff_t step = 0;
-	ptrdiff_t count = sze;
-
-	//returns first element greater than or equal to the element
-	while(count > 0) {
-		auto it = out;
-		step = count / 2;
-		it += step;
-		if(stlib_internal::less_func(*it, item)) {
-			out = ++it;
-			count -= step + 1;
-		} else
-			count = step;
-	}
-	return out != end && stlib_internal::greater_equal_func(*out, item) && stlib_internal::less_equal_func(*out, item);
-}
-template<typename Itr, typename T, typename Less>
-bool binary_search(Itr beg, Itr end, const T& item,
-				   Less comp, Itr& out) {
-	//binary search return the insertion point, in both the found and not found case
-	ptrdiff_t sze = distance(beg, end);
-	if(sze == 0) {
-		out = end;
-		return false;
-	}
-
-	out = beg;
-	ptrdiff_t step = 0;
-	ptrdiff_t count = sze;
-
-	//returns first element greater than or equal to the element
-	while(count > 0) {
-		auto it = out;
-		step = count / 2;
-		it += step;
-		if(stlib_internal::less_func(*it, item, comp)) {
-			out = ++it;
-			count -= step + 1;
-		} else
-			count = step;
-	}
-	return out != end && stlib_internal::greater_equal_func(*out, item, comp) && stlib_internal::less_equal_func(*out, item, comp);
-}
-	
-template<typename Itr>
-void bubble_sort(Itr beg, Itr end) {
-	if(distance(beg, end) <= 1)
-		return;
-	bool sorted = false;
-	Itr ed = end; --ed;
-	while(!sorted) {
-		sorted = true;
-		for(Itr bg = beg; bg != ed; ++bg) {
-			Itr nxt = bg;
-			++nxt;
-			if(stlib_internal::less_func(*nxt, *bg)) {
-				std::swap(*bg, *nxt);
-				sorted = false;
-			}
-		}
-		--ed;
-	}
-}
-template<typename Itr, typename Comp>
-void bubble_sort(Itr beg, Itr end, Comp cmp) {
-	if(distance(beg, end) <= 1)
-		return;
-	bool sorted = false;
-	Itr ed = end; --ed;
-	while(!sorted) {
-		sorted = true;
-		for(Itr bg = beg; bg != ed; ++bg) {
-			Itr nxt = bg;
-			++nxt;
-			if(stlib_internal::less_func(*nxt, *bg, cmp)) {
-				std::swap(*bg, *nxt);
-				sorted = false;
-			}
-		}
-		--ed;
-	}
-}
-
-
-template<typename Itr>
-void insertion_sort(Itr beg, Itr end) {
-	if(distance(beg, end) <= 1)
-		return;
-	Itr strt = beg + 1;
-	for(; strt != end; ++strt) {
-		Itr crnt = strt;
-		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), *crnt)) {
-			std::swap(*crnt, *(crnt - 1));
-			--crnt;
-		}
-	}
-}
-template<typename Itr, typename Comp>
-void insertion_sort(Itr beg, Itr end, Comp cmp) {
-	if(distance(beg, end) <= 1)
-		return;
-	Itr strt = beg + 1;
-	for(; strt != end; ++strt) {
-		Itr crnt = strt;
-		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), *crnt, cmp)) {
-			std::swap(*crnt, *(crnt - 1));
-			--crnt;
-		}
-	}
-}
-
-template<typename Itr>
-void binary_insertion_sort(Itr beg, Itr end) {
-	if(distance(beg, end) <= 1)
-		return;
-
-	Itr strt = beg + 1;
-	for(; strt != end; ++strt) {
-		Itr out;
-		if(binary_search(beg, strt, *strt, out)) {
-			//we have found one equal to this, move right until we find one that isn't equal
-			++out;
-			for(; out != strt && stlib_internal::equal_func(*out, *strt); ++out);
-			--out;
-
-			for(Itr c = strt; c != out; --c)
-				std::swap(*c, *(c - 1));
-		} else if(out != strt) {
-			for(Itr c = strt; c != out; --c)
-				std::swap(*c, *(c - 1));
-		}
-	}
-}
-template<typename Itr, typename Comp>
-void binary_insertion_sort(Itr beg, Itr end, Comp cmp) {
-	if(distance(beg, end) <= 1)
-		return;
-
-	Itr strt = beg + 1;
-	for(; strt != end; ++strt) {
-		Itr out;
-		if(binary_search(beg, strt, *strt, cmp, out)) {
-			//we have found one equal to this, move right until we find one that isn't equal
-			++out;
-			for(; out != strt && stlib_internal::equal_func(*out, *strt, cmp); ++out);
-			--out;
-
-			for(Itr c = strt; c != out; --c)
-				std::swap(*c, *(c - 1));
-		} else if(out != strt) {
-			for(Itr c = strt; c != out; --c)
-				std::swap(*c, *(c - 1));
-		}
-	}
-}
-
 namespace stlib_internal {
 template<typename T>
 struct value_for {
@@ -556,6 +388,174 @@ void move_pivot(Itr nhalf, Itr& pivot, Comp cmp) {
 		}
 	}
 }
+}
+
+//basic binary search
+template<typename Itr, typename T>
+bool binary_search(Itr beg, Itr end, const T& item,
+				   Itr& out) {
+	//binary search return the insertion point, in both the found and not found case
+	ptrdiff_t sze = distance(beg, end);
+	if(sze == 0) {
+		out = end;
+		return false;
+	}
+
+	out = beg;
+	ptrdiff_t step = 0;
+	ptrdiff_t count = sze;
+
+	//returns first element greater than or equal to the element
+	while(count > 0) {
+		auto it = out;
+		step = count / 2;
+		it += step;
+		if(stlib_internal::less_func(*it, item)) {
+			out = ++it;
+			count -= step + 1;
+		} else
+			count = step;
+	}
+	return out != end && stlib_internal::greater_equal_func(*out, item) && stlib_internal::less_equal_func(*out, item);
+}
+template<typename Itr, typename T, typename Less>
+bool binary_search(Itr beg, Itr end, const T& item,
+				   Less comp, Itr& out) {
+	//binary search return the insertion point, in both the found and not found case
+	ptrdiff_t sze = distance(beg, end);
+	if(sze == 0) {
+		out = end;
+		return false;
+	}
+
+	out = beg;
+	ptrdiff_t step = 0;
+	ptrdiff_t count = sze;
+
+	//returns first element greater than or equal to the element
+	while(count > 0) {
+		auto it = out;
+		step = count / 2;
+		it += step;
+		if(stlib_internal::less_func(*it, item, comp)) {
+			out = ++it;
+			count -= step + 1;
+		} else
+			count = step;
+	}
+	return out != end && stlib_internal::greater_equal_func(*out, item, comp) && stlib_internal::less_equal_func(*out, item, comp);
+}
+	
+template<typename Itr>
+void bubble_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
+	bool sorted = false;
+	Itr ed = end; --ed;
+	while(!sorted) {
+		sorted = true;
+		for(Itr bg = beg; bg != ed; ++bg) {
+			Itr nxt = bg;
+			++nxt;
+			if(stlib_internal::less_func(*nxt, *bg)) {
+				std::swap(*bg, *nxt);
+				sorted = false;
+			}
+		}
+		--ed;
+	}
+}
+template<typename Itr, typename Comp>
+void bubble_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	bool sorted = false;
+	Itr ed = end; --ed;
+	while(!sorted) {
+		sorted = true;
+		for(Itr bg = beg; bg != ed; ++bg) {
+			Itr nxt = bg;
+			++nxt;
+			if(stlib_internal::less_func(*nxt, *bg, cmp)) {
+				std::swap(*bg, *nxt);
+				sorted = false;
+			}
+		}
+		--ed;
+	}
+}
+
+
+template<typename Itr>
+void insertion_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
+	Itr strt = beg + 1;
+	for(; strt != end; ++strt) {
+		Itr crnt = strt;
+		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), *crnt)) {
+			std::swap(*crnt, *(crnt - 1));
+			--crnt;
+		}
+	}
+}
+template<typename Itr, typename Comp>
+void insertion_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	Itr strt = beg + 1;
+	for(; strt != end; ++strt) {
+		Itr crnt = strt;
+		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), *crnt, cmp)) {
+			std::swap(*crnt, *(crnt - 1));
+			--crnt;
+		}
+	}
+}
+
+template<typename Itr>
+void binary_insertion_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
+
+	Itr strt = beg + 1;
+	for(; strt != end; ++strt) {
+		Itr out;
+		if(binary_search(beg, strt, *strt, out)) {
+			//we have found one equal to this, move right until we find one that isn't equal
+			++out;
+			for(; out != strt && stlib_internal::equal_func(*out, *strt); ++out);
+			--out;
+
+			for(Itr c = strt; c != out; --c)
+				std::swap(*c, *(c - 1));
+		} else if(out != strt) {
+			for(Itr c = strt; c != out; --c)
+				std::swap(*c, *(c - 1));
+		}
+	}
+}
+template<typename Itr, typename Comp>
+void binary_insertion_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+
+	Itr strt = beg + 1;
+	for(; strt != end; ++strt) {
+		Itr out;
+		if(binary_search(beg, strt, *strt, cmp, out)) {
+			//we have found one equal to this, move right until we find one that isn't equal
+			++out;
+			for(; out != strt && stlib_internal::equal_func(*out, *strt, cmp); ++out);
+			--out;
+
+			for(Itr c = strt; c != out; --c)
+				std::swap(*c, *(c - 1));
+		} else if(out != strt) {
+			for(Itr c = strt; c != out; --c)
+				std::swap(*c, *(c - 1));
+		}
+	}
 }
 
 template<typename Itr>
