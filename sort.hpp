@@ -1064,6 +1064,11 @@ void merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 				merge_internal(cleft, cright, cend, bufbeg, cmp);
 				pos += (len * 2);
 			}
+			//move the rest of the buffer across (needed as we swap buffers)
+			if(pos < sze) {
+				Itr cleft = beg + pos;
+				copy_buffers(cleft, end, bufbeg);
+			}
 		} else {
 			Itr bufbeg = beg;
 			Itr bufend = end;
@@ -1076,6 +1081,11 @@ void merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 				//do merge
 				merge_internal(cleft, cright, cend, bufbeg, cmp);
 				pos += (len * 2);
+			}
+			//move the rest of the buffer across (needed as we swap buffers)
+			if(pos < sze) {
+				T* cleft = buf + pos;
+				copy_buffers(cleft, bfrend, bufbeg);
 			}
 		}
 
@@ -1150,6 +1160,11 @@ void merge_sort_internal(Itr beg, Itr end, T* buf) {
 				merge_internal(cleft, cright, cend, bufbeg);
 				pos += (len * 2);
 			}
+			//move the rest of the buffer across (needed as we swap buffers)
+			if(pos < sze) {
+				Itr cleft = beg + pos;
+				copy_buffers(cleft, end, bufbeg);
+			}
 		} else {
 			Itr bufbeg = beg;
 			Itr bufend = end;
@@ -1162,6 +1177,11 @@ void merge_sort_internal(Itr beg, Itr end, T* buf) {
 				//do merge
 				merge_internal(cleft, cright, cend, bufbeg);
 				pos += (len * 2);
+			}
+			//move the rest of the buffer across (needed as we swap buffers)
+			if(pos < sze) {
+				T* cleft = buf + pos;
+				copy_buffers(cleft, bfrend, bufbeg);
 			}
 		}
 
