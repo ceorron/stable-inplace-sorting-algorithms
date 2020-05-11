@@ -92,7 +92,7 @@ inline bool greater_equal_func(const T& lhs, const T& rhs, Comp cmp) {
 	return !cmp(lhs, rhs);
 }
 
-bool equal_func_bool(const bool less, const bool& greater);
+bool equal_func_bool(const bool less, const bool greater);
 bool less_func_bool(const bool less);
 bool greater_func_bool(const bool greater);
 bool less_equal_func_bool(const bool greater);
