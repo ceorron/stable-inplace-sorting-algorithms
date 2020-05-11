@@ -426,23 +426,21 @@ The following is an explination of the merge_sweep_sort algorithm, merge_sweep_s
 ```
 Step 1: pick a pivot
 
-Step 2: Recursive halving the size of the list until we get to list size 1 or 2
+Step 2: Recursive half the size of the list until we get to a list of length 1 or 2.
 
-    a : if 1 return the items indicated as in sublist 1 containing the items below the pivot or sublist 2 containing the items above the pivot
+    a : if length 1 return the items indicated as in sublist 1, containing the items below the pivot or sublist 2, containing the items above the pivot.
 
-    b : if 2 sort the items if below the pivot move to the left, if above move to the right return the items indicated as in sublist 1 containing the items below the pivot or sublist 2 containing the items above the pivot
+    b : if length 2 sort the items, if below the pivot move to the left, if above move to the right. return the items indicated as in sublist 1, containing the items below the pivot or sublist 2, containing the items above the pivot.
 
-Do Step 2 for both the left and right halfs.
+    c : else Combine the left and right halfs, stlib::rotate the bottom sublist of the left (those greater than the pivot) with the top half of the right (those less than the pivot).
 
-Step 3: else Combine the left and right halfs, stlib::rotate the bottom sublist of the left (those greater than the pivot) with the top half of the right (those less than the pivot).
+    d : you have now created two new sublists. return the items indicated as in sublist 1, containing the items below the pivot or sublist 2, containing the items above the pivot.
 
-    c : you have now created two new sublists return the items indicated as in sublist 1 containing the items below the pivot or sublist 2 containing the items above the pivot
+Step 3: Once done you have all of the items greater than the pivot on one side and all those less than the pivot on the other. Move the pivot into place.
 
-Step 4: Once done you have all of the items greater than the pivot on one side and all those less than the pivot on the other. Move the pivot into place.
+Step 4: Repeat from Step 1 for those greater than the pivot and those less than the pivot.
 
-Step 5: Repeat from Step 1 for those greater than the pivot and those less than the pivot.
-
-Step 6: The list is sorted.
+Step 5: The list is sorted.
 ```
 
 Merge sweep sort is an interesting sorting algorithm as it simply resembles no other sorting algorithm. It exclusively moves items using the rotate function (instead of swap). Allowing it to be an in-place sorting algorithm that compares to both merge_sort and quick_sort in behavoir while doing the work of neither. It is possibly the fastest in-place, stable sorting algorithm that uses only stack space (log N).
@@ -454,19 +452,19 @@ The zip_sort outer function simply repeats the zip_merge across the whole list u
 ```
 Step 1: starting at array_size = 1
 
-Step 2: no-op
+Step 2: Repeat Step 3 for all items in the list, move forward by array_size * 2
 
-Step 3: Repeat Step 4 for all items in the list move forward by array_size * 2
+    Step 3: Take 2 array sublists next to each other, both of length array_size, apply zip_merge (sublist form the left and right buffers)
 
-Step 4: Take 2 array sublists next to each other both of length array_size apply zip_merge (sublist are left and right buffers)
+Step 4: array_size = array_size * 2
 
-Step 5: array_size = array_size * 2
-
-Step 6: Repeat from Step 2 if array_size < length
+Step 5: Repeat from Step 2 if array_size < length
 ```
 
 
 The zip_merge is just like a merge_sort merge function except everything remains in place. Put simply the function keeps four buffers the output buffer, the left buffer, the right buffer and the middle buffer.
+
+Given left and right buffers both sorted the algorithm proceeds to merge them as follows:
 
 ```
 Repeat until we have no items left (left buffer or right buffer is empty)
