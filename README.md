@@ -9,6 +9,8 @@ They have the following characteristics.
 | bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1040 | 9225716 |
 | insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 161 | 1074187 |
 | binary_insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 205 | 1035926 |
+| inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 198 | 1006264 |
+| hybrid_inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 191 | 990845 |
 | zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 89 | 55025 |
 | hybrid_zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 75 | 51888 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 252 | 30865 |
@@ -46,6 +48,8 @@ Adaptive version of stable_quick_sort and intro_sort use a more complex function
 hybrid_zip_sort and hybrid_merge_sort are both hybird sorting algorithms, combining insertion_sort with their respective algorithms, and as a result are faster variations of zip_sort and merge_sort respectively.
 
 binary_insertion_sort is a re-thought insertion_sort that searches in the sorted part of the list using binary search to find the insertion point. The algorithm is still O(n<sup>2</sup>), best and worst case, but now only does O(n log n) comparisons and so is faster in some cases. Note binary_insertion_sort is still slower than insertion_sort when sorting a small number of items.
+
+inplace_merge_sort and hybrid_inplace_merge_sort were added for comparison with zip_sort and merge_sweep_sort. As the most common in-place merge sort algorithms in use. They are O(n log n) comparisons/time complexity.
 
 # Example use - C++
 
@@ -178,6 +182,50 @@ int main() {
         {
             timer tmr;
             stlib::hybrid_merge_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test in-place merge sort" << std::endl;
+        //test merge sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::inplace_merge_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test hybrid in-place merge sort" << std::endl;
+        //test merge sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::hybird_inplace_merge_sort(vec.begin(), vec.end());
         }
 
         std::cout << "[" << std::endl;
