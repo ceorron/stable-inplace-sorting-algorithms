@@ -1866,6 +1866,171 @@ bool hybrid_merge_sort(Itr beg, Itr end) {
 	return false;
 }
 
+
+namespace stlib_internal {
+template<typename Itr>
+void inplace_merge(Itr beg1, Itr beg2, Itr end2) {
+	//move all of the right that should be in the left, rotate those in the right to be in the left
+	Itr bg1 = beg1;
+	Itr bg2 = beg2;
+
+	while(bg1 != bg2 && bg2 != end2) {
+		//find any in the right that appear before those in the left (aka less than)
+		Itr tmp1 = bg2;
+		Itr tmp2 = bg1;
+		for(; bg2 != end2 && less_func(*bg2, *bg1); ++bg2, ++tmp2);
+		if(bg2 != tmp1) {
+			rotate(bg1, tmp1, bg2);
+			bg1 = tmp2;
+		} else
+			++bg1;
+	}
+}
+}
+template<typename Itr>
+void inplace_merge_sort(Itr beg, Itr end) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = 1;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do in-place merge
+			stlib_internal::inplace_merge(cleft, cright, cend);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+template<typename Itr>
+void hybrid_inplace_merge_sort(Itr beg, Itr end) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+	//sort small runs with insertion sort before doing merge
+	uint64_t insert_count = 16;
+	{
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			insertion_sort(bg, ed);
+			bg = ed;
+		}
+	}
+	if(sze <= insert_count)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = insert_count;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do in-place merge
+			stlib_internal::inplace_merge(cleft, cright, cend);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+namespace stlib_internal {
+template<typename Itr, typename Comp>
+void inplace_merge(Itr beg1, Itr beg2, Itr end2, Comp cmp) {
+	//move all of the right that should be in the left, rotate those in the right to be in the left
+	Itr bg1 = beg1;
+	Itr bg2 = beg2;
+
+	while(bg1 != bg2 && bg2 != end2) {
+		//find any in the right that appear before those in the left (aka less than)
+		Itr tmp1 = bg2;
+		Itr tmp2 = bg1;
+		for(; bg2 != end2 && less_func(*bg2, *bg1, cmp); ++bg2, ++tmp2);
+		if(bg2 != tmp1) {
+			rotate(bg1, tmp1, bg2);
+			bg1 = tmp2;
+		} else
+			++bg1;
+	}
+}
+}
+template<typename Itr, typename Comp>
+void inplace_merge_sort(Itr beg, Itr end, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = 1;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do in-place merge
+			stlib_internal::inplace_merge(cleft, cright, cend, cmp);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+template<typename Itr, typename Comp>
+void hybrid_inplace_merge_sort(Itr beg, Itr end, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+	//sort small runs with insertion sort before doing merge
+	uint64_t insert_count = 16;
+	{
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			insertion_sort(bg, ed);
+			bg = ed;
+		}
+	}
+	if(sze <= insert_count)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = insert_count;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do in-place merge
+			stlib_internal::inplace_merge(cleft, cright, cend, cmp);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+
+
 namespace stlib_internal {
 template<typename Itr>
 struct zip_sort_stk_data {
