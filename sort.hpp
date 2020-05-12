@@ -2606,11 +2606,11 @@ inline void intro_sort(Itr beg, Itr end, Comp cmp) {
 
 template<typename Itr>
 inline void stable_sort(Itr beg, Itr end) {
-	merge_sort(beg, end);
+	hybrid_merge_sort(beg, end);
 }
 template<typename Itr, typename Comp>
 inline void stable_sort(Itr beg, Itr end, Comp cmp) {
-	merge_sort(beg, end, cmp);
+	hybrid_merge_sort(beg, end, cmp);
 }
 template<typename Itr>
 inline void sort(Itr beg, Itr end) {
