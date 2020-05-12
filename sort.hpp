@@ -1897,7 +1897,7 @@ void inplace_merge_sort(Itr beg, Itr end) {
 	uint64_t len = 1;
 	while(len < sze) {
 		uint64_t pos = 0;
-		//go through all of the sorted sublists, zip them together
+		//go through all of the sorted sublists, merge them together
 		while(pos + len < sze) {
 			//make the two halves
 			Itr cleft = beg + pos;
@@ -1934,7 +1934,7 @@ void hybrid_inplace_merge_sort(Itr beg, Itr end) {
 	uint64_t len = insert_count;
 	while(len < sze) {
 		uint64_t pos = 0;
-		//go through all of the sorted sublists, zip them together
+		//go through all of the sorted sublists, merge them together
 		while(pos + len < sze) {
 			//make the two halves
 			Itr cleft = beg + pos;
@@ -1978,7 +1978,7 @@ void inplace_merge_sort(Itr beg, Itr end, Comp cmp) {
 	uint64_t len = 1;
 	while(len < sze) {
 		uint64_t pos = 0;
-		//go through all of the sorted sublists, zip them together
+		//go through all of the sorted sublists, merge them together
 		while(pos + len < sze) {
 			//make the two halves
 			Itr cleft = beg + pos;
@@ -2015,7 +2015,7 @@ void hybrid_inplace_merge_sort(Itr beg, Itr end, Comp cmp) {
 	uint64_t len = insert_count;
 	while(len < sze) {
 		uint64_t pos = 0;
-		//go through all of the sorted sublists, zip them together
+		//go through all of the sorted sublists, merge them together
 		while(pos + len < sze) {
 			//make the two halves
 			Itr cleft = beg + pos;
