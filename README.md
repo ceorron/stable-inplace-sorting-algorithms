@@ -9,8 +9,8 @@ They have the following characteristics.
 | bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1040 | 9225716 |
 | insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 161 | 1074187 |
 | binary_insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 205 | 1035926 |
-| inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 198 | 1006264 |
-| hybrid_inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 191 | 990845 |
+| inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 198 | 1006264 |
+| hybrid_inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 191 | 990845 |
 | zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 89 | 55025 |
 | hybrid_zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 75 | 51888 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 252 | 30865 |
