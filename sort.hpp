@@ -2779,6 +2779,9 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 			}
 		}
 
+		//this is already sorted, don't sort any more!
+		if(swaps == 0 && is_sorted(tmp.beg, tmp.end + 1)) continue;
+
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
 		//implements sort shorter first optimisation
