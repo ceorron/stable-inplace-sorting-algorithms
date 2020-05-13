@@ -514,7 +514,7 @@ Step 5: Repeat from Step 2 if array_size < length
 
 The zip_merge is just like a merge_sort merge function except everything remains in place. Put simply the function keeps four buffers the output buffer, the left buffer, the right buffer and the middle buffer.
 
-Given left and right buffers both sorted the algorithm proceeds to merge them as follows:
+Given left and right buffers, both sorted, the algorithm proceeds to merge them as follows:
 
 ```
 Repeat until we have no items left (left buffer or right buffer is empty)
