@@ -45,13 +45,13 @@ See below for an indepth description of both algorithms.
 
 As of May 2020 we introduced intro_sort, this is an implementation similar to std::sort. However our intro_sort algorithm is commonly faster than both std::sort and std::stable_sort in our tests. See table above. (NOTE intro_sort is not a stable sorting algorithm as it builds from quick_sort.)
 
-Adaptive version of stable_quick_sort and intro_sort use a more complex function for finding a pivot, this has a minor, but non zero, overhead. This is to avoid the probable worst case performance that occurs in quick_sort when the input data is flat (aka many items in the input list are equal), meaning these versions of algorithms stable_quick_sort and intro_sort perform much better in scenarios where there are some equal items in the input list, and so should be prefered, but are otherwise identical to those algorithms.
+Adaptive version of stable_quick_sort and intro_sort use a more complex function for finding a pivot, this has a minor, but non zero, overhead. This is to avoid the probable worst case performance that occurs in quick_sort when the input data is flat (aka many items in the input list are equal) or when the input is already sorted/partially sorted. Meaning these versions of algorithms stable_quick_sort and intro_sort perform much better in scenarios where there are some equal/sorted items in the input list, and so should be prefered, but are otherwise identical to those algorithms.
 
 hybrid_zip_sort and hybrid_merge_sort are both hybird sorting algorithms, combining insertion_sort with their respective algorithms, and as a result are faster variations of zip_sort and merge_sort respectively.
 
-binary_insertion_sort is a re-thought insertion_sort that searches in the sorted part of the list using binary search to find the insertion point. The algorithm is still O(n<sup>2</sup>), best and worst case, but now only does O(n log n) comparisons and so is faster in some cases. Note binary_insertion_sort is still slower than insertion_sort when sorting a small number of items.
+binary_insertion_sort is a re-thought insertion_sort that searches in the sorted part of the list using binary search to find the insertion point. The algorithm is still O(n<sup>2</sup>), best and worst case, but now only does O(n log n) comparisons and so is faster in some cases. NOTE binary_insertion_sort is still slower than insertion_sort when sorting a small number of items.
 
-inplace_merge_sort and hybrid_inplace_merge_sort were added for comparison with zip_sort and merge_sweep_sort. As the most common in-place merge sort algorithms in use. They are O(n log n) comparisons/time complexity.
+inplace_merge_sort and hybrid_inplace_merge_sort were added for comparison with zip_sort and merge_sweep_sort. As the most common in-place merge sort algorithms in use. They have O(n log n) comparisons/time complexity, but perform many more swaps/moves to be efficient when compared with those algorithms.
 
 # Example use - C++
 
