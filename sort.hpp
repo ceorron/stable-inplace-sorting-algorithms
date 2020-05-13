@@ -445,6 +445,35 @@ bool binary_search(Itr beg, Itr end, const T& item,
 	}
 	return out != end && stlib_internal::greater_equal_func(*out, item, comp) && stlib_internal::less_equal_func(*out, item, comp);
 }
+
+template<typename Itr>
+bool is_sorted(Itr beg, Itr end) {
+	for(; beg != end - 1; ++beg)
+		if(less_func(*(beg + 1), *beg))
+			return false;
+	return true;
+}
+template<typename Itr, typename Comp>
+bool is_sorted(Itr beg, Itr end, Comp cmp) {
+	for(; beg != end - 1; ++beg)
+		if(less_func(*(beg + 1), *beg, cmp))
+			return false;
+	return true;
+}
+template<typename Itr>
+bool is_reverse_sorted(Itr beg, Itr end) {
+	for(; beg != end - 1; ++beg)
+		if(greater_func(*(beg + 1), *beg))
+			return false;
+	return true;
+}
+template<typename Itr, typename Comp>
+bool is_reverse_sorted(Itr beg, Itr end, Comp cmp) {
+	for(; beg != end - 1; ++beg)
+		if(greater_func(*(beg + 1), *beg, cmp))
+			return false;
+	return true;
+}
 	
 template<typename Itr>
 void bubble_sort(Itr beg, Itr end) {
@@ -703,6 +732,28 @@ bool stable_quick_sort_less_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
 	return *(begidx + lidx) < *(begidx + ridx);
 }
 template<typename Itr, typename IdxItr>
+bool stable_quick_sort_greater_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
+	if(less_func(*left, *right))
+		return false;
+	if(greater_func(*left, *right))
+		return true;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	return *(begidx + lidx) > *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr>
+bool stable_quick_sort_less_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
+	if(less_func(*left, *right))
+		return true;
+	if(greater_func(*left, *right))
+		return false;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	if(*(begidx + lidx) < *(begidx + ridx))
+		return true;
+	return *(begidx + lidx) == *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr>
 bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
 	if(less_func(*left, *right))
 		return false;
@@ -710,7 +761,16 @@ bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr b
 		return true;
 	size_t lidx = distance(beg, left);
 	size_t ridx = distance(beg, right);
+	if(*(begidx + lidx) > *(begidx + ridx))
+		return true;
 	return *(begidx + lidx) == *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr>
+bool stable_quick_sort_is_sorted(Itr start, Itr beg, Itr end, IdxItr begidx) {
+	for(; beg != end - 1; ++beg)
+		if(stable_quick_sort_less_func(start, (beg + 1), beg, begidx))
+			return false;
+	return true;
 }
 template<typename Itr, typename IdxItr>
 void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
@@ -805,9 +865,10 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
-		bool good = middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot);
-		if(!good) continue;
+		if(!middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot)) continue;
 
+		//if there are no swaps then most likely already in order, just finish sorting
+		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -820,6 +881,7 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -831,9 +893,13 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
+				++swaps;
 				pivot = right;
 			}
 		}
+
+		//this is already sorted, don't sort any more!
+		if(swaps == 0 && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
 
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
@@ -874,6 +940,28 @@ bool stable_quick_sort_less_func(Itr beg, Itr left, Itr right, IdxItr begidx, Co
 	return *(begidx + lidx) < *(begidx + ridx);
 }
 template<typename Itr, typename IdxItr, typename Comp>
+bool stable_quick_sort_greater_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
+	if(less_func(*left, *right, cmp))
+		return false;
+	if(greater_func(*left, *right, cmp))
+		return true;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	return *(begidx + lidx) > *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr, typename Comp>
+bool stable_quick_sort_less_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
+	if(less_func(*left, *right, cmp))
+		return true;
+	if(greater_func(*left, *right, cmp))
+		return false;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	if(*(begidx + lidx) < *(begidx + ridx))
+		return true;
+	return *(begidx + lidx) == *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr, typename Comp>
 bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
 	if(less_func(*left, *right, cmp))
 		return false;
@@ -881,7 +969,16 @@ bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr b
 		return true;
 	size_t lidx = distance(beg, left);
 	size_t ridx = distance(beg, right);
+	if(*(begidx + lidx) > *(begidx + ridx))
+		return true;
 	return *(begidx + lidx) == *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr, typename Comp>
+bool stable_quick_sort_is_sorted(Itr start, Itr beg, Itr end, IdxItr begidx, Comp cmp) {
+	for(; beg != end - 1; ++beg)
+		if(stable_quick_sort_less_func(start, (beg + 1), beg, begidx, cmp))
+			return false;
+	return true;
 }
 template<typename Itr, typename IdxItr, typename Comp>
 void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
@@ -976,9 +1073,10 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
-		bool good = middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp);
-		if(!good) continue;
+		if(!middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp)) continue;
 
+		//if there are no swaps then most likely already in order, just finish sorting
+		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -991,6 +1089,7 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -1002,9 +1101,13 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
+				++swaps;
 				pivot = right;
 			}
 		}
+
+		//this is already sorted, don't sort any more!
+		if(swaps == 0 && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
 
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
@@ -2640,9 +2743,10 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
-		bool good = stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot);
-		if(!good) continue;
+		if(!stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot)) continue;
 
+		//if there are no swaps then most likely already in order, just finish sorting
+		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -2655,9 +2759,13 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 				break;
 
 			std::swap(*left, *right);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
+
+		//this is already sorted, don't sort any more!
+		if(swaps == 0 && is_sorted(tmp.beg, tmp.end + 1)) continue;
 
 		//if right is on the less side, move back
 		if(right != pivot) {
@@ -2666,6 +2774,7 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 			//move the pivot into place
 			if(right != pivot) {
 				std::swap(*right, *pivot);
+				++swaps;
 				pivot = right;
 			}
 		}
@@ -2708,9 +2817,10 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
-		bool good = stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp);
-		if(!good) continue;
+		if(!stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp)) continue;
 
+		//if there are no swaps then most likely already in order, just finish sorting
+		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -2723,6 +2833,7 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 				break;
 
 			std::swap(*left, *right);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -2734,9 +2845,13 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 			//move the pivot into place
 			if(right != pivot) {
 				std::swap(*right, *pivot);
+				++swaps;
 				pivot = right;
 			}
 		}
+
+		//this is already sorted, don't sort any more!
+		if(swaps == 0 && is_sorted(tmp.beg, tmp.end + 1, cmp)) continue;
 
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
@@ -2784,21 +2899,6 @@ inline void sort(Itr beg, Itr end) {
 template<typename Itr, typename Comp>
 inline void sort(Itr beg, Itr end, Comp cmp) {
 	intro_sort(beg, end, cmp);
-}
-
-template<typename Itr>
-bool is_sorted(Itr beg, Itr end) {
-	for(; beg != end - 1; ++beg)
-		if(less_func(*(beg + 1), *beg))
-			return false;
-	return true;
-}
-template<typename Itr>
-bool is_reverse_sorted(Itr beg, Itr end) {
-	for(; beg != end - 1; ++beg)
-		if(greater_func(*(beg + 1), *beg))
-			return false;
-	return true;
 }
 
 }
