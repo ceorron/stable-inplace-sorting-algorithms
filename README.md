@@ -41,6 +41,8 @@ merge_sweep_sort could be said to be quick_sort like algorithms.
 
 zip_sort is a merge_sort like algorithm. It's merge function does everything in-place, unlike merge_sort, while also providing excellent speed (minimal moves).
 
+See below for an indepth description of both algorithms.
+
 As of May 2020 we introduced intro_sort, this is an implementation similar to std::sort. However our intro_sort algorithm is commonly faster than both std::sort and std::stable_sort in our tests. See table above. (NOTE intro_sort is not a stable sorting algorithm as it builds from quick_sort.)
 
 Adaptive version of stable_quick_sort and intro_sort use a more complex function for finding a pivot, this has a minor, but non zero, overhead. This is to avoid the probable worst case performance that occurs in quick_sort when the input data is flat (aka many items in the input list are equal), meaning these versions of algorithms stable_quick_sort and intro_sort perform much better in scenarios where there are some equal items in the input list, and so should be prefered, but are otherwise identical to those algorithms.
