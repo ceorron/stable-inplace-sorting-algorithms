@@ -899,10 +899,10 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		}
 
 		//this is already sorted, don't sort any more!
-		if(swaps == 0 && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
-
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > 1) | (dist2 > 1)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > 1)
@@ -1107,10 +1107,10 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		}
 
 		//this is already sorted, don't sort any more!
-		if(swaps == 0 && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
-
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > 1) | (dist2 > 1)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > 1)
@@ -2780,10 +2780,10 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 		}
 
 		//this is already sorted, don't sort any more!
-		if(swaps == 0 && is_sorted(tmp.beg, tmp.end + 1)) continue;
-
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && (((dist1 > 32) | (dist2 > 32)) && is_sorted(tmp.beg, tmp.end + 1))) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > 32)
@@ -2854,10 +2854,10 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 		}
 
 		//this is already sorted, don't sort any more!
-		if(swaps == 0 && is_sorted(tmp.beg, tmp.end + 1, cmp)) continue;
-
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > 32) | (dist2 > 32)) && is_sorted(tmp.beg, tmp.end + 1, cmp)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > 32)
