@@ -2764,9 +2764,6 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 				pivot = right;
 		} while(left + 1 != right);
 
-		//this is already sorted, don't sort any more!
-		if(swaps == 0 && is_sorted(tmp.beg, tmp.end + 1)) continue;
-
 		//if right is on the less side, move back
 		if(right != pivot) {
 			if(stlib_internal::less_func(*right, *pivot))
