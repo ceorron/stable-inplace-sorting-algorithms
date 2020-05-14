@@ -1973,20 +1973,20 @@ bool hybrid_merge_sort(Itr beg, Itr end) {
 namespace stlib_internal {
 template<typename Itr>
 void inplace_merge(Itr beg1, Itr beg2, Itr end2) {
-	//move all of the right that should be in the left, rotate those in the right to be in the left
-	Itr bg1 = beg1;
-	Itr bg2 = beg2;
-
-	while(bg1 != bg2 && bg2 != end2) {
-		//find any in the right that appear before those in the left (aka less than)
-		Itr tmp1 = bg2;
-		Itr tmp2 = bg1;
-		for(; bg2 != end2 && less_func(*bg2, *bg1); ++bg2, ++tmp2);
-		if(bg2 != tmp1) {
-			rotate(bg1, tmp1, bg2);
-			bg1 = tmp2;
-		} else
-			++bg1;
+	//backwards inplace merge sort, is more efficient than forwards inplace merge sort
+	Itr left = beg2 - 1;
+	Itr right = end2 - 1;
+	for(; left != beg1 - 1 && right != left; --right) {
+		//get all of those that are greater, move them to the right
+		Itr lft = left;
+		Itr rght = right;
+		for(; lft != beg1 - 1 && greater_func(*lft, *right); --lft, --rght);
+		if(lft != left) {
+			//move those greater left to the right hande side
+			rotate(lft + 1, left + 1, right + 1);
+			left = lft;
+		}
+		right = rght;
 	}
 }
 }
@@ -2054,20 +2054,20 @@ void hybrid_inplace_merge_sort(Itr beg, Itr end) {
 namespace stlib_internal {
 template<typename Itr, typename Comp>
 void inplace_merge(Itr beg1, Itr beg2, Itr end2, Comp cmp) {
-	//move all of the right that should be in the left, rotate those in the right to be in the left
-	Itr bg1 = beg1;
-	Itr bg2 = beg2;
-
-	while(bg1 != bg2 && bg2 != end2) {
-		//find any in the right that appear before those in the left (aka less than)
-		Itr tmp1 = bg2;
-		Itr tmp2 = bg1;
-		for(; bg2 != end2 && less_func(*bg2, *bg1, cmp); ++bg2, ++tmp2);
-		if(bg2 != tmp1) {
-			rotate(bg1, tmp1, bg2);
-			bg1 = tmp2;
-		} else
-			++bg1;
+	//backwards inplace merge sort, is more efficient than forwards inplace merge sort
+	Itr left = beg2 - 1;
+	Itr right = end2 - 1;
+	for(; left != beg1 - 1 && right != left; --right) {
+		//get all of those that are greater, move them to the right
+		Itr lft = left;
+		Itr rght = right;
+		for(; lft != beg1 - 1 && greater_func(*lft, *right, cmp); --lft, --rght);
+		if(lft != left) {
+			//move those greater left to the right hande side
+			rotate(lft + 1, left + 1, right + 1);
+			left = lft;
+		}
+		right = rght;
 	}
 }
 }
