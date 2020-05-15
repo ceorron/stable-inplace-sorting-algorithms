@@ -847,7 +847,7 @@ void stable_quick_sort(Itr beg, Itr end) {
 }
 namespace stlib_internal {
 template<typename Itr, typename IdxItr>
-void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
+void adaptive_stable_quick_sort_internal(unsigned cutoff, Itr beg, Itr end, IdxItr begidx) {
 	if(distance(beg, end) <= 1)
 		return;
 	//add a stack item
@@ -901,18 +901,18 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > 1) | (dist2 > 1)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
+		if(swaps == 0 && ((dist1 > cutoff) | (dist2 > cutoff)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
 
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
-			if(dist2 > 1)
+			if(dist2 > cutoff)
 				add_stack_item(tmp.beg, pivot - 1, stk, idx);
-			if(dist1 > 1)
+			if(dist1 > cutoff)
 				add_stack_item(pivot + 1, tmp.end, stk, idx);
 		} else {
-			if(dist1 > 1)
+			if(dist1 > cutoff)
 				add_stack_item(pivot + 1, tmp.end, stk, idx);
-			if(dist2 > 1)
+			if(dist2 > cutoff)
 				add_stack_item(tmp.beg, pivot - 1, stk, idx);
 		}
 	}
@@ -926,7 +926,19 @@ void adaptive_stable_quick_sort(Itr beg, Itr end) {
 	idxs.resize(distance(beg, end));
 	for(size_t i = 0; i < idxs.size(); ++i)
 		idxs[i] = i;
-	stlib_internal::adaptive_stable_quick_sort_internal(beg, end, idxs.begin());
+	stlib_internal::adaptive_stable_quick_sort_internal(1, beg, end, idxs.begin());
+}
+template<typename Itr>
+void adaptive_stable_intro_sort(Itr beg, Itr end) {
+	if(distance(beg, end) <= 1)
+		return;
+	std::vector<size_t> idxs;
+	idxs.resize(distance(beg, end));
+	for(size_t i = 0; i < idxs.size(); ++i)
+		idxs[i] = i;
+	stlib_internal::adaptive_stable_quick_sort_internal(32, beg, end, idxs.begin());
+	
+	insertion_sort(beg, end);
 }
 namespace stlib_internal {
 template<typename Itr, typename IdxItr, typename Comp>
@@ -1055,7 +1067,7 @@ void stable_quick_sort(Itr beg, Itr end, Comp cmp) {
 }
 namespace stlib_internal {
 template<typename Itr, typename IdxItr, typename Comp>
-void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
+void adaptive_stable_quick_sort_internal(unsigned cutoff, Itr beg, Itr end, IdxItr begidx, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
 	//add a stack item
@@ -1109,18 +1121,18 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > 1) | (dist2 > 1)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
+		if(swaps == 0 && ((dist1 > cutoff) | (dist2 > cutoff)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
 
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
-			if(dist2 > 1)
+			if(dist2 > cutoff)
 				add_stack_item(tmp.beg, pivot - 1, stk, idx);
-			if(dist1 > 1)
+			if(dist1 > cutoff)
 				add_stack_item(pivot + 1, tmp.end, stk, idx);
 		} else {
-			if(dist1 > 1)
+			if(dist1 > cutoff)
 				add_stack_item(pivot + 1, tmp.end, stk, idx);
-			if(dist2 > 1)
+			if(dist2 > cutoff)
 				add_stack_item(tmp.beg, pivot - 1, stk, idx);
 		}
 	}
@@ -1134,7 +1146,19 @@ void adaptive_stable_quick_sort(Itr beg, Itr end, Comp cmp) {
 	idxs.resize(distance(beg, end));
 	for(size_t i = 0; i < idxs.size(); ++i)
 		idxs[i] = i;
-	stlib_internal::adaptive_stable_quick_sort_internal(beg, end, idxs.begin(), cmp);
+	stlib_internal::adaptive_stable_quick_sort_internal(1, beg, end, idxs.begin(), cmp);
+}
+template<typename Itr, typename Comp>
+void adaptive_stable_intro_sort(Itr beg, Itr end, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	std::vector<size_t> idxs;
+	idxs.resize(distance(beg, end));
+	for(size_t i = 0; i < idxs.size(); ++i)
+		idxs[i] = i;
+	stlib_internal::adaptive_stable_quick_sort_internal(32, beg, end, idxs.begin(), cmp);
+	
+	insertion_sort(beg, end, cmp);
 }
 
 
