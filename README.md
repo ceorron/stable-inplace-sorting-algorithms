@@ -18,6 +18,7 @@ They have the following characteristics.
 | quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 52 | 6908 |
 | adaptive_stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 74 | 6714 |
 | merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 45 | 6041 |
+| adaptive_stable_intro_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | (N) | 56 | 5744 |
 | std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 44 | 5421 |
 | hybrid_merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 37 | 5228 |
 | intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 36 | 4894 |
@@ -404,6 +405,28 @@ int main() {
         {
             timer tmr;
             stlib::intro_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test adaptive stable intro sort" << std::endl;
+        //test intro sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::adaptive_stable_intro_sort(vec.begin(), vec.end());
         }
 
         std::cout << "[" << std::endl;
