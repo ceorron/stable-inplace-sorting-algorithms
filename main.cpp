@@ -384,6 +384,28 @@ int main() {
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
+        std::cout << "test adaptive stable intro sort" << std::endl;
+        //test intro sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < count; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::adaptive_stable_intro_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < count; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
         std::cout << "test std::sort" << std::endl;
         //test std::sort
         std::vector<uint32_t> vec;
