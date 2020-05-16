@@ -135,6 +135,56 @@ void add_stack_item(Itr beg1, Itr end1,
 	if(idx == stk.size())
 		stk.resize(stk.size() * 2);
 }
+template<typename Itr>
+struct intro_stack_less_data {
+	Itr beg;
+	Itr end;
+	unsigned depth;
+};
+template<typename Itr>
+void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
+					std::vector<intro_stack_less_data<Itr>>& stk, size_t& idx) {
+	if(depth == 1) {
+		//do O(n log n) zip sort if we have reached the maximum depth
+		zip_sort(beg1, end1);
+	} else {
+		intro_stack_less_data<Itr> dat = {
+			beg2,
+			end2,
+			depth - 1
+		};
+		stk[idx++] = std::move(dat);
+		if(idx == stk.size())
+			stk.resize(stk.size() * 2);
+	}
+}
+template<typename Itr, typename Comp>
+void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
+					std::vector<intro_stack_less_data<Itr>>& stk, size_t& idx, Comp cmp) {
+	if(depth == 1) {
+		//do O(n log n) zip sort if we have reached the maximum depth
+		zip_sort(beg1, end1, cmp);
+	} else {
+		intro_stack_less_data<Itr> dat = {
+			beg2,
+			end2,
+			depth - 1
+		};
+		stk[idx++] = std::move(dat);
+		if(idx == stk.size())
+			stk.resize(stk.size() * 2);
+	}
+}
+template<typename Num>
+unsigned get_depth(Num n) {
+	//always have atleast a depth of 3
+	unsigned depth = 1;
+	while(n > 1) {
+		n /= 2;
+		++depth;
+	}
+	return depth * 2 + 1;
+}
 
 template<typename Itr>
 inline Itr half_point(Itr first, Itr last) {
@@ -847,7 +897,7 @@ void stable_quick_sort(Itr beg, Itr end) {
 }
 namespace stlib_internal {
 template<typename Itr, typename IdxItr>
-void adaptive_stable_quick_sort_internal(unsigned cutoff, Itr beg, Itr end, IdxItr begidx) {
+void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 	if(distance(beg, end) <= 1)
 		return;
 	//add a stack item
@@ -901,19 +951,93 @@ void adaptive_stable_quick_sort_internal(unsigned cutoff, Itr beg, Itr end, IdxI
 		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > cutoff) | (dist2 > cutoff)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
+		if(swaps == 0 && ((dist1 > 1) | (dist2 > 1)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
 
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
-			if(dist2 > cutoff)
+			if(dist2 > 1)
 				add_stack_item(tmp.beg, pivot - 1, stk, idx);
-			if(dist1 > cutoff)
+			if(dist1 > 1)
 				add_stack_item(pivot + 1, tmp.end, stk, idx);
 		} else {
-			if(dist1 > cutoff)
+			if(dist1 > 1)
 				add_stack_item(pivot + 1, tmp.end, stk, idx);
-			if(dist2 > cutoff)
+			if(dist2 > 1)
 				add_stack_item(tmp.beg, pivot - 1, stk, idx);
+		}
+	}
+}
+template<typename Itr, typename IdxItr>
+void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
+	if(distance(beg, end) <= 1)
+		return;
+	unsigned maxdepth = get_depth(distance(beg, end));
+
+	//add a stack item
+	vector<intro_stack_less_data<Itr>> stk;
+	stk.resize(15);
+	size_t idx = 0;
+	intro_stack_less_data<Itr> dat = {
+		beg,
+		end - 1,
+		maxdepth
+	};
+	stk[idx++] = std::move(dat);
+
+	while(idx > 0) {
+		intro_stack_less_data<Itr> tmp = stk[--idx];
+		Itr left = tmp.beg - 1;
+		Itr right = tmp.end + 1;
+		Itr pivot;
+		if(!middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot)) continue;
+
+		//if there are no swaps then most likely already in order, just finish sorting
+		unsigned swaps = 0;
+		do {
+			++left;
+			--right;
+			//pivot goes to the right!!
+			while(left != right && left != pivot && stable_quick_sort_less_func(beg, left, pivot, begidx))
+				++left;
+			while(left != right && stable_quick_sort_greater_equal_func(beg, right, pivot, begidx))
+				--right;
+			if(left == right)
+				break;
+
+			stable_quick_sort_swap(beg, left, right, begidx);
+			++swaps;
+			if(left == pivot)
+				pivot = right;
+		} while(left + 1 != right);
+
+		//if right is on the less side, move back
+		if(right != pivot) {
+			if(stable_quick_sort_less_func(beg, right, pivot, begidx))
+				++right;
+			//move the pivot into place
+			if(right != pivot) {
+				stable_quick_sort_swap(beg, right, pivot, begidx);
+				++swaps;
+				pivot = right;
+			}
+		}
+
+		//this is already sorted, don't sort any more!
+		auto dist1 = distance(pivot + 1, tmp.end + 1);
+		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > 32) | (dist2 > 32)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
+
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 32)
+				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
+			if(dist1 > 32)
+				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
+		} else {
+			if(dist1 > 32)
+				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
+			if(dist2 > 32)
+				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
 		}
 	}
 }
@@ -936,7 +1060,7 @@ void adaptive_stable_intro_sort(Itr beg, Itr end) {
 	idxs.resize(distance(beg, end));
 	for(size_t i = 0; i < idxs.size(); ++i)
 		idxs[i] = i;
-	stlib_internal::adaptive_stable_quick_sort_internal(32, beg, end, idxs.begin());
+	stlib_internal::adaptive_stable_intro_sort_internal(32, beg, end, idxs.begin());
 	
 	insertion_sort(beg, end);
 }
@@ -1067,7 +1191,7 @@ void stable_quick_sort(Itr beg, Itr end, Comp cmp) {
 }
 namespace stlib_internal {
 template<typename Itr, typename IdxItr, typename Comp>
-void adaptive_stable_quick_sort_internal(unsigned cutoff, Itr beg, Itr end, IdxItr begidx, Comp cmp) {
+void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
 	//add a stack item
@@ -1121,19 +1245,93 @@ void adaptive_stable_quick_sort_internal(unsigned cutoff, Itr beg, Itr end, IdxI
 		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > cutoff) | (dist2 > cutoff)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
+		if(swaps == 0 && ((dist1 > 1) | (dist2 > 1)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
 
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
-			if(dist2 > cutoff)
+			if(dist2 > 1)
 				add_stack_item(tmp.beg, pivot - 1, stk, idx);
-			if(dist1 > cutoff)
+			if(dist1 > 1)
 				add_stack_item(pivot + 1, tmp.end, stk, idx);
 		} else {
-			if(dist1 > cutoff)
+			if(dist1 > 1)
 				add_stack_item(pivot + 1, tmp.end, stk, idx);
-			if(dist2 > cutoff)
+			if(dist2 > 1)
 				add_stack_item(tmp.beg, pivot - 1, stk, idx);
+		}
+	}
+}
+template<typename Itr, typename IdxItr, typename Comp>
+void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	unsigned maxdepth = get_depth(distance(beg, end));
+
+	//add a stack item
+	vector<intro_stack_less_data<Itr>> stk;
+	stk.resize(15);
+	size_t idx = 0;
+	intro_stack_less_data<Itr> dat = {
+		beg,
+		end - 1,
+		maxdepth
+	};
+	stk[idx++] = std::move(dat);
+
+	while(idx > 0) {
+		intro_stack_less_data<Itr> tmp = stk[--idx];
+		Itr left = tmp.beg - 1;
+		Itr right = tmp.end + 1;
+		Itr pivot;
+		if(!middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp)) continue;
+
+		//if there are no swaps then most likely already in order, just finish sorting
+		unsigned swaps = 0;
+		do {
+			++left;
+			--right;
+			//pivot goes to the right!!
+			while(left != right && left != pivot && stable_quick_sort_less_func(beg, left, pivot, begidx, cmp))
+				++left;
+			while(left != right && stable_quick_sort_greater_equal_func(beg, right, pivot, begidx, cmp))
+				--right;
+			if(left == right)
+				break;
+
+			stable_quick_sort_swap(beg, left, right, begidx);
+			++swaps;
+			if(left == pivot)
+				pivot = right;
+		} while(left + 1 != right);
+
+		//if right is on the less side, move back
+		if(right != pivot) {
+			if(stable_quick_sort_less_func(beg, right, pivot, begidx, cmp))
+				++right;
+			//move the pivot into place
+			if(right != pivot) {
+				stable_quick_sort_swap(beg, right, pivot, begidx);
+				++swaps;
+				pivot = right;
+			}
+		}
+
+		//this is already sorted, don't sort any more!
+		auto dist1 = distance(pivot + 1, tmp.end + 1);
+		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > 32) | (dist2 > 32)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
+
+		//implements sort shorter first optimisation
+		if(dist1 < dist2) {
+			if(dist2 > 32)
+				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
+			if(dist1 > 32)
+				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
+		} else {
+			if(dist1 > 32)
+				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
+			if(dist2 > 32)
+				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
 		}
 	}
 }
@@ -1156,7 +1354,7 @@ void adaptive_stable_intro_sort(Itr beg, Itr end, Comp cmp) {
 	idxs.resize(distance(beg, end));
 	for(size_t i = 0; i < idxs.size(); ++i)
 		idxs[i] = i;
-	stlib_internal::adaptive_stable_quick_sort_internal(32, beg, end, idxs.begin(), cmp);
+	stlib_internal::adaptive_stable_intro_sort_internal(32, beg, end, idxs.begin(), cmp);
 	
 	insertion_sort(beg, end, cmp);
 }
@@ -2559,58 +2757,6 @@ void zip_sort_rec2(Itr beg, Itr end, Comp cmp) {
 }
 
 
-namespace stlib_internal {
-template<typename Itr>
-struct intro_stack_less_data {
-	Itr beg;
-	Itr end;
-	unsigned depth;
-};
-template<typename Num>
-unsigned get_depth(Num n) {
-	//always have atleast a depth of 3
-	unsigned depth = 1;
-	while(n > 1) {
-		n /= 2;
-		++depth;
-	}
-	return depth * 2 + 1;
-}
-template<typename Itr>
-void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
-					std::vector<intro_stack_less_data<Itr>>& stk, size_t& idx) {
-	if(depth == 1) {
-		//do O(n log n) zip sort if we have reached the maximum depth
-		zip_sort(beg1, end1);
-	} else {
-		intro_stack_less_data<Itr> dat = {
-			beg2,
-			end2,
-			depth - 1
-		};
-		stk[idx++] = std::move(dat);
-		if(idx == stk.size())
-			stk.resize(stk.size() * 2);
-	}
-}
-template<typename Itr, typename Comp>
-void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
-					std::vector<intro_stack_less_data<Itr>>& stk, size_t& idx, Comp cmp) {
-	if(depth == 1) {
-		//do O(n log n) zip sort if we have reached the maximum depth
-		zip_sort(beg1, end1, cmp);
-	} else {
-		intro_stack_less_data<Itr> dat = {
-			beg2,
-			end2,
-			depth - 1
-		};
-		stk[idx++] = std::move(dat);
-		if(idx == stk.size())
-			stk.resize(stk.size() * 2);
-	}
-}
-}
 template<typename Itr>
 void intro_quick_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
