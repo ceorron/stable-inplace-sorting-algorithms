@@ -27,9 +27,15 @@
 
 #include <utility>
 #include <stdlib.h>
+#include <stdint.h>
 #include <vector>
 
 namespace stlib {
+
+template<typename Itr>
+void zip_sort(Itr beg, Itr end);
+template<typename Itr, typename Comp>
+void zip_sort(Itr beg, Itr end, Comp cmp);
 
 namespace stlib_internal {
 template<typename T>
@@ -396,7 +402,7 @@ void move_pivot(Itr nhalf, Itr& pivot) {
 			}
 
 			//do move
-			rotate(it + 1, it + (1 + greater_count), moveit);
+			stlib_internal::rotate(it + 1, it + (1 + greater_count), moveit);
 			moveit -= greater_count;
 			pivot -= greater_count;
 
@@ -428,7 +434,7 @@ void move_pivot(Itr nhalf, Itr& pivot, Comp cmp) {
 			}
 
 			//do move
-			rotate(it + 1, it + (1 + greater_count), moveit);
+			stlib_internal::rotate(it + 1, it + (1 + greater_count), moveit);
 			moveit -= greater_count;
 			pivot -= greater_count;
 
@@ -499,32 +505,32 @@ bool binary_search(Itr beg, Itr end, const T& item,
 template<typename Itr>
 bool is_sorted(Itr beg, Itr end) {
 	for(; beg != end - 1; ++beg)
-		if(less_func(*(beg + 1), *beg))
+		if(stlib_internal::less_func(*(beg + 1), *beg))
 			return false;
 	return true;
 }
 template<typename Itr, typename Comp>
 bool is_sorted(Itr beg, Itr end, Comp cmp) {
 	for(; beg != end - 1; ++beg)
-		if(less_func(*(beg + 1), *beg, cmp))
+		if(stlib_internal::less_func(*(beg + 1), *beg, cmp))
 			return false;
 	return true;
 }
 template<typename Itr>
 bool is_reverse_sorted(Itr beg, Itr end) {
 	for(; beg != end - 1; ++beg)
-		if(greater_func(*(beg + 1), *beg))
+		if(stlib_internal::greater_func(*(beg + 1), *beg))
 			return false;
 	return true;
 }
 template<typename Itr, typename Comp>
 bool is_reverse_sorted(Itr beg, Itr end, Comp cmp) {
 	for(; beg != end - 1; ++beg)
-		if(greater_func(*(beg + 1), *beg, cmp))
+		if(stlib_internal::greater_func(*(beg + 1), *beg, cmp))
 			return false;
 	return true;
 }
-	
+
 template<typename Itr>
 void bubble_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
@@ -974,7 +980,7 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 	unsigned maxdepth = get_depth(distance(beg, end));
 
 	//add a stack item
-	vector<intro_stack_less_data<Itr>> stk;
+	std::vector<intro_stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
 	intro_stack_less_data<Itr> dat = {
@@ -1050,7 +1056,7 @@ void adaptive_stable_quick_sort(Itr beg, Itr end) {
 	idxs.resize(distance(beg, end));
 	for(size_t i = 0; i < idxs.size(); ++i)
 		idxs[i] = i;
-	stlib_internal::adaptive_stable_quick_sort_internal(1, beg, end, idxs.begin());
+	stlib_internal::adaptive_stable_quick_sort_internal(beg, end, idxs.begin());
 }
 template<typename Itr>
 void adaptive_stable_intro_sort(Itr beg, Itr end) {
@@ -1060,8 +1066,8 @@ void adaptive_stable_intro_sort(Itr beg, Itr end) {
 	idxs.resize(distance(beg, end));
 	for(size_t i = 0; i < idxs.size(); ++i)
 		idxs[i] = i;
-	stlib_internal::adaptive_stable_intro_sort_internal(32, beg, end, idxs.begin());
-	
+	stlib_internal::adaptive_stable_intro_sort_internal(beg, end, idxs.begin());
+
 	insertion_sort(beg, end);
 }
 namespace stlib_internal {
@@ -1268,7 +1274,7 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 	unsigned maxdepth = get_depth(distance(beg, end));
 
 	//add a stack item
-	vector<intro_stack_less_data<Itr>> stk;
+	std::vector<intro_stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
 	intro_stack_less_data<Itr> dat = {
@@ -1355,7 +1361,7 @@ void adaptive_stable_intro_sort(Itr beg, Itr end, Comp cmp) {
 	for(size_t i = 0; i < idxs.size(); ++i)
 		idxs[i] = i;
 	stlib_internal::adaptive_stable_intro_sort_internal(32, beg, end, idxs.begin(), cmp);
-	
+
 	insertion_sort(beg, end, cmp);
 }
 
@@ -1455,7 +1461,7 @@ void do_merge_sweep(merge_sweep_stack_less_data<Itr>& lhs, merge_sweep_stack_les
 
 	//do rotate to combine the halfs
 	//swap the greater of the first with the less of the second
-	rotate(lhs.nhalf, lhs.end, rhs.nhalf);
+	stlib_internal::rotate(lhs.nhalf, lhs.end, rhs.nhalf);
 
 	//keep track of pivot, pivot moves with greater
 	if(pivot >= lhs.nhalf && pivot < lhs.end)
@@ -1578,7 +1584,7 @@ void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf) {
 
 	//do rotate to combine the halfs
 	//swap the greater of the first with the less of the second
-	rotate(nhalf1, half, nhalf2);
+	stlib_internal::rotate(nhalf1, half, nhalf2);
 	//keep track of pivot, pivot moves lesser up
 	if(pivot >= nhalf1 && pivot < half)
 		pivot += distance(half, nhalf2);
@@ -1620,7 +1626,7 @@ void merge_sweep_sort(Itr beg, Itr end) {
 		Itr pivot = stlib_internal::middle_of_three(item.beg, stlib_internal::half_point(item.beg, item.end), item.end - 1);
 
 		Itr nhalf;
-		merge_sweep_sort_iterative(pivot, item.beg, item.end, nhalf);
+		stlib_internal::merge_sweep_sort_iterative(pivot, item.beg, item.end, nhalf);
 
 		stlib_internal::move_pivot(nhalf, pivot);
 
@@ -1754,7 +1760,7 @@ void merge_sweep_sort_recurse(Itr& pivot, Itr beg, Itr end, Itr& nhalf, Comp cmp
 
 	//do rotate to combine the halfs
 	//swap the greater of the first with the less of the second
-	rotate(nhalf1, half, nhalf2);
+	stlib_internal::rotate(nhalf1, half, nhalf2);
 	//keep track of pivot, pivot moves lesser up
 	if(pivot >= nhalf1 && pivot < half)
 		pivot += distance(half, nhalf2);
@@ -1796,7 +1802,7 @@ void merge_sweep_sort(Itr beg, Itr end, Comp cmp) {
 		Itr pivot = stlib_internal::middle_of_three(item.beg, stlib_internal::half_point(item.beg, item.end), item.end - 1, cmp);
 
 		Itr nhalf;
-		merge_sweep_sort_iterative(pivot, item.beg, item.end, nhalf, cmp);
+		stlib_internal::merge_sweep_sort_iterative(pivot, item.beg, item.end, nhalf, cmp);
 
 		stlib_internal::move_pivot(nhalf, pivot, cmp);
 
@@ -1913,7 +1919,7 @@ bool merge_sort(Itr beg, Itr end, Comp cmp) {
 	}
 	return false;
 }
-namesapce stlib_internal {
+namespace stlib_internal {
 template<typename Itr, typename T, typename Comp>
 void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 	uint64_t sze = distance(beg, end);
@@ -2004,7 +2010,7 @@ bool hybrid_merge_sort(Itr beg, Itr end, Comp cmp) {
 	return false;
 }
 
-namesapce stlib_internal {
+namespace stlib_internal {
 template<typename Itr1, typename Itr2>
 void merge_internal(Itr1 beg1, Itr1 beg2, Itr1 end2, Itr2& begout) {
 	Itr1 end1 = beg2;
@@ -2099,7 +2105,7 @@ bool merge_sort(Itr beg, Itr end) {
 	}
 	return false;
 }
-namesapce stlib_internal {
+namespace stlib_internal {
 template<typename Itr, typename T>
 void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf) {
 	uint64_t sze = distance(beg, end);
@@ -2205,7 +2211,7 @@ void inplace_merge(Itr beg1, Itr beg2, Itr end2) {
 		for(; lft != beg1 - 1 && greater_func(*lft, *right); --lft, --rght);
 		if(lft != left) {
 			//move those greater left to the right hande side
-			rotate(lft + 1, left + 1, right + 1);
+			stlib_internal::rotate(lft + 1, left + 1, right + 1);
 			left = lft;
 		}
 		right = rght;
@@ -2286,7 +2292,7 @@ void inplace_merge(Itr beg1, Itr beg2, Itr end2, Comp cmp) {
 		for(; lft != beg1 - 1 && greater_func(*lft, *right, cmp); --lft, --rght);
 		if(lft != left) {
 			//move those greater left to the right hande side
-			rotate(lft + 1, left + 1, right + 1);
+			stlib_internal::rotate(lft + 1, left + 1, right + 1);
 			left = lft;
 		}
 		right = rght;
@@ -2434,7 +2440,7 @@ void zip_merge(Itr left, Itr right, Itr end) {
 		++left;
 		if(left == mdlstart) {
 			//if the left reaches the middle, re-order the middle section so smallest first
-			rotate(mdlstart, mdltop, right);
+			stlib_internal::rotate(mdlstart, mdltop, right);
 			mdlstart = right;
 			mdltop = right;
 		}
@@ -2442,8 +2448,8 @@ void zip_merge(Itr left, Itr right, Itr end) {
 
 	if(left != right) {
 		//if the right has reached the end before the left
-		rotate(mdlstart, mdltop, right);
-		rotate(left, mdlstart, right);
+		stlib_internal::rotate(mdlstart, mdltop, right);
+		stlib_internal::rotate(left, mdlstart, right);
 	}
 }
 }
@@ -2631,7 +2637,7 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 		++left;
 		if(left == mdlstart) {
 			//if the left reaches the middle, re-order the middle section so smallest first
-			rotate(mdlstart, mdltop, right);
+			stlib_internal::rotate(mdlstart, mdltop, right);
 			mdlstart = right;
 			mdltop = right;
 		}
@@ -2639,8 +2645,8 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 
 	if(left != right) {
 		//if the right has reached the end before the left
-		rotate(mdlstart, mdltop, right);
-		rotate(left, mdlstart, right);
+		stlib_internal::rotate(mdlstart, mdltop, right);
+		stlib_internal::rotate(left, mdlstart, right);
 	}
 }
 }
@@ -2949,7 +2955,7 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && (((dist1 > 32) | (dist2 > 32)) && is_sorted(tmp.beg, tmp.end + 1))) continue;
+		if(swaps == 0 && ((dist1 > 32) | (dist2 > 32)) && stlib::is_sorted(tmp.beg, tmp.end + 1)) continue;
 
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
@@ -2975,7 +2981,7 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 	std::vector<stlib_internal::intro_stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	istlib_internal::ntro_stack_less_data<Itr> dat = {
+	stlib_internal::intro_stack_less_data<Itr> dat = {
 		beg,
 		end - 1,
 		maxdepth
@@ -3023,7 +3029,7 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > 32) | (dist2 > 32)) && is_sorted(tmp.beg, tmp.end + 1, cmp)) continue;
+		if(swaps == 0 && ((dist1 > 32) | (dist2 > 32)) && stlib::is_sorted(tmp.beg, tmp.end + 1, cmp)) continue;
 
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
