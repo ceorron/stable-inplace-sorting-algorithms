@@ -494,7 +494,7 @@ int main() {
 
 ## merge_sweep_sort
 
-The following is an explination of the merge_sweep_sort algorithm, merge_sweep_sort is a quick_sort like algorithm.
+The following is an description of the merge_sweep_sort algorithm, merge_sweep_sort is a quick_sort like algorithm.
 
 ```
 Step 1: pick a pivot
