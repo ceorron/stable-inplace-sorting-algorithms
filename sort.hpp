@@ -29,8 +29,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <vector>
+#include <algorithm>
 
 namespace stlib {
+
+constexpr int INSERTION_SORT_CUTOFF = 32;
+constexpr int HYBRID_INSERTION_SORT_CUTOFF = 16;
 
 template<typename Itr>
 void zip_sort(Itr beg, Itr end);
@@ -125,6 +129,175 @@ void copy_buffers(Itr1 beg, Itr1 end, Itr2& out) {
 		construct(*out, std::move(*beg));
 }
 
+
+template<typename Itr, typename IdxItr>
+void stable_quick_sort_swap(Itr beg, Itr left, Itr right, IdxItr begidx) {
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+
+	std::swap(*left, *right);
+	std::swap(*(begidx + lidx), *(begidx + ridx));
+}
+template<typename Itr, typename IdxItr>
+bool stable_quick_sort_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
+	//items are never equal in stable sort as indexes are always unique
+	return false;
+}
+template<typename Itr, typename IdxItr>
+bool stable_quick_sort_less_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
+	if(less_func(*left, *right))
+		return true;
+	if(greater_func(*left, *right))
+		return false;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	return *(begidx + lidx) < *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr>
+bool stable_quick_sort_greater_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
+	if(less_func(*left, *right))
+		return false;
+	if(greater_func(*left, *right))
+		return true;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	return *(begidx + lidx) > *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr>
+bool stable_quick_sort_less_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
+	if(less_func(*left, *right))
+		return true;
+	if(greater_func(*left, *right))
+		return false;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	if(*(begidx + lidx) < *(begidx + ridx))
+		return true;
+	return *(begidx + lidx) == *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr>
+bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
+	if(less_func(*left, *right))
+		return false;
+	if(greater_func(*left, *right))
+		return true;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	if(*(begidx + lidx) > *(begidx + ridx))
+		return true;
+	return *(begidx + lidx) == *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr>
+bool stable_quick_sort_is_sorted(Itr start, Itr beg, Itr end, IdxItr begidx) {
+	for(; beg != end - 1; ++beg)
+		if(stable_quick_sort_less_func(start, (beg + 1), beg, begidx))
+			return false;
+	return true;
+}
+template<typename Itr, typename IdxItr>
+bool stable_quick_sort_is_reverse_sorted(Itr start, Itr beg, Itr end, IdxItr begidx) {
+	for(; beg != end - 1; ++beg)
+		if(stable_quick_sort_greater_func(start, (beg + 1), beg, begidx))
+			return false;
+	return true;
+}
+template<typename Itr, typename IdxItr, typename Comp>
+bool stable_quick_sort_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
+	//items are never equal in stable sort as indexes are always unique
+	return false;
+}
+template<typename Itr, typename IdxItr, typename Comp>
+bool stable_quick_sort_less_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
+	if(less_func(*left, *right, cmp))
+		return true;
+	if(greater_func(*left, *right, cmp))
+		return false;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	return *(begidx + lidx) < *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr, typename Comp>
+bool stable_quick_sort_greater_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
+	if(less_func(*left, *right, cmp))
+		return false;
+	if(greater_func(*left, *right, cmp))
+		return true;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	return *(begidx + lidx) > *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr, typename Comp>
+bool stable_quick_sort_less_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
+	if(less_func(*left, *right, cmp))
+		return true;
+	if(greater_func(*left, *right, cmp))
+		return false;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	if(*(begidx + lidx) < *(begidx + ridx))
+		return true;
+	return *(begidx + lidx) == *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr, typename Comp>
+bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
+	if(less_func(*left, *right, cmp))
+		return false;
+	if(greater_func(*left, *right, cmp))
+		return true;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	if(*(begidx + lidx) > *(begidx + ridx))
+		return true;
+	return *(begidx + lidx) == *(begidx + ridx);
+}
+template<typename Itr, typename IdxItr, typename Comp>
+bool stable_quick_sort_is_sorted(Itr start, Itr beg, Itr end, IdxItr begidx, Comp cmp) {
+	for(; beg != end - 1; ++beg)
+		if(stable_quick_sort_less_func(start, (beg + 1), beg, begidx, cmp))
+			return false;
+	return true;
+}
+template<typename Itr, typename IdxItr, typename Comp>
+bool stable_quick_sort_is_reverse_sorted(Itr start, Itr beg, Itr end, IdxItr begidx, Comp cmp) {
+	for(; beg != end - 1; ++beg)
+		if(stable_quick_sort_greater_func(start, (beg + 1), beg, begidx, cmp))
+			return false;
+	return true;
+}
+
+}
+
+template<typename Itr>
+bool is_sorted(Itr beg, Itr end) {
+	for(; beg != end - 1; ++beg)
+		if(stlib_internal::less_func(*(beg + 1), *beg))
+			return false;
+	return true;
+}
+template<typename Itr, typename Comp>
+bool is_sorted(Itr beg, Itr end, Comp cmp) {
+	for(; beg != end - 1; ++beg)
+		if(stlib_internal::less_func(*(beg + 1), *beg, cmp))
+			return false;
+	return true;
+}
+template<typename Itr>
+bool is_reverse_sorted(Itr beg, Itr end) {
+	for(; beg != end - 1; ++beg)
+		if(stlib_internal::greater_func(*(beg + 1), *beg))
+			return false;
+	return true;
+}
+template<typename Itr, typename Comp>
+bool is_reverse_sorted(Itr beg, Itr end, Comp cmp) {
+	for(; beg != end - 1; ++beg)
+		if(stlib_internal::greater_func(*(beg + 1), *beg, cmp))
+			return false;
+	return true;
+}
+
+
+namespace stlib_internal {
 template<typename Itr>
 struct stack_less_data {
 	Itr beg;
@@ -255,6 +428,22 @@ bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out) {
 		return true;
 	}
 
+	//test for sorted ordering
+	if(less_equal_func_bool(last_first) && less_equal_func_bool(middle_first) && less_equal_func_bool(last_middle) && stlib::is_sorted(first, last + 1)) {
+		//if the first is less than the last
+		//first is less equal to middle
+		//middle is less equal to last
+		return false;
+	}
+	//test for reverse ordering
+	if(greater_func_bool(last_first) && greater_equal_func_bool(first_middle) && greater_equal_func_bool(middle_last) && stlib::is_reverse_sorted(first, last + 1)) {
+		//if the first is greater than the last
+		//first is greater equal to middle
+		//middle is greater equal to last
+		std::reverse(first, last + 1);
+		return false;
+	}
+
 	//choose the middle one
 	if(less_func_bool(middle_first)) {
 		if(less_func_bool(last_middle)) {
@@ -263,19 +452,6 @@ bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out) {
 		} else if(less_func_bool(last_first)) {
 			out = last;
 			return true;
-		}
-		if(equal_func_bool(first_middle, middle_first) && equal_func_bool(middle_last, last_middle)) {
-			//break ties by selecting a new pivot - any pivot that is not equal to these
-			//must be atleast 3 big
-			if(first + 1 == last - 1)
-				//just exit only three in the list, all equal!
-				return false;
-			for(Itr beg = first + 1; beg != last; ++beg)
-				if(!equal_func(*first, *beg)) {
-					out = beg;
-					return true;
-				}
-			return false;
 		}
 		out = first;
 		return true;
@@ -286,19 +462,6 @@ bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out) {
 		} else if(less_func_bool(last_first)) {
 			out = first;
 			return true;
-		}
-		if(equal_func_bool(first_middle, middle_first) && equal_func_bool(middle_last, last_middle)) {
-			//break ties by selecting a new pivot - any pivot that is not equal to these
-			//must be atleast 3 big
-			if(first + 1 == last - 1)
-				//just exit only three in the list, all equal!
-				return false;
-			for(Itr beg = first + 1; beg != last; ++beg)
-				if(!equal_func(*first, *beg)) {
-					out = beg;
-					return true;
-				}
-			return false;
 		}
 		out = last;
 		return true;
@@ -330,6 +493,22 @@ bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out, Comp cmp) {
 		return true;
 	}
 
+	//test for sorted ordering
+	if(less_equal_func_bool(last_first) && less_equal_func_bool(middle_first) && less_equal_func_bool(last_middle) && stlib::is_sorted(first, last + 1, cmp)) {
+		//if the first is less than the last
+		//first is less equal to middle
+		//middle is less equal to last
+		return false;
+	}
+	//test for reverse ordering
+	if(greater_func_bool(last_first) && greater_equal_func_bool(first_middle) && greater_equal_func_bool(middle_last) && stlib::is_reverse_sorted(first, last + 1, cmp)) {
+		//if the first is greater than the last
+		//first is greater equal to middle
+		//middle is greater equal to last
+		std::reverse(first, last + 1);
+		return false;
+	}
+
 	//choose the middle one
 	if(less_func_bool(middle_first)) {
 		if(less_func_bool(last_middle)) {
@@ -338,19 +517,6 @@ bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out, Comp cmp) {
 		} else if(less_func_bool(last_first)) {
 			out = last;
 			return true;
-		}
-		if(equal_func_bool(first_middle, middle_first) && equal_func_bool(middle_last, last_middle)) {
-			//break ties by selecting a new pivot - any pivot that is not equal to these
-			//must be atleast 3 big
-			if(first + 1 == last - 1)
-				//just exit only three in the list, all equal!
-				return false;
-			for(Itr beg = first + 1; beg != last; ++beg)
-				if(!equal_func(*first, *beg, cmp)) {
-					out = beg;
-					return true;
-				}
-			return false;
 		}
 		out = first;
 		return true;
@@ -362,18 +528,139 @@ bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out, Comp cmp) {
 			out = first;
 			return true;
 		}
-		if(equal_func_bool(first_middle, middle_first) && equal_func_bool(middle_last, last_middle)) {
-			//break ties by selecting a new pivot - any pivot that is not equal to these
-			//must be atleast 3 big
-			if(first + 1 == last - 1)
-				//just exit only three in the list, all equal!
-				return false;
-			for(Itr beg = first + 1; beg != last; ++beg)
-				if(!equal_func(*first, *beg, cmp)) {
-					out = beg;
-					return true;
-				}
-			return false;
+		out = last;
+		return true;
+	}
+}
+template<typename Itr, typename IdxItr>
+bool stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begidx, Itr& out) {
+	//do upfront comparison
+	bool first_middle = stable_quick_sort_less_func(beg, first, middle, begidx);
+	bool middle_first = stable_quick_sort_less_func(beg, middle, first, begidx);
+
+	bool middle_last = stable_quick_sort_less_func(beg, middle, last, begidx);
+	bool last_middle = stable_quick_sort_less_func(beg, last, middle, begidx);
+
+	bool last_first = stable_quick_sort_less_func(beg, last, first, begidx);
+	bool first_last = stable_quick_sort_less_func(beg, first, last, begidx);
+
+	//if two of them are the same then choose the other one
+	if(equal_func_bool(first_middle, middle_first) && !equal_func_bool(middle_last, last_middle)) {
+		out = last;
+		return true;
+	}
+	if(equal_func_bool(middle_last, last_middle) && !equal_func_bool(first_middle, middle_first)) {
+		out = first;
+		return true;
+	}
+	if(equal_func_bool(last_first, first_last) && !equal_func_bool(middle_last, last_middle)) {
+		out = middle;
+		return true;
+	}
+
+	//test for sorted ordering
+	if(less_equal_func_bool(last_first) && less_equal_func_bool(middle_first) && less_equal_func_bool(last_middle) &&
+	   stable_quick_sort_is_sorted(beg, first, last + 1, begidx)) {
+		//if the first is less than the last
+		//first is less equal to middle
+		//middle is less equal to last
+		return false;
+	}
+	//test for reverse ordering
+	if(greater_func_bool(last_first) && greater_equal_func_bool(first_middle) && greater_equal_func_bool(middle_last) &&
+	   stable_quick_sort_is_reverse_sorted(beg, first, last + 1, begidx)) {
+		//if the first is greater than the last
+		//first is greater equal to middle
+		//middle is greater equal to last
+		std::reverse(first, last + 1);
+		return false;
+	}
+
+	//choose the middle one
+	if(less_func_bool(middle_first)) {
+		if(less_func_bool(last_middle)) {
+			out = middle;
+			return true;
+		} else if(less_func_bool(last_first)) {
+			out = last;
+			return true;
+		}
+		out = first;
+		return true;
+	} else {
+		if(less_func_bool(middle_last)) {
+			out = middle;
+			return true;
+		} else if(less_func_bool(last_first)) {
+			out = first;
+			return true;
+		}
+		out = last;
+		return true;
+	}
+}
+template<typename Itr, typename IdxItr, typename Comp>
+bool stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begidx, Itr& out, Comp cmp) {
+	//do upfront comparison
+	bool first_middle = stable_quick_sort_less_func(beg, first, middle, begidx, cmp);
+	bool middle_first = stable_quick_sort_less_func(beg, middle, first, begidx, cmp);
+
+	bool middle_last = stable_quick_sort_less_func(beg, middle, last, begidx, cmp);
+	bool last_middle = stable_quick_sort_less_func(beg, last, middle, begidx, cmp);
+
+	bool last_first = stable_quick_sort_less_func(beg, last, first, begidx, cmp);
+	bool first_last = stable_quick_sort_less_func(beg, first, last, begidx, cmp);
+
+	//if two of them are the same then choose the other one
+	if(equal_func_bool(first_middle, middle_first) && !equal_func_bool(middle_last, last_middle)) {
+		out = last;
+		return true;
+	}
+	if(equal_func_bool(middle_last, last_middle) && !equal_func_bool(first_middle, middle_first)) {
+		out = first;
+		return true;
+	}
+	if(equal_func_bool(last_first, first_last) && !equal_func_bool(middle_last, last_middle)) {
+		out = middle;
+		return true;
+	}
+
+	//test for sorted ordering
+	if(less_equal_func_bool(last_first) && less_equal_func_bool(middle_first) && less_equal_func_bool(last_middle) &&
+	   stable_quick_sort_is_sorted(beg, first, last + 1, begidx, cmp)) {
+		//if the first is less than the last
+		//first is less equal to middle
+		//middle is less equal to last
+		return false;
+	}
+	//test for reverse ordering
+	if(greater_func_bool(last_first) && greater_equal_func_bool(first_middle) && greater_equal_func_bool(middle_last) &&
+	   stable_quick_sort_is_reverse_sorted(beg, first, last + 1, begidx, cmp)) {
+		//if the first is greater than the last
+		//first is greater equal to middle
+		//middle is greater equal to last
+		std::reverse(first, last + 1);
+		return false;
+	}
+
+	//choose the middle one
+	if(less_func_bool(middle_first)) {
+		if(less_func_bool(last_middle)) {
+			out = middle;
+			return true;
+		} else if(less_func_bool(last_first)) {
+			out = last;
+			return true;
+		}
+		out = first;
+		return true;
+	} else {
+		if(less_func_bool(middle_last)) {
+			out = middle;
+			return true;
+		} else if(less_func_bool(last_first)) {
+			out = first;
+			return true;
 		}
 		out = last;
 		return true;
@@ -503,35 +790,6 @@ bool binary_search(Itr beg, Itr end, const T& item,
 }
 
 template<typename Itr>
-bool is_sorted(Itr beg, Itr end) {
-	for(; beg != end - 1; ++beg)
-		if(stlib_internal::less_func(*(beg + 1), *beg))
-			return false;
-	return true;
-}
-template<typename Itr, typename Comp>
-bool is_sorted(Itr beg, Itr end, Comp cmp) {
-	for(; beg != end - 1; ++beg)
-		if(stlib_internal::less_func(*(beg + 1), *beg, cmp))
-			return false;
-	return true;
-}
-template<typename Itr>
-bool is_reverse_sorted(Itr beg, Itr end) {
-	for(; beg != end - 1; ++beg)
-		if(stlib_internal::greater_func(*(beg + 1), *beg))
-			return false;
-	return true;
-}
-template<typename Itr, typename Comp>
-bool is_reverse_sorted(Itr beg, Itr end, Comp cmp) {
-	for(; beg != end - 1; ++beg)
-		if(stlib_internal::greater_func(*(beg + 1), *beg, cmp))
-			return false;
-	return true;
-}
-
-template<typename Itr>
 void bubble_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
@@ -578,10 +836,14 @@ void insertion_sort(Itr beg, Itr end) {
 	Itr strt = beg + 1;
 	for(; strt != end; ++strt) {
 		Itr crnt = strt;
-		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), *crnt)) {
-			std::swap(*crnt, *(crnt - 1));
+
+		//move this to the correct place (do insert)
+		typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*crnt);
+		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), val)) {
+			stlib_internal::construct(*crnt, std::move(*(crnt - 1)));
 			--crnt;
 		}
+		stlib_internal::construct(*crnt, std::move(val));
 	}
 }
 template<typename Itr, typename Comp>
@@ -591,12 +853,18 @@ void insertion_sort(Itr beg, Itr end, Comp cmp) {
 	Itr strt = beg + 1;
 	for(; strt != end; ++strt) {
 		Itr crnt = strt;
-		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), *crnt, cmp)) {
-			std::swap(*crnt, *(crnt - 1));
+
+		//move this to the correct place (do insert)
+		typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*crnt);
+		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), val, cmp)) {
+			stlib_internal::construct(*crnt, std::move(*(crnt - 1)));
 			--crnt;
 		}
+		stlib_internal::construct(*crnt, std::move(val));
 	}
 }
+
+
 
 template<typename Itr>
 void binary_insertion_sort(Itr beg, Itr end) {
@@ -612,11 +880,17 @@ void binary_insertion_sort(Itr beg, Itr end) {
 			for(; out != strt && stlib_internal::equal_func(*out, *strt); ++out);
 			--out;
 
-			for(Itr c = strt; c != out; --c)
-				std::swap(*c, *(c - 1));
+			Itr c = strt;
+			typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*c);
+			for(; c != out; --c)
+				stlib_internal::construct(*c, std::move(*(c - 1)));
+			stlib_internal::construct(*c, std::move(val));
 		} else if(out != strt) {
-			for(Itr c = strt; c != out; --c)
-				std::swap(*c, *(c - 1));
+			Itr c = strt;
+			typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*c);
+			for(; c != out; --c)
+				stlib_internal::construct(*c, std::move(*(c - 1)));
+			stlib_internal::construct(*c, std::move(val));
 		}
 	}
 }
@@ -634,11 +908,17 @@ void binary_insertion_sort(Itr beg, Itr end, Comp cmp) {
 			for(; out != strt && stlib_internal::equal_func(*out, *strt, cmp); ++out);
 			--out;
 
-			for(Itr c = strt; c != out; --c)
-				std::swap(*c, *(c - 1));
+			Itr c = strt;
+			typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*c);
+			for(; c != out; --c)
+				stlib_internal::construct(*c, std::move(*(c - 1)));
+			stlib_internal::construct(*c, std::move(val));
 		} else if(out != strt) {
-			for(Itr c = strt; c != out; --c)
-				std::swap(*c, *(c - 1));
+			Itr c = strt;
+			typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*c);
+			for(; c != out; --c)
+				stlib_internal::construct(*c, std::move(*(c - 1)));
+			stlib_internal::construct(*c, std::move(val));
 		}
 	}
 }
@@ -770,65 +1050,6 @@ void quick_sort(Itr beg, Itr end, Comp cmp) {
 
 namespace stlib_internal {
 template<typename Itr, typename IdxItr>
-void stable_quick_sort_swap(Itr beg, Itr left, Itr right, IdxItr begidx) {
-	size_t lidx = distance(beg, left);
-	size_t ridx = distance(beg, right);
-
-	std::swap(*left, *right);
-	std::swap(*(begidx + lidx), *(begidx + ridx));
-}
-template<typename Itr, typename IdxItr>
-bool stable_quick_sort_less_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
-	if(less_func(*left, *right))
-		return true;
-	if(greater_func(*left, *right))
-		return false;
-	size_t lidx = distance(beg, left);
-	size_t ridx = distance(beg, right);
-	return *(begidx + lidx) < *(begidx + ridx);
-}
-template<typename Itr, typename IdxItr>
-bool stable_quick_sort_greater_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
-	if(less_func(*left, *right))
-		return false;
-	if(greater_func(*left, *right))
-		return true;
-	size_t lidx = distance(beg, left);
-	size_t ridx = distance(beg, right);
-	return *(begidx + lidx) > *(begidx + ridx);
-}
-template<typename Itr, typename IdxItr>
-bool stable_quick_sort_less_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
-	if(less_func(*left, *right))
-		return true;
-	if(greater_func(*left, *right))
-		return false;
-	size_t lidx = distance(beg, left);
-	size_t ridx = distance(beg, right);
-	if(*(begidx + lidx) < *(begidx + ridx))
-		return true;
-	return *(begidx + lidx) == *(begidx + ridx);
-}
-template<typename Itr, typename IdxItr>
-bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
-	if(less_func(*left, *right))
-		return false;
-	if(greater_func(*left, *right))
-		return true;
-	size_t lidx = distance(beg, left);
-	size_t ridx = distance(beg, right);
-	if(*(begidx + lidx) > *(begidx + ridx))
-		return true;
-	return *(begidx + lidx) == *(begidx + ridx);
-}
-template<typename Itr, typename IdxItr>
-bool stable_quick_sort_is_sorted(Itr start, Itr beg, Itr end, IdxItr begidx) {
-	for(; beg != end - 1; ++beg)
-		if(stable_quick_sort_less_func(start, (beg + 1), beg, begidx))
-			return false;
-	return true;
-}
-template<typename Itr, typename IdxItr>
 void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 	if(distance(beg, end) <= 1)
 		return;
@@ -921,7 +1142,7 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
-		if(!middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot)) continue;
+		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot)) continue;
 
 		//if there are no swaps then most likely already in order, just finish sorting
 		unsigned swaps = 0;
@@ -995,7 +1216,7 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
-		if(!middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot)) continue;
+		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot)) continue;
 
 		//if there are no swaps then most likely already in order, just finish sorting
 		unsigned swaps = 0;
@@ -1031,18 +1252,18 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > 32) | (dist2 > 32)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
+		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
 
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
-			if(dist2 > 32)
+			if(dist2 > INSERTION_SORT_CUTOFF)
 				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
-			if(dist1 > 32)
+			if(dist1 > INSERTION_SORT_CUTOFF)
 				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
 		} else {
-			if(dist1 > 32)
+			if(dist1 > INSERTION_SORT_CUTOFF)
 				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
-			if(dist2 > 32)
+			if(dist2 > INSERTION_SORT_CUTOFF)
 				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
 		}
 	}
@@ -1071,57 +1292,6 @@ void adaptive_stable_intro_sort(Itr beg, Itr end) {
 	insertion_sort(beg, end);
 }
 namespace stlib_internal {
-template<typename Itr, typename IdxItr, typename Comp>
-bool stable_quick_sort_less_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
-	if(less_func(*left, *right, cmp))
-		return true;
-	if(greater_func(*left, *right, cmp))
-		return false;
-	size_t lidx = distance(beg, left);
-	size_t ridx = distance(beg, right);
-	return *(begidx + lidx) < *(begidx + ridx);
-}
-template<typename Itr, typename IdxItr, typename Comp>
-bool stable_quick_sort_greater_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
-	if(less_func(*left, *right, cmp))
-		return false;
-	if(greater_func(*left, *right, cmp))
-		return true;
-	size_t lidx = distance(beg, left);
-	size_t ridx = distance(beg, right);
-	return *(begidx + lidx) > *(begidx + ridx);
-}
-template<typename Itr, typename IdxItr, typename Comp>
-bool stable_quick_sort_less_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
-	if(less_func(*left, *right, cmp))
-		return true;
-	if(greater_func(*left, *right, cmp))
-		return false;
-	size_t lidx = distance(beg, left);
-	size_t ridx = distance(beg, right);
-	if(*(begidx + lidx) < *(begidx + ridx))
-		return true;
-	return *(begidx + lidx) == *(begidx + ridx);
-}
-template<typename Itr, typename IdxItr, typename Comp>
-bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
-	if(less_func(*left, *right, cmp))
-		return false;
-	if(greater_func(*left, *right, cmp))
-		return true;
-	size_t lidx = distance(beg, left);
-	size_t ridx = distance(beg, right);
-	if(*(begidx + lidx) > *(begidx + ridx))
-		return true;
-	return *(begidx + lidx) == *(begidx + ridx);
-}
-template<typename Itr, typename IdxItr, typename Comp>
-bool stable_quick_sort_is_sorted(Itr start, Itr beg, Itr end, IdxItr begidx, Comp cmp) {
-	for(; beg != end - 1; ++beg)
-		if(stable_quick_sort_less_func(start, (beg + 1), beg, begidx, cmp))
-			return false;
-	return true;
-}
 template<typename Itr, typename IdxItr, typename Comp>
 void stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
 	if(distance(beg, end) <= 1)
@@ -1215,7 +1385,7 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
-		if(!middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp)) continue;
+		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot, cmp)) continue;
 
 		//if there are no swaps then most likely already in order, just finish sorting
 		unsigned swaps = 0;
@@ -1289,7 +1459,7 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
-		if(!middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp)) continue;
+		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot, cmp)) continue;
 
 		//if there are no swaps then most likely already in order, just finish sorting
 		unsigned swaps = 0;
@@ -1325,18 +1495,18 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > 32) | (dist2 > 32)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
+		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
 
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
-			if(dist2 > 32)
+			if(dist2 > INSERTION_SORT_CUTOFF)
 				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
-			if(dist1 > 32)
+			if(dist1 > INSERTION_SORT_CUTOFF)
 				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
 		} else {
-			if(dist1 > 32)
+			if(dist1 > INSERTION_SORT_CUTOFF)
 				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
-			if(dist2 > 32)
+			if(dist2 > INSERTION_SORT_CUTOFF)
 				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
 		}
 	}
@@ -1350,7 +1520,7 @@ void adaptive_stable_quick_sort(Itr beg, Itr end, Comp cmp) {
 	idxs.resize(distance(beg, end));
 	for(size_t i = 0; i < idxs.size(); ++i)
 		idxs[i] = i;
-	stlib_internal::adaptive_stable_quick_sort_internal(1, beg, end, idxs.begin(), cmp);
+	stlib_internal::adaptive_stable_quick_sort_internal(beg, end, idxs.begin(), cmp);
 }
 template<typename Itr, typename Comp>
 void adaptive_stable_intro_sort(Itr beg, Itr end, Comp cmp) {
@@ -1360,7 +1530,7 @@ void adaptive_stable_intro_sort(Itr beg, Itr end, Comp cmp) {
 	idxs.resize(distance(beg, end));
 	for(size_t i = 0; i < idxs.size(); ++i)
 		idxs[i] = i;
-	stlib_internal::adaptive_stable_intro_sort_internal(32, beg, end, idxs.begin(), cmp);
+	stlib_internal::adaptive_stable_intro_sort_internal(beg, end, idxs.begin(), cmp);
 
 	insertion_sort(beg, end, cmp);
 }
@@ -1927,7 +2097,7 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 		return;
 
 	//sort small runs with insertion sort before doing merge
-	uint64_t insert_count = 16;
+	uint64_t insert_count = INSERTION_SORT_CUTOFF;
 	{
 		uint64_t len = insert_count;
 		uint64_t count = 0;
@@ -2113,7 +2283,7 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf) {
 		return;
 
 	//sort small runs with insertion sort before doing merge
-	uint64_t insert_count = 16;
+	uint64_t insert_count = INSERTION_SORT_CUTOFF;
 	{
 		uint64_t len = insert_count;
 		uint64_t count = 0;
@@ -2248,7 +2418,7 @@ void hybrid_inplace_merge_sort(Itr beg, Itr end) {
 	if(sze <= 1)
 		return;
 	//sort small runs with insertion sort before doing merge
-	uint64_t insert_count = 16;
+	uint64_t insert_count = HYBRID_INSERTION_SORT_CUTOFF;
 	{
 		uint64_t len = insert_count;
 		uint64_t count = 0;
@@ -2329,7 +2499,7 @@ void hybrid_inplace_merge_sort(Itr beg, Itr end, Comp cmp) {
 	if(sze <= 1)
 		return;
 	//sort small runs with insertion sort before doing merge
-	uint64_t insert_count = 16;
+	uint64_t insert_count = HYBRID_INSERTION_SORT_CUTOFF;
 	{
 		uint64_t len = insert_count;
 		uint64_t count = 0;
@@ -2484,7 +2654,7 @@ void hybrid_zip_sort(Itr beg, Itr end) {
 	if(sze <= 1)
 		return;
 	//sort small runs with insertion sort before doing merge
-	uint64_t insert_count = 16;
+	uint64_t insert_count = HYBRID_INSERTION_SORT_CUTOFF;
 	{
 		uint64_t len = insert_count;
 		uint64_t count = 0;
@@ -2681,7 +2851,7 @@ void hybrid_zip_sort(Itr beg, Itr end, Comp cmp) {
 	if(sze <= 1)
 		return;
 	//sort small runs with insertion sort before doing merge
-	uint64_t insert_count = 16;
+	uint64_t insert_count = HYBRID_INSERTION_SORT_CUTOFF;
 	{
 		uint64_t len = insert_count;
 		uint64_t count = 0;
@@ -2817,14 +2987,14 @@ void intro_quick_sort(Itr beg, Itr end) {
 		auto dist2 = distance(tmp.beg, pivot);
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
-			if(dist2 > 32)
+			if(dist2 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
-			if(dist1 > 32)
+			if(dist1 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
 		} else {
-			if(dist1 > 32)
+			if(dist1 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
-			if(dist2 > 32)
+			if(dist2 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
 		}
 	}
@@ -2883,14 +3053,14 @@ void intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 		auto dist2 = distance(tmp.beg, pivot);
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
-			if(dist2 > 32)
+			if(dist2 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
-			if(dist1 > 32)
+			if(dist1 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
 		} else {
-			if(dist1 > 32)
+			if(dist1 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
-			if(dist2 > 32)
+			if(dist2 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
 		}
 	}
@@ -2955,18 +3125,18 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > 32) | (dist2 > 32)) && stlib::is_sorted(tmp.beg, tmp.end + 1)) continue;
+		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stlib::is_sorted(tmp.beg, tmp.end + 1)) continue;
 
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
-			if(dist2 > 32)
+			if(dist2 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
-			if(dist1 > 32)
+			if(dist1 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
 		} else {
-			if(dist1 > 32)
+			if(dist1 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
-			if(dist2 > 32)
+			if(dist2 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
 		}
 	}
@@ -3029,18 +3199,18 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > 32) | (dist2 > 32)) && stlib::is_sorted(tmp.beg, tmp.end + 1, cmp)) continue;
+		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stlib::is_sorted(tmp.beg, tmp.end + 1, cmp)) continue;
 
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
-			if(dist2 > 32)
+			if(dist2 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
-			if(dist1 > 32)
+			if(dist1 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
 		} else {
-			if(dist1 > 32)
+			if(dist1 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
-			if(dist2 > 32)
+			if(dist2 > INSERTION_SORT_CUTOFF)
 				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
 		}
 	}
@@ -3078,3 +3248,4 @@ inline void sort(Itr beg, Itr end, Comp cmp) {
 }
 
 }
+
