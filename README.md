@@ -7,12 +7,12 @@ They have the following characteristics.
 | Name | Inplace | Stable | Average complexity (Big O) | Worst case complexity (Big O) | Stack memory | Additional memory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: |
 | bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1040 | 9225716 |
-| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 161 | 1074187 |
-| binary_insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 205 | 1035926 |
+| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 177 | 758073 |
+| binary_insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 216 | 636183 |
 | inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 260 | 946125 |
 | hybrid_inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 212 | 841530 |
 | zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 89 | 55025 |
-| hybrid_zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 75 | 51888 |
+| hybrid_zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 75 | 49960 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 252 | 30865 |
 | stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 66 | 7012 |
 | quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 52 | 6908 |
@@ -22,7 +22,7 @@ They have the following characteristics.
 | std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 44 | 5421 |
 | hybrid_merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 37 | 5228 |
 | intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 36 | 4894 |
-| adaptive_intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 37 | 4848 |
+| adaptive_intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 37 | 4755 |
 | std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 36 | 4738 |
 
 (All tests with MSVC compiler in release x64)
