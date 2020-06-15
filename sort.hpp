@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------------*\
  |																					|
- | sort.hpp		 																	|
+ | sort.hpp																			|
  |																					|
  | Copyright (c) 2020 Richard Cookman												|
  |																					|
@@ -1144,8 +1144,6 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		Itr pivot;
 		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot)) continue;
 
-		//if there are no swaps then most likely already in order, just finish sorting
-		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -1158,7 +1156,6 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
-			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -1170,16 +1167,12 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
-				++swaps;
 				pivot = right;
 			}
 		}
 
-		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > 1) | (dist2 > 1)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
-
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > 1)
@@ -1218,8 +1211,6 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		Itr pivot;
 		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot)) continue;
 
-		//if there are no swaps then most likely already in order, just finish sorting
-		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -1232,7 +1223,6 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
-			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -1244,16 +1234,12 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
-				++swaps;
 				pivot = right;
 			}
 		}
 
-		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
-
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
@@ -1387,8 +1373,6 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		Itr pivot;
 		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot, cmp)) continue;
 
-		//if there are no swaps then most likely already in order, just finish sorting
-		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -1401,7 +1385,6 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
-			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -1413,16 +1396,12 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
-				++swaps;
 				pivot = right;
 			}
 		}
 
-		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > 1) | (dist2 > 1)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
-
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > 1)
@@ -1461,8 +1440,6 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		Itr pivot;
 		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot, cmp)) continue;
 
-		//if there are no swaps then most likely already in order, just finish sorting
-		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -1475,7 +1452,6 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
-			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -1487,16 +1463,12 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
-				++swaps;
 				pivot = right;
 			}
 		}
 
-		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
-
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
@@ -3091,8 +3063,6 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 		Itr pivot;
 		if(!stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot)) continue;
 
-		//if there are no swaps then most likely already in order, just finish sorting
-		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -3105,7 +3075,6 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 				break;
 
 			std::swap(*left, *right);
-			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -3117,16 +3086,12 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 			//move the pivot into place
 			if(right != pivot) {
 				std::swap(*right, *pivot);
-				++swaps;
 				pivot = right;
 			}
 		}
 
-		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stlib::is_sorted(tmp.beg, tmp.end + 1)) continue;
-
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
@@ -3165,8 +3130,6 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 		Itr pivot;
 		if(!stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp)) continue;
 
-		//if there are no swaps then most likely already in order, just finish sorting
-		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -3179,7 +3142,6 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 				break;
 
 			std::swap(*left, *right);
-			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -3191,16 +3153,12 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 			//move the pivot into place
 			if(right != pivot) {
 				std::swap(*right, *pivot);
-				++swaps;
 				pivot = right;
 			}
 		}
 
-		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
-		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stlib::is_sorted(tmp.beg, tmp.end + 1, cmp)) continue;
-
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
