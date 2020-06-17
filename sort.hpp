@@ -37,9 +37,9 @@ constexpr int INSERTION_SORT_CUTOFF = 32;
 constexpr int HYBRID_INSERTION_SORT_CUTOFF = 16;
 
 template<typename Itr>
-void zip_sort(Itr beg, Itr end);
+void rotate_merge_sort(Itr beg, Itr end);
 template<typename Itr, typename Comp>
-void zip_sort(Itr beg, Itr end, Comp cmp);
+void rotate_merge_sort(Itr beg, Itr end, Comp cmp);
 
 namespace stlib_internal {
 template<typename T>
@@ -325,7 +325,7 @@ void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
 					std::vector<intro_stack_less_data<Itr>>& stk, size_t& idx) {
 	if(depth == 1) {
 		//do O(n log n) zip sort if we have reached the maximum depth
-		zip_sort(beg1, end1);
+		rotate_merge_sort(beg1, end1);
 	} else {
 		intro_stack_less_data<Itr> dat = {
 			beg2,
@@ -342,7 +342,7 @@ void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
 					std::vector<intro_stack_less_data<Itr>>& stk, size_t& idx, Comp cmp) {
 	if(depth == 1) {
 		//do O(n log n) zip sort if we have reached the maximum depth
-		zip_sort(beg1, end1, cmp);
+		rotate_merge_sort(beg1, end1, cmp);
 	} else {
 		intro_stack_less_data<Itr> dat = {
 			beg2,
@@ -1144,6 +1144,8 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		Itr pivot;
 		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot)) continue;
 
+		//if there are no swaps then most likely already in order, just finish sorting
+		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -1156,6 +1158,7 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -1167,12 +1170,16 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
+				++swaps;
 				pivot = right;
 			}
 		}
 
+		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > 1) | (dist2 > 1)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > 1)
@@ -1211,6 +1218,8 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		Itr pivot;
 		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot)) continue;
 
+		//if there are no swaps then most likely already in order, just finish sorting
+		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -1223,6 +1232,7 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -1234,12 +1244,16 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
+				++swaps;
 				pivot = right;
 			}
 		}
 
+		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
@@ -1373,6 +1387,8 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		Itr pivot;
 		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot, cmp)) continue;
 
+		//if there are no swaps then most likely already in order, just finish sorting
+		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -1385,6 +1401,7 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -1396,12 +1413,16 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
+				++swaps;
 				pivot = right;
 			}
 		}
 
+		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > 1) | (dist2 > 1)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > 1)
@@ -1440,6 +1461,8 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		Itr pivot;
 		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot, cmp)) continue;
 
+		//if there are no swaps then most likely already in order, just finish sorting
+		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -1452,6 +1475,7 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -1463,12 +1487,16 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
+				++swaps;
 				pivot = right;
 			}
 		}
 
+		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
@@ -2506,6 +2534,256 @@ void hybrid_inplace_merge_sort(Itr beg, Itr end, Comp cmp) {
 
 namespace stlib_internal {
 template<typename Itr>
+void inner_rotate_merge(Itr beg1, Itr beg2, Itr end2, Itr& out) {
+	//if size == 0 return
+	uint64_t sze = distance(beg1, beg2);
+	if(sze == 0)
+		return;
+
+	//search through the right for the position of the first from the left hand side
+	Itr tmp;
+	bool found = binary_search(beg2, end2, *beg1, tmp);
+	if(found) {
+		//if we are moving in an equal item, move to the left while we are looking at equal items (ensures stable ordering)
+		--tmp;
+		for(; tmp != (beg2 - 1) && equal_func(*beg1, *tmp); --tmp);
+		++tmp;
+	}
+	uint64_t pos = distance(beg2, tmp);
+
+	//rotate so that all of the left is in the correct position
+	stlib_internal::rotate(beg1, beg2, tmp);
+	out = beg1 + pos;
+
+	if(sze == 1) return;
+
+	//call rotate merge on top half of the left side
+	Itr nbeg1_1 = out + sze / 2;
+	Itr nbeg2_1 = out + sze;
+	Itr nend2_1 = end2;
+	Itr nout_1;
+	inner_rotate_merge(nbeg1_1, nbeg2_1, nend2_1, nout_1);
+
+	if(sze >= 2) {
+		//call rotate merge on bottom half of the left side (also advance 1 forward as this is now in the correct place)
+		Itr nbeg1_2 = out + 1;
+		Itr nbeg2_2 = out + sze / 2;
+		Itr nend2_2 = nout_1;
+		Itr nout_2;
+		inner_rotate_merge(nbeg1_2, nbeg2_2, nend2_2, nout_2);
+	}
+}
+template<typename Itr>
+void rotate_merge(Itr beg1, Itr beg2, Itr end2) {
+	//half the left, do this before doing rotate merge (reduces initial rotate cost considerably)
+	uint64_t sze = distance(beg1, beg2);
+	if(sze == 0)
+		return;
+
+	//call rotate merge on top half of the left side
+	Itr nbeg1_1 = beg1 + sze / 2;
+	Itr nbeg2_1 = beg1 + sze;
+	Itr nend2_1 = end2;
+	Itr nout_1;
+	inner_rotate_merge(nbeg1_1, nbeg2_1, nend2_1, nout_1);
+
+	//call rotate merge on bottom half of the left side (also advance 1 forward as this is now in the correct place)
+	Itr nbeg1_2 = beg1;
+	Itr nbeg2_2 = beg1 + sze / 2;
+	Itr nend2_2 = nout_1;
+	Itr nout_2;
+	inner_rotate_merge(nbeg1_2, nbeg2_2, nend2_2, nout_2);
+}
+}
+template<typename Itr>
+void rotate_merge_sort(Itr beg, Itr end) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = 1;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, merge them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do rotate merge
+			stlib_internal::rotate_merge(cleft, cright, cend);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+template<typename Itr>
+void hybrid_rotate_merge_sort(Itr beg, Itr end) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+	//sort small runs with insertion sort before doing merge
+	uint64_t insert_count = INSERTION_SORT_CUTOFF;
+	{
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			insertion_sort(bg, ed);
+			bg = ed;
+		}
+	}
+	if(sze <= insert_count)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = insert_count;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, merge them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do rotate merge
+			stlib_internal::rotate_merge(cleft, cright, cend);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+namespace stlib_internal {
+template<typename Itr, typename Comp>
+void inner_rotate_merge(Itr beg1, Itr beg2, Itr end2, Comp cmp, Itr& out) {
+	//if size == 0 return
+	uint64_t sze = distance(beg1, beg2);
+	if(sze == 0)
+		return;
+
+	//search through the right for the position of the first from the left hand side
+	Itr tmp;
+	bool found = binary_search(beg2, end2, *beg1, cmp, tmp);
+	if(found) {
+		//if we are moving in an equal item, move to the left while we are looking at equal items (ensures stable ordering)
+		--tmp;
+		for(; tmp != (beg2 - 1) && equal_func(*beg1, *tmp, cmp); --tmp);
+		++tmp;
+	}
+	uint64_t pos = distance(beg2, tmp);
+
+	//rotate so that all of the left is in the correct position
+	stlib_internal::rotate(beg1, beg2, tmp);
+	out = beg1 + pos;
+
+	if(sze == 1) return;
+
+	//call rotate merge on top half of the left side
+	Itr nbeg1_1 = out + sze / 2;
+	Itr nbeg2_1 = out + sze;
+	Itr nend2_1 = end2;
+	Itr nout_1;
+	inner_rotate_merge(nbeg1_1, nbeg2_1, nend2_1, cmp, nout_1);
+
+	if(sze >= 2) {
+		//call rotate merge on bottom half of the left side (also advance 1 forward as this is now in the correct place)
+		Itr nbeg1_2 = out + 1;
+		Itr nbeg2_2 = out + sze / 2;
+		Itr nend2_2 = nout_1;
+		Itr nout_2;
+		inner_rotate_merge(nbeg1_2, nbeg2_2, nend2_2, cmp, nout_2);
+	}
+}
+template<typename Itr, typename Comp>
+void rotate_merge(Itr beg1, Itr beg2, Itr end2, Comp cmp) {
+	//half the left, do this before doing rotate merge (reduces initial rotate cost considerably)
+	uint64_t sze = distance(beg1, beg2);
+	if(sze == 0)
+		return;
+
+	//call rotate merge on top half of the left side
+	Itr nbeg1_1 = beg1 + sze / 2;
+	Itr nbeg2_1 = beg1 + sze;
+	Itr nend2_1 = end2;
+	Itr nout_1;
+	inner_rotate_merge(nbeg1_1, nbeg2_1, nend2_1, cmp, nout_1);
+
+	//call rotate merge on bottom half of the left side (also advance 1 forward as this is now in the correct place)
+	Itr nbeg1_2 = beg1;
+	Itr nbeg2_2 = beg1 + sze / 2;
+	Itr nend2_2 = nout_1;
+	Itr nout_2;
+	inner_rotate_merge(nbeg1_2, nbeg2_2, nend2_2, cmp, nout_2);
+}
+}
+template<typename Itr, typename Comp>
+void rotate_merge_sort(Itr beg, Itr end, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = 1;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, merge them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do rotate merge
+			stlib_internal::rotate_merge(cleft, cright, cend, cmp);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+template<typename Itr, typename Comp>
+void hybrid_rotate_merge_sort(Itr beg, Itr end, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+	//sort small runs with insertion sort before doing merge
+	uint64_t insert_count = INSERTION_SORT_CUTOFF;
+	{
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			insertion_sort(bg, ed, cmp);
+			bg = ed;
+		}
+	}
+	if(sze <= insert_count)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = insert_count;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, merge them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do rotate merge
+			stlib_internal::rotate_merge(cleft, cright, cend, cmp);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+
+
+namespace stlib_internal {
+template<typename Itr>
 struct zip_sort_stk_data {
 	bool complete = false;
 	Itr beg;
@@ -3063,6 +3341,8 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 		Itr pivot;
 		if(!stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot)) continue;
 
+		//if there are no swaps then most likely already in order, just finish sorting
+		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -3075,6 +3355,7 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 				break;
 
 			std::swap(*left, *right);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -3086,12 +3367,16 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 			//move the pivot into place
 			if(right != pivot) {
 				std::swap(*right, *pivot);
+				++swaps;
 				pivot = right;
 			}
 		}
 
+		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stlib::is_sorted(tmp.beg, tmp.end + 1)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
@@ -3130,6 +3415,8 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 		Itr pivot;
 		if(!stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp)) continue;
 
+		//if there are no swaps then most likely already in order, just finish sorting
+		unsigned swaps = 0;
 		do {
 			++left;
 			--right;
@@ -3142,6 +3429,7 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 				break;
 
 			std::swap(*left, *right);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -3153,12 +3441,16 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 			//move the pivot into place
 			if(right != pivot) {
 				std::swap(*right, *pivot);
+				++swaps;
 				pivot = right;
 			}
 		}
 
+		//this is already sorted, don't sort any more!
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stlib::is_sorted(tmp.beg, tmp.end + 1, cmp)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
