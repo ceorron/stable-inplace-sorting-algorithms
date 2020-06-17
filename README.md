@@ -608,7 +608,7 @@ Repeat until we have no items left (left buffer or right buffer is empty)
 
 To keep the above algorithm fast the following optimisations are needed.
 
-1. the output buffer preceeds the left buffer.
+1. the output buffer precedes the left buffer.
 
 2. The middle buffer is kept as a cicular list that occupies the space between the left buffer and the right buffers.
 
@@ -620,7 +620,7 @@ These mean the following optimization can be achieved:
 
  - Because only left items are moved into the middle buffer the middle buffer only contains items from the left buffer, so moving the left buffer item to the middle buffer and moving the middle buffer item to the output buffer is O(1) operation. Just swap the item in the left buffer with the item in the middle buffer. This places the top of the middle buffer into the output buffer and the top of the left buffer onto the end of the middle buffer.
 
- - Moving items from the right buffer to the output buffer involves moving items on the left into the middle buffer, at worst this is (1/4 n) operation. This can be optimised further by moving multiple items at once where it is possible to do so.
+ - Moving items from the right buffer to the output buffer involves moving items in the left buffer into the middle buffer, at worst this is (1/4 n) operation. This can be optimised further by moving multiple items at once where it is possible to do so.
 
 A well implemented algorithm does exactly n comparisons, and at the very worst approximately (n * (1/4 * n)) swaps.
 
@@ -628,7 +628,7 @@ The algorithm works very well when the input has a large number of consecutive "
 
 Because a well implemented zip_sort algorithm needs to move items around more than 1 item at a time this means that the algorithm makes use of a smaller ammount of stack allocated "scratch space" for the efficient movement of multiple items between the buffers (specifically from the left buffer to the middle buffer). This is constant in size, as it is set at the larger of (1 x sizeof(T)) or 2048 bytes. This means the algorithm can move (trunc(2048/sizeof(T)) or 1) items in a single iteration.
 
-So long as the algorithm doesn't run out of scratch space (very unlikely), the algorithm achieves exactly (n log n) comparisons, the minimum possible for a comparison sorting algorithm. However the number of swaps remains high to keep all items in-place but are significantly reduced by the efficient management of the 4 buffers.
+So long as the algorithm doesn't run out of scratch space (very unlikely), the algorithm achieves exactly (n log n) comparisons, the minimum possible for a comparison sorting algorithm. However the number of swaps/writes remains high to keep all items in-place but are significantly reduced by the efficient management of the 4 buffers.
 
 zip_sort acheives an incredible O(n log n) average and worst case performance with constant memory through a variety of neat tricks all while acheiving very good runtime performance.
 
