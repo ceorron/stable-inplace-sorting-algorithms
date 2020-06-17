@@ -14,6 +14,8 @@ They have the following characteristics.
 | zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 89 | 55025 |
 | hybrid_zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 75 | 49960 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 252 | 30865 |
+| rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 176 | 21205 |
+| hybrid_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 104 | 18744 |
 | stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 66 | 7012 |
 | quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 52 | 6908 |
 | adaptive_stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 74 | 6714 |
@@ -35,7 +37,7 @@ This is presented for those looking to study some new sorting techniques and who
 
 The idea for merge_sweep_sort and zip_sort came from the idea of using std::rotate as part of a recursive decent sorting algorithm, and so merge_sweep_sort and zip_sort make use of the rotate function. zip_sort came later and was added in May 2020.
 
-merge_sweep_sort gives the best overall performance for an in-place, stable sorting algorithm that uses no additional memory.
+hybrid_rotate_merge_sort gives the best overall performance for an in-place, stable sorting algorithm that uses no additional memory.
 zip_sort gives the best overall performance for an in-place, stable sorting algorithm that uses constant memory space, as well as giving O(n log n) worst case performance.
 
 merge_sweep_sort could be said to be quick_sort like algorithms.
@@ -48,9 +50,12 @@ As of May 2020 we introduced intro_sort, this is an implementation similar to st
 
 Adaptive version of stable_quick_sort and intro_sort use a more complex function for finding a pivot, this has a minor, but non zero, overhead. This is to avoid the probable worst case performance that occurs in quick_sort when the input data is flat (aka many items in the input list are equal) or when the input is already sorted/partially sorted. Meaning these versions of algorithms stable_quick_sort and intro_sort perform much better in scenarios where there are some equal/sorted items in the input list, and so should be prefered, but are otherwise identical to those algorithms.
 
-hybrid_zip_sort and hybrid_merge_sort are both hybird sorting algorithms, combining insertion_sort with their respective algorithms, and as a result are faster variations of zip_sort and merge_sort respectively.
+hybrid_rotate_merge_sort, hybrid_zip_sort and hybrid_merge_sort are hybird sorting algorithms, combining insertion_sort with their respective algorithms, and as a result are faster variations of rotate_merge_sort, zip_sort and merge_sort respectively.
 
 binary_insertion_sort is a re-thought insertion_sort that searches in the sorted part of the list using binary search to find the insertion point. The algorithm is still O(n<sup>2</sup>), best and worst case, but now only does O(n log n) comparisons and so is faster in some cases. NOTE binary_insertion_sort is still slower than insertion_sort when sorting a small number of items.
+
+rotate_merge_sort (and hybrid_rotate_merge_sort), are merge sort like algorithms that use binary search and rotate to merge 2 sorted lists in-place. They are both faster than zip_sort/hybrid_zip_sort and merge_sweep_sort.
+These implementation were inspired by this video https://www.youtube.com/watch?v=AgnSL2ohk2M&t=971s but are simpler implementations of this idea.
 
 inplace_merge_sort and hybrid_inplace_merge_sort were added for comparison with zip_sort and merge_sweep_sort. As the most common in-place merge sort algorithms in use. They have O(n log n) comparisons/time complexity, but perform many more swaps/moves to be efficient when compared with those algorithms.
 
@@ -229,6 +234,50 @@ int main() {
         {
             timer tmr;
             stlib::hybird_inplace_merge_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test rotate merge sort" << std::endl;
+        //test merge sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::rotate_merge_sort(vec.begin(), vec.end());
+        }
+
+        std::cout << "[" << std::endl;
+        for(uint32_t i = 0; i < 700; ++i) {
+            std::cout << "[ " << vec[i] << "], ";
+            if(i > 0 && i % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test hybrid rotate merge sort" << std::endl;
+        //test merge sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < 700; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::hybird_rotate_merge_sort(vec.begin(), vec.end());
         }
 
         std::cout << "[" << std::endl;
