@@ -2552,19 +2552,14 @@ void rotate_merge(Itr beg1, Itr beg2, Itr end2) {
 	if(sze == 0)
 		return;
 
-	//call rotate merge on top half of the left side
-	Itr nbeg1_1 = beg1 + sze / 2;
-	Itr nbeg2_1 = beg1 + sze;
-	Itr nend2_1 = end2;
-	Itr nout_1;
-	inner_rotate_merge(nbeg1_1, nbeg2_1, nend2_1, nout_1);
-
-	//call rotate merge on bottom half of the left side (also advance 1 forward as this is now in the correct place)
-	Itr nbeg1_2 = beg1;
-	Itr nbeg2_2 = beg1 + sze / 2;
-	Itr nend2_2 = nout_1;
-	Itr nout_2;
-	inner_rotate_merge(nbeg1_2, nbeg2_2, nend2_2, nout_2);
+	Itr nout_1 = end2;
+	while(sze > 0) {
+		Itr nbeg1_1 = beg1 + sze / 2;
+		Itr nbeg2_1 = beg1 + sze;
+		Itr nend2_1 = nout_1;
+		inner_rotate_merge(nbeg1_1, nbeg2_1, nend2_1, nout_1);
+		sze /= 2;
+	}
 }
 }
 template<typename Itr>
@@ -2676,19 +2671,14 @@ void rotate_merge(Itr beg1, Itr beg2, Itr end2, Comp cmp) {
 	if(sze == 0)
 		return;
 
-	//call rotate merge on top half of the left side
-	Itr nbeg1_1 = beg1 + sze / 2;
-	Itr nbeg2_1 = beg1 + sze;
-	Itr nend2_1 = end2;
-	Itr nout_1;
-	inner_rotate_merge(nbeg1_1, nbeg2_1, nend2_1, cmp, nout_1);
-
-	//call rotate merge on bottom half of the left side (also advance 1 forward as this is now in the correct place)
-	Itr nbeg1_2 = beg1;
-	Itr nbeg2_2 = beg1 + sze / 2;
-	Itr nend2_2 = nout_1;
-	Itr nout_2;
-	inner_rotate_merge(nbeg1_2, nbeg2_2, nend2_2, cmp, nout_2);
+	Itr nout_1 = end2;
+	while(sze > 0) {
+		Itr nbeg1_1 = beg1 + sze / 2;
+		Itr nbeg2_1 = beg1 + sze;
+		Itr nend2_1 = nout_1;
+		inner_rotate_merge(nbeg1_1, nbeg2_1, nend2_1, cmp, nout_1);
+		sze /= 2;
+	}
 }
 }
 template<typename Itr, typename Comp>
