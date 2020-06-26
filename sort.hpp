@@ -2746,8 +2746,8 @@ void hybrid_rotate_merge_sort(Itr beg, Itr end, Comp cmp) {
 namespace stlib_internal {
 template<typename Itr>
 inline bool needs_middle_reorder(uint64_t movecounttotal, Itr mdlstart, Itr right) {
-	//when the move count is greater equal to twice the middle size then we should re-order
-	//2 times middle size is the estimate for the number of write a rotate would take
+	//when the move count is greater equal to the middle size then we should re-order
+	//middle size is the estimate for the number of write a rotate would take
 	//estimates the best time to reorder to minimise total writes
 	return movecounttotal >= distance(mdlstart, right);
 }
