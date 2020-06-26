@@ -2839,8 +2839,11 @@ void zip_merge(Itr left, Itr right, Itr end) {
 		if((left == mdlstart) | reorder) {
 			//if the left reaches the middle, re-order the middle section so smallest first
 			stlib_internal::rotate(mdlstart, mdltop, right);
-			mdlstart = right;
-			mdltop = right;
+			if(left == mdlstart) {
+				mdlstart = right;
+				mdltop = right;
+			} else
+				mdltop = mdlstart;
 
 			movecounttotal = 0;
 		}
@@ -2884,7 +2887,7 @@ void hybrid_zip_sort(Itr beg, Itr end) {
 	if(sze <= 1)
 		return;
 	//sort small runs with insertion sort before doing merge
-	uint64_t insert_count = INSERTION_SORT_CUTOFF;
+	uint64_t insert_count = 16;
 	{
 		uint64_t len = insert_count;
 		uint64_t count = 0;
@@ -3048,8 +3051,11 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 		if((left == mdlstart) | reorder) {
 			//if the left reaches the middle, re-order the middle section so smallest first
 			stlib_internal::rotate(mdlstart, mdltop, right);
-			mdlstart = right;
-			mdltop = right;
+			if(left == mdlstart) {
+				mdlstart = right;
+				mdltop = right;
+			} else
+				mdltop = mdlstart;
 
 			movecounttotal = 0;
 		}
@@ -3093,7 +3099,7 @@ void hybrid_zip_sort(Itr beg, Itr end, Comp cmp) {
 	if(sze <= 1)
 		return;
 	//sort small runs with insertion sort before doing merge
-	uint64_t insert_count = INSERTION_SORT_CUTOFF;
+	uint64_t insert_count = 16;
 	{
 		uint64_t len = insert_count;
 		uint64_t count = 0;
