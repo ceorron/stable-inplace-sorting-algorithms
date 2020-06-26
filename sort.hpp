@@ -34,7 +34,6 @@
 namespace stlib {
 
 constexpr int INSERTION_SORT_CUTOFF = 32;
-constexpr int HYBRID_INSERTION_SORT_CUTOFF = 16;
 
 template<typename Itr>
 void rotate_merge_sort(Itr beg, Itr end);
@@ -2390,7 +2389,7 @@ void hybrid_inplace_merge_sort(Itr beg, Itr end) {
 	if(sze <= 1)
 		return;
 	//sort small runs with insertion sort before doing merge
-	uint64_t insert_count = HYBRID_INSERTION_SORT_CUTOFF;
+	uint64_t insert_count = INSERTION_SORT_CUTOFF;
 	{
 		uint64_t len = insert_count;
 		uint64_t count = 0;
@@ -2471,7 +2470,7 @@ void hybrid_inplace_merge_sort(Itr beg, Itr end, Comp cmp) {
 	if(sze <= 1)
 		return;
 	//sort small runs with insertion sort before doing merge
-	uint64_t insert_count = HYBRID_INSERTION_SORT_CUTOFF;
+	uint64_t insert_count = INSERTION_SORT_CUTOFF;
 	{
 		uint64_t len = insert_count;
 		uint64_t count = 0;
@@ -2746,6 +2745,13 @@ void hybrid_rotate_merge_sort(Itr beg, Itr end, Comp cmp) {
 
 namespace stlib_internal {
 template<typename Itr>
+inline bool needs_middle_reorder(uint64_t movecounttotal, Itr mdlstart, Itr right) {
+	//when the move count is greater equal to twice the middle size then we should re-order
+	//2 times middle size is the estimate for the number of write a rotate would take
+	//estimates the best time to reorder to minimise total writes
+	return movecounttotal >= distance(mdlstart, right);
+}
+template<typename Itr>
 struct zip_sort_stk_data {
 	bool complete = false;
 	Itr beg;
@@ -2753,8 +2759,8 @@ struct zip_sort_stk_data {
 };
 template<typename Itr>
 void zip_merge(Itr left, Itr right, Itr end) {
-	//the swap beffer, uninitialised memory buffer
-	using valueof = typename stlib::stlib_internal::value_for<Itr>::value_type;
+	//the swap buffer, uninitialised memory buffer
+	using valueof = typename stlib_internal::value_for<Itr>::value_type;
 	constexpr uint16_t buffer_count = (2048/sizeof(valueof) > 0 ? 2048/sizeof(valueof) : 1);
 	alignas(valueof) char bufr[buffer_count * sizeof(valueof)];
 	valueof* swapbufr = (valueof*)bufr;
@@ -2762,8 +2768,10 @@ void zip_merge(Itr left, Itr right, Itr end) {
 	//all of the middle sections
 	Itr mdlstart = right;
 	Itr mdltop = right;
+	uint64_t movecounttotal = 0;
 
 	while((left != right) & (right != end)) {
+		bool reorder = false;
 		if(mdltop != right) {
 			//if we have a middle section test the middle against the right - long run optimisation
 			if(less_func(*right, *mdltop)) {
@@ -2790,6 +2798,7 @@ void zip_merge(Itr left, Itr right, Itr end) {
 					//move in the new data
 					for(uint16_t i = 0; i < count; ++i, ++mdltop)
 						construct(*mdltop, std::move(swapbufr[i]));
+					movecounttotal += count;
 
 					if((count >= buffer_count) | (left == mdlstart) | (right == end))
 						//if we exit because we reach the end of the input we can move across
@@ -2798,9 +2807,14 @@ void zip_merge(Itr left, Itr right, Itr end) {
 						//swap the middle with the left
 						std::swap(*left, *mdltop);
 						++mdltop;
-						if(mdltop == right)
+						if(mdltop == right) {
 							mdltop = mdlstart;
+							movecounttotal = 0;
+						}
 					}
+
+					//test for reorder optimisation, reorder when it is most optimal to do so to reduce the total number of write
+					reorder = (mdltop != mdlstart && needs_middle_reorder(movecounttotal, mdlstart, right));
 				} else {
 					std::swap(*left, *right);
 					++right;
@@ -2808,8 +2822,10 @@ void zip_merge(Itr left, Itr right, Itr end) {
 			} else {
 				std::swap(*left, *mdltop);
 				++mdltop;
-				if(mdltop == right)
+				if(mdltop == right) {
 					mdltop = mdlstart;
+					movecounttotal = 0;
+				}
 			}
 		} else {
 			//test the right against the left
@@ -2820,11 +2836,13 @@ void zip_merge(Itr left, Itr right, Itr end) {
 		}
 
 		++left;
-		if(left == mdlstart) {
+		if((left == mdlstart) | reorder) {
 			//if the left reaches the middle, re-order the middle section so smallest first
 			stlib_internal::rotate(mdlstart, mdltop, right);
 			mdlstart = right;
 			mdltop = right;
+
+			movecounttotal = 0;
 		}
 	}
 
@@ -2866,7 +2884,7 @@ void hybrid_zip_sort(Itr beg, Itr end) {
 	if(sze <= 1)
 		return;
 	//sort small runs with insertion sort before doing merge
-	uint64_t insert_count = HYBRID_INSERTION_SORT_CUTOFF;
+	uint64_t insert_count = INSERTION_SORT_CUTOFF;
 	{
 		uint64_t len = insert_count;
 		uint64_t count = 0;
@@ -2950,8 +2968,8 @@ void zip_sort_rec2(Itr beg, Itr end) {
 namespace stlib_internal {
 template<typename Itr, typename Comp>
 void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
-	//the swap beffer, uninitialised memory buffer
-	using valueof = typename stlib::stlib_internal::value_for<Itr>::value_type;
+	//the swap buffer, uninitialised memory buffer
+	using valueof = typename stlib_internal::value_for<Itr>::value_type;
 	constexpr uint16_t buffer_count = (2048/sizeof(valueof) > 0 ? 2048/sizeof(valueof) : 1);
 	alignas(valueof) char bufr[buffer_count * sizeof(valueof)];
 	valueof* swapbufr = (valueof*)bufr;
@@ -2959,8 +2977,10 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 	//all of the middle sections
 	Itr mdlstart = right;
 	Itr mdltop = right;
+	uint64_t movecounttotal = 0;
 
 	while((left != right) & (right != end)) {
+		bool reorder = false;
 		if(mdltop != right) {
 			//if we have a middle section test the middle against the right - long run optimisation
 			if(less_func(*right, *mdltop, cmp)) {
@@ -2987,6 +3007,7 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 					//move in the new data
 					for(uint16_t i = 0; i < count; ++i, ++mdltop)
 						construct(*mdltop, std::move(swapbufr[i]));
+					movecounttotal += count;
 
 					if((count >= buffer_count) | (left == mdlstart) | (right == end))
 						//if we exit because we reach the end of the input we can move across
@@ -2995,9 +3016,14 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 						//swap the middle with the left
 						std::swap(*left, *mdltop);
 						++mdltop;
-						if(mdltop == right)
+						if(mdltop == right) {
 							mdltop = mdlstart;
+							movecounttotal = 0;
+						}
 					}
+
+					//test for reorder optimisation, reorder when it is most optimal to do so to reduce the total number of write
+					reorder = (mdltop != mdlstart && needs_middle_reorder(movecounttotal, mdlstart, right));
 				} else {
 					std::swap(*left, *right);
 					++right;
@@ -3005,23 +3031,27 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 			} else {
 				std::swap(*left, *mdltop);
 				++mdltop;
-				if(mdltop == right)
+				if(mdltop == right) {
 					mdltop = mdlstart;
+					movecounttotal = 0;
+				}
 			}
 		} else {
 			//test the right against the left
-			if(less_func(*right, *left, cmp)) {
+			if(less_func(*right, *left)) {
 				std::swap(*left, *right);
 				++right;
 			}
 		}
 
 		++left;
-		if(left == mdlstart) {
+		if((left == mdlstart) | reorder) {
 			//if the left reaches the middle, re-order the middle section so smallest first
 			stlib_internal::rotate(mdlstart, mdltop, right);
 			mdlstart = right;
 			mdltop = right;
+
+			movecounttotal = 0;
 		}
 	}
 
@@ -3063,7 +3093,7 @@ void hybrid_zip_sort(Itr beg, Itr end, Comp cmp) {
 	if(sze <= 1)
 		return;
 	//sort small runs with insertion sort before doing merge
-	uint64_t insert_count = HYBRID_INSERTION_SORT_CUTOFF;
+	uint64_t insert_count = INSERTION_SORT_CUTOFF;
 	{
 		uint64_t len = insert_count;
 		uint64_t count = 0;
