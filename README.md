@@ -11,8 +11,8 @@ They have the following characteristics.
 | hybrid_inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 212 | 841530 |
 | insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 177 | 758073 |
 | binary_insertion_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 216 | 636183 |
-| zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 89 | 55025 |
-| hybrid_zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 75 | 49960 |
+| zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 91 | 53456 |
+| hybrid_zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 73 | 51774 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 252 | 30865 |
 | rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 176 | 21205 |
 | hybrid_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 104 | 18744 |
@@ -621,8 +621,10 @@ These mean the following optimization can be achieved:
  - Because only left items are moved into the middle buffer the middle buffer only contains items from the left buffer, so moving the left buffer item to the middle buffer and moving the middle buffer item to the output buffer is O(1) operation. Just swap the item in the left buffer with the item in the middle buffer. This places the top of the middle buffer into the output buffer and the top of the left buffer onto the end of the middle buffer.
 
  - Moving items from the right buffer to the output buffer involves moving items in the left buffer into the middle buffer, at worst this is (1/4 n) operation. This can be optimised further by moving multiple items at once where it is possible to do so.
+ 
+ - Also because the middle buffer is kept as a cicular list, the middle buffer can be reordered with a rotate operation at any time. This means that by reordering the middle buffer the algorithm can reduce the total number of writes to the middle buffer. The version implemented opts to reorder the middle buffer when the total middle buffer write count exceeds the number of items in the middle buffer, this is close to the optimal time for reordering the middle buffer to reduce the number of total writes.
 
-A well implemented algorithm does exactly n comparisons, and at the very worst approximately (n * (1/4 * n)) swaps.
+A well implemented algorithm does exactly n comparisons, and at the very worst approximately (n * (1/4 * n)) swaps but due to the above optimisations the total number of swaps will be much less.
 
 The algorithm works very well when the input has a large number of consecutive "runs" on either the left or right sides as these operations take exactly O(n) for the length of the run. Typically this happens rarely in random data (runs are generally 2 or 3 long, on average, in our tests) but in real world data runs can often be much longer.
 
