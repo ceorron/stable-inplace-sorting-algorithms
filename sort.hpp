@@ -3038,7 +3038,7 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 			}
 		} else {
 			//test the right against the left
-			if(less_func(*right, *left)) {
+			if(less_func(*right, *left, cmp)) {
 				std::swap(*left, *right);
 				++right;
 			}
