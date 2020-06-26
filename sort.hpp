@@ -2001,7 +2001,7 @@ void merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 		//which way are we copying this?
 		if(first) {
 			T* bufbeg = buf;
-			T* bufend = bfrend;
+			//T* bufend = bfrend;
 			while(pos + len < sze) {
 				//make the two halves
 				Itr cleft = beg + pos;
@@ -2019,7 +2019,7 @@ void merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 			}
 		} else {
 			Itr bufbeg = beg;
-			Itr bufend = end;
+			//Itr bufend = end;
 			while(pos + len < sze) {
 				//make the two halves
 				T* cleft = buf + pos;
@@ -2091,7 +2091,7 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 		//which way are we copying this?
 		if(first) {
 			T* bufbeg = buf;
-			T* bufend = bfrend;
+			//T* bufend = bfrend;
 			while(pos + len < sze) {
 				//make the two halves
 				Itr cleft = beg + pos;
@@ -2109,7 +2109,7 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 			}
 		} else {
 			Itr bufbeg = beg;
-			Itr bufend = end;
+			//Itr bufend = end;
 			while(pos + len < sze) {
 				//make the two halves
 				T* cleft = buf + pos;
@@ -2187,7 +2187,7 @@ void merge_sort_internal(Itr beg, Itr end, T* buf) {
 		//which way are we copying this?
 		if(first) {
 			T* bufbeg = buf;
-			T* bufend = bfrend;
+			//T* bufend = bfrend;
 			while(pos + len < sze) {
 				//make the two halves
 				Itr cleft = beg + pos;
@@ -2205,7 +2205,7 @@ void merge_sort_internal(Itr beg, Itr end, T* buf) {
 			}
 		} else {
 			Itr bufbeg = beg;
-			Itr bufend = end;
+			//Itr bufend = end;
 			while(pos + len < sze) {
 				//make the two halves
 				T* cleft = buf + pos;
@@ -2277,7 +2277,7 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf) {
 		//which way are we copying this?
 		if(first) {
 			T* bufbeg = buf;
-			T* bufend = bfrend;
+			//T* bufend = bfrend;
 			while(pos + len < sze) {
 				//make the two halves
 				Itr cleft = beg + pos;
@@ -2295,7 +2295,7 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf) {
 			}
 		} else {
 			Itr bufbeg = beg;
-			Itr bufend = end;
+			//Itr bufend = end;
 			while(pos + len < sze) {
 				//make the two halves
 				T* cleft = buf + pos;
