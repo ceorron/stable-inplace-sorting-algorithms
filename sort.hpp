@@ -2749,7 +2749,7 @@ inline bool needs_middle_reorder(uint64_t movecounttotal, Itr mdlstart, Itr righ
 	//when the move count is greater equal to the middle size then we should re-order
 	//middle size is the estimate for the number of write a rotate would take
 	//estimates the best time to reorder to minimise total writes
-	return movecounttotal >= distance(mdlstart, right);
+	return movecounttotal >= (uint64_t)distance(mdlstart, right);
 }
 template<typename Itr>
 struct zip_sort_stk_data {
