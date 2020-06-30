@@ -53,5 +53,45 @@ bool greater_equal_func_bool(const bool less) {
 	return !less;
 }
 
+zip_merge_indexes& get_current_indexes(zip_merge_indexes* indexes, unsigned indexes_end) {
+	if(indexes_end == 0)
+		return indexes[NEW_ZIP_SORT_INDEX_ARRAY_SIZE - 1];
+	return indexes[indexes_end - 1];
+}
+void pop_indexes_count(zip_merge_indexes* indexes,
+					   unsigned& indexes_start) {
+	--indexes[indexes_start].count;
+	if(indexes[indexes_start].count == 0) {
+		++indexes_start;
+		if(indexes_start == NEW_ZIP_SORT_INDEX_ARRAY_SIZE)
+			indexes_start = 0;
+	}
+}
+void push_indexes_count(unsigned idx, unsigned count,
+						zip_merge_indexes* indexes,
+						unsigned& indexes_end) {
+	//increment the current index
+	zip_merge_indexes& crnt = get_current_indexes(indexes, indexes_end);
+	if(crnt.index == idx) {
+		crnt.count += count;
+		return;
+	}
+
+	//add a new index
+	indexes[indexes_end].index = idx;
+	indexes[indexes_end].count = count;
+	++indexes_end;
+	if(indexes_end == NEW_ZIP_SORT_INDEX_ARRAY_SIZE)
+		indexes_end = 0;
+}
+unsigned calculate_index_total(unsigned indexes_start, unsigned indexes_end) {
+	if(indexes_start <= indexes_end)
+		return indexes_end - indexes_start;
+	return NEW_ZIP_SORT_INDEX_ARRAY_SIZE - (indexes_start - indexes_end);
+}
+bool indexes_full(unsigned indexes_start, unsigned indexes_end) {
+	return NEW_ZIP_SORT_INDEX_ARRAY_SIZE - calculate_index_total(indexes_start, indexes_end) <= 1;
+}
+
 }
 }
