@@ -3210,7 +3210,7 @@ void new_zip_sort_do_merge(Itr left, Itr right, Itr end, NEW_ZIP_MERGE_KIND kind
 		rotate_merge(left, right, end);
 		break;
 	case NEW_ZIP_MERGE_KIND::NZMK_INPLACE_MERGE:
-		inplace_merge(left, right, end);
+		stlib_internal::inplace_merge(left, right, end);
 		break;
 	default:
 		zip_merge(left, right, end);
@@ -3643,7 +3643,7 @@ void new_zip_sort_do_merge(Itr left, Itr right, Itr end, Comp cmp, NEW_ZIP_MERGE
 		rotate_merge(left, right, end, cmp);
 		break;
 	case NEW_ZIP_MERGE_KIND::NZMK_INPLACE_MERGE:
-		inplace_merge(left, right, end, cmp);
+		stlib_internal::inplace_merge(left, right, end, cmp);
 		break;
 	default:
 		zip_merge(left, right, end, cmp);
