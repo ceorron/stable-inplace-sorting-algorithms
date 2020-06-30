@@ -3157,9 +3157,10 @@ enum class NEW_ZIP_MERGE_KIND : uint8_t {
 	NZMK_RECURSIVE,
 	//possibly slightly faster than above
 	NZMK_ROTATE_MERGE,
-	//slower than both of the above options (NZMK_INPLACE_MERGE + NZMK_CONSTANT_MEM)
+	//slower than both of the above options, gives constant memory usage
 	NZMK_INPLACE_MERGE,
-	NZMK_CONSTANT_MEM
+	//calls older zip_merge, gives constant memory usage
+	NZMK_ZIP_MERGE
 };
 namespace stlib_internal {
 template<typename Itr>
@@ -3208,8 +3209,11 @@ void new_zip_sort_do_merge(Itr left, Itr right, Itr end, NEW_ZIP_MERGE_KIND kind
 	case NEW_ZIP_MERGE_KIND::NZMK_ROTATE_MERGE:
 		rotate_merge(left, right, end);
 		break;
+	case NEW_ZIP_MERGE_KIND::NZMK_INPLACE_MERGE:
+		inplace_merge(left, right, end);
+		break;
 	default:
-		stlib_internal::inplace_merge(left, right, end);
+		zip_merge(left, right, end);
 		break;
 	}
 }
@@ -3638,8 +3642,11 @@ void new_zip_sort_do_merge(Itr left, Itr right, Itr end, Comp cmp, NEW_ZIP_MERGE
 	case NEW_ZIP_MERGE_KIND::NZMK_ROTATE_MERGE:
 		rotate_merge(left, right, end, cmp);
 		break;
+	case NEW_ZIP_MERGE_KIND::NZMK_INPLACE_MERGE:
+		inplace_merge(left, right, end, cmp);
+		break;
 	default:
-		stlib_internal::inplace_merge(left, right, end, cmp);
+		zip_merge(left, right, end, cmp);
 		break;
 	}
 }
