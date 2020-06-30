@@ -3349,9 +3349,14 @@ void reorder_middle_sections(zip_merge_section<Itr>* sections,
 }
 template<typename Itr>
 void new_zip_merge(Itr left, Itr right, Itr end, NEW_ZIP_MERGE_KIND kind, bool stable, int max_move) {
+	using valueof = typename stlib::stlib_internal::value_for<Itr>::value_type;
+	constexpr uint16_t buffer_count = (2048/sizeof(valueof) > 0 ? 2048/sizeof(valueof) : 1);
+	alignas(valueof) char bufr[buffer_count * sizeof(valueof)];
+	valueof* swapbufr = (valueof*)bufr;
+
 	// data for all of the middle sections
-	alignas(zip_merge_section<Itr>) char bufr[sizeof(zip_merge_section<Itr>) * NEW_ZIP_SORT_ARRAY_SIZE];
-	zip_merge_section<Itr>* sections = (zip_merge_section<Itr>*)bufr;
+	alignas(zip_merge_section<Itr>) char bufr2[sizeof(zip_merge_section<Itr>) * NEW_ZIP_SORT_ARRAY_SIZE];
+	zip_merge_section<Itr>* sections = (zip_merge_section<Itr>*)bufr2;
 	zip_merge_indexes indexes[NEW_ZIP_SORT_INDEX_ARRAY_SIZE];
 	unsigned sec_pos = 0;
 	unsigned indexes_start = 0;
@@ -3364,33 +3369,56 @@ void new_zip_merge(Itr left, Itr right, Itr end, NEW_ZIP_MERGE_KIND kind, bool s
 			if(less_func(*right, *sections[idx].mdltop)) {
 				// right is less than the left
 				// copy out the left, move in the right
-				typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*left);
+				unsigned count = 0;
+				construct(swapbufr[count++], std::move(*left));
 				construct(*left, std::move(*right));
 
 				Itr right_pos = right;
 				if(sections[sec_pos - 1].mdlstart == sections[sec_pos - 1].mdltop) {
 					// if possible add the right to the end section
-					construct(*right, std::move(val));
+					construct(*right, std::move(swapbufr[0]));
 
-					//always push before pop to prevent invalid circular queue
+					//push count
 					push_indexes_count(sec_pos - 1, 1,
 									   indexes,
 									   indexes_end);
 				} else if(distance(sections[sec_pos - 1].mdltop, right) < max_move) {
 					// small list optimisation
 					// if possible to add to the end of last
-					// move everything right by one
-					for( ; right_pos != sections[sec_pos - 1].mdltop; --right_pos)
-						construct(*right_pos, std::move(*(right_pos - 1)));
-					construct(*right_pos, std::move(val));
-					++sections[sec_pos - 1].mdltop;
+					++right;
+					++left;
+					while(((count < buffer_count) & (left != leftend) & (right != end)) && less_func(*right, *sections[idx].mdltop)) {
+						construct(swapbufr[count++], std::move(*left));
+						construct(*left, std::move(*right));
+						++right;
+						++left;
+					}
 
-					//always push before pop to prevent invalid circular queue
-					push_indexes_count(sec_pos - 1, 1,
+					//move the new smallest into the correct place in the middle section
+					//move the middle section right
+					Itr mdlend = right;
+					Itr mdl = mdlend - count;
+					do {
+						--mdlend;
+						--mdl;
+						construct(*mdlend, std::move(*mdl));
+					} while(mdl != sections[sec_pos - 1].mdltop);
+
+					//move in the new data
+					for(uint16_t i = 0; i < count; ++i, ++sections[sec_pos - 1].mdltop)
+						construct(*sections[sec_pos - 1].mdltop, std::move(swapbufr[i]));
+					right_pos = sections[sec_pos - 1].mdltop - 1;
+
+					//push count
+					push_indexes_count(sec_pos - 1, count,
 									   indexes,
 									   indexes_end);
+
+					//go back one - accounts for future changes
+					--left;
+					--right;
 				} else {
-					construct(*right, std::move(val));
+					construct(*right, std::move(swapbufr[0]));
 					// create a new end section
 					construct(sections[sec_pos].mdltop, right);
 					construct(sections[sec_pos].mdlstart, right);
@@ -3406,8 +3434,7 @@ void new_zip_merge(Itr left, Itr right, Itr end, NEW_ZIP_MERGE_KIND kind, bool s
 
 				// if this is stable we have things avaliable on the left and
 				if(stable && distance(left, leftend) > 1 && equal_func(*(left + 1), *right_pos)) {
-					Itr tmp = left;
-					++tmp; ++tmp;
+					Itr tmp = left + 2;
 					unsigned count = 1;
 					unsigned idx = sec_pos - 1;
 
@@ -3752,9 +3779,14 @@ void reorder_middle_sections(zip_merge_section<Itr>* sections,
 }
 template<typename Itr, typename Comp>
 void new_zip_merge(Itr left, Itr right, Itr end, Comp cmp, NEW_ZIP_MERGE_KIND kind, bool stable, int max_move) {
+	using valueof = typename stlib::stlib_internal::value_for<Itr>::value_type;
+	constexpr uint16_t buffer_count = (2048/sizeof(valueof) > 0 ? 2048/sizeof(valueof) : 1);
+	alignas(valueof) char bufr[buffer_count * sizeof(valueof)];
+	valueof* swapbufr = (valueof*)bufr;
+
 	// data for all of the middle sections
-	alignas(zip_merge_section<Itr>) char bufr[sizeof(zip_merge_section<Itr>) * NEW_ZIP_SORT_ARRAY_SIZE];
-	zip_merge_section<Itr>* sections = (zip_merge_section<Itr>*)bufr;
+	alignas(zip_merge_section<Itr>) char bufr2[sizeof(zip_merge_section<Itr>) * NEW_ZIP_SORT_ARRAY_SIZE];
+	zip_merge_section<Itr>* sections = (zip_merge_section<Itr>*)bufr2;
 	zip_merge_indexes indexes[NEW_ZIP_SORT_INDEX_ARRAY_SIZE];
 	unsigned sec_pos = 0;
 	unsigned indexes_start = 0;
@@ -3767,33 +3799,56 @@ void new_zip_merge(Itr left, Itr right, Itr end, Comp cmp, NEW_ZIP_MERGE_KIND ki
 			if(less_func(*right, *sections[idx].mdltop, cmp)) {
 				// right is less than the left
 				// copy out the left, move in the right
-				typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*left);
+				unsigned count = 0;
+				construct(swapbufr[count++], std::move(*left));
 				construct(*left, std::move(*right));
 
 				Itr right_pos = right;
 				if(sections[sec_pos - 1].mdlstart == sections[sec_pos - 1].mdltop) {
 					// if possible add the right to the end section
-					construct(*right, std::move(val));
+					construct(*right, std::move(swapbufr[0]));
 
-					//always push before pop to prevent invalid circular queue
+					//push count
 					push_indexes_count(sec_pos - 1, 1,
 									   indexes,
 									   indexes_end);
 				} else if(distance(sections[sec_pos - 1].mdltop, right) < max_move) {
 					// small list optimisation
 					// if possible to add to the end of last
-					// move everything right by one
-					for( ; right_pos != sections[sec_pos - 1].mdltop; --right_pos)
-						construct(*right_pos, std::move(*(right_pos - 1)));
-					construct(*right_pos, std::move(val));
-					++sections[sec_pos - 1].mdltop;
+					++right;
+					++left;
+					while(((count < buffer_count) & (left != leftend) & (right != end)) && less_func(*right, *sections[idx].mdltop, cmp)) {
+						construct(swapbufr[count++], std::move(*left));
+						construct(*left, std::move(*right));
+						++right;
+						++left;
+					}
 
-					//always push before pop to prevent invalid circular queue
-					push_indexes_count(sec_pos - 1, 1,
+					//move the new smallest into the correct place in the middle section
+					//move the middle section right
+					Itr mdlend = right;
+					Itr mdl = mdlend - count;
+					do {
+						--mdlend;
+						--mdl;
+						construct(*mdlend, std::move(*mdl));
+					} while(mdl != sections[sec_pos - 1].mdltop);
+
+					//move in the new data
+					for(uint16_t i = 0; i < count; ++i, ++sections[sec_pos - 1].mdltop)
+						construct(*sections[sec_pos - 1].mdltop, std::move(swapbufr[i]));
+					right_pos = sections[sec_pos - 1].mdltop - 1;
+
+					//push count
+					push_indexes_count(sec_pos - 1, count,
 									   indexes,
 									   indexes_end);
+
+					//go back one - accounts for future changes
+					--left;
+					--right;
 				} else {
-					construct(*right, std::move(val));
+					construct(*right, std::move(swapbufr[0]));
 					// create a new end section
 					construct(sections[sec_pos].mdltop, right);
 					construct(sections[sec_pos].mdlstart, right);
@@ -3809,8 +3864,7 @@ void new_zip_merge(Itr left, Itr right, Itr end, Comp cmp, NEW_ZIP_MERGE_KIND ki
 
 				// if this is stable we have things avaliable on the left and
 				if(stable && distance(left, leftend) > 1 && equal_func(*(left + 1), *right_pos, cmp)) {
-					Itr tmp = left;
-					++tmp; ++tmp;
+					Itr tmp = left + 2;
 					unsigned count = 1;
 					unsigned idx = sec_pos - 1;
 
