@@ -35,6 +35,15 @@ namespace stlib {
 
 constexpr int INSERTION_SORT_CUTOFF = 32;
 
+constexpr int NEW_ZIP_SORT_ARRAY_SIZE = 64;
+constexpr int NEW_ZIP_SORT_INDEX_ARRAY_SIZE = 7000;
+
+//general distance function for pointers
+template<typename U>
+inline ptrdiff_t distance(U* first, U* last) {
+	return last - first;
+}
+
 template<typename Itr>
 void rotate_merge_sort(Itr beg, Itr end);
 template<typename Itr, typename Comp>
@@ -55,8 +64,18 @@ struct value_for<T*> {
 
 template<typename T>
 void construct(T& lhs, T&& rhs) {
-	//just call placement new
+	//call placement new
 	new (&lhs) T(std::move(rhs));
+}
+template<typename T>
+void construct(T& lhs, T& rhs) {
+	//call placement new
+	new (&lhs) T(rhs);
+}
+template<typename T>
+void destruct(T& val) {
+	//call destructor
+	val.~T();
 }
 
 //some function abstractions, only use less than operator
@@ -414,33 +433,17 @@ bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out) {
 	bool first_last = less_func(*first, *last);
 
 	//if two of them are the same then choose the other one
-	if(equal_func_bool(first_middle, middle_first) && !equal_func_bool(middle_last, last_middle)) {
+	if(equal_func_bool(first_middle, middle_first) & !equal_func_bool(middle_last, last_middle)) {
 		out = last;
 		return true;
 	}
-	if(equal_func_bool(middle_last, last_middle) && !equal_func_bool(first_middle, middle_first)) {
+	if(equal_func_bool(middle_last, last_middle) & !equal_func_bool(first_middle, middle_first)) {
 		out = first;
 		return true;
 	}
-	if(equal_func_bool(last_first, first_last) && !equal_func_bool(middle_last, last_middle)) {
+	if(equal_func_bool(last_first, first_last) & !equal_func_bool(middle_last, last_middle)) {
 		out = middle;
 		return true;
-	}
-
-	//test for sorted ordering
-	if(less_equal_func_bool(last_first) && less_equal_func_bool(middle_first) && less_equal_func_bool(last_middle) && stlib::is_sorted(first, last + 1)) {
-		//if the first is less than the last
-		//first is less equal to middle
-		//middle is less equal to last
-		return false;
-	}
-	//test for reverse ordering
-	if(greater_func_bool(last_first) && greater_equal_func_bool(first_middle) && greater_equal_func_bool(middle_last) && stlib::is_reverse_sorted(first, last + 1)) {
-		//if the first is greater than the last
-		//first is greater equal to middle
-		//middle is greater equal to last
-		std::reverse(first, last + 1);
-		return false;
 	}
 
 	//choose the middle one
@@ -479,33 +482,17 @@ bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out, Comp cmp) {
 	bool first_last = less_func(*first, *last, cmp);
 
 	//if two of them are the same then choose the other one
-	if(equal_func_bool(first_middle, middle_first) && !equal_func_bool(middle_last, last_middle)) {
+	if(equal_func_bool(first_middle, middle_first) & !equal_func_bool(middle_last, last_middle)) {
 		out = last;
 		return true;
 	}
-	if(equal_func_bool(middle_last, last_middle) && !equal_func_bool(first_middle, middle_first)) {
+	if(equal_func_bool(middle_last, last_middle) & !equal_func_bool(first_middle, middle_first)) {
 		out = first;
 		return true;
 	}
-	if(equal_func_bool(last_first, first_last) && !equal_func_bool(middle_last, last_middle)) {
+	if(equal_func_bool(last_first, first_last) & !equal_func_bool(middle_last, last_middle)) {
 		out = middle;
 		return true;
-	}
-
-	//test for sorted ordering
-	if(less_equal_func_bool(last_first) && less_equal_func_bool(middle_first) && less_equal_func_bool(last_middle) && stlib::is_sorted(first, last + 1, cmp)) {
-		//if the first is less than the last
-		//first is less equal to middle
-		//middle is less equal to last
-		return false;
-	}
-	//test for reverse ordering
-	if(greater_func_bool(last_first) && greater_equal_func_bool(first_middle) && greater_equal_func_bool(middle_last) && stlib::is_reverse_sorted(first, last + 1, cmp)) {
-		//if the first is greater than the last
-		//first is greater equal to middle
-		//middle is greater equal to last
-		std::reverse(first, last + 1);
-		return false;
 	}
 
 	//choose the middle one
@@ -544,35 +531,17 @@ bool stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begi
 	bool first_last = stable_quick_sort_less_func(beg, first, last, begidx);
 
 	//if two of them are the same then choose the other one
-	if(equal_func_bool(first_middle, middle_first) && !equal_func_bool(middle_last, last_middle)) {
+	if(equal_func_bool(first_middle, middle_first) & !equal_func_bool(middle_last, last_middle)) {
 		out = last;
 		return true;
 	}
-	if(equal_func_bool(middle_last, last_middle) && !equal_func_bool(first_middle, middle_first)) {
+	if(equal_func_bool(middle_last, last_middle) & !equal_func_bool(first_middle, middle_first)) {
 		out = first;
 		return true;
 	}
-	if(equal_func_bool(last_first, first_last) && !equal_func_bool(middle_last, last_middle)) {
+	if(equal_func_bool(last_first, first_last) & !equal_func_bool(middle_last, last_middle)) {
 		out = middle;
 		return true;
-	}
-
-	//test for sorted ordering
-	if(less_equal_func_bool(last_first) && less_equal_func_bool(middle_first) && less_equal_func_bool(last_middle) &&
-	   stable_quick_sort_is_sorted(beg, first, last + 1, begidx)) {
-		//if the first is less than the last
-		//first is less equal to middle
-		//middle is less equal to last
-		return false;
-	}
-	//test for reverse ordering
-	if(greater_func_bool(last_first) && greater_equal_func_bool(first_middle) && greater_equal_func_bool(middle_last) &&
-	   stable_quick_sort_is_reverse_sorted(beg, first, last + 1, begidx)) {
-		//if the first is greater than the last
-		//first is greater equal to middle
-		//middle is greater equal to last
-		std::reverse(first, last + 1);
-		return false;
 	}
 
 	//choose the middle one
@@ -611,35 +580,17 @@ bool stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begi
 	bool first_last = stable_quick_sort_less_func(beg, first, last, begidx, cmp);
 
 	//if two of them are the same then choose the other one
-	if(equal_func_bool(first_middle, middle_first) && !equal_func_bool(middle_last, last_middle)) {
+	if(equal_func_bool(first_middle, middle_first) & !equal_func_bool(middle_last, last_middle)) {
 		out = last;
 		return true;
 	}
-	if(equal_func_bool(middle_last, last_middle) && !equal_func_bool(first_middle, middle_first)) {
+	if(equal_func_bool(middle_last, last_middle) & !equal_func_bool(first_middle, middle_first)) {
 		out = first;
 		return true;
 	}
-	if(equal_func_bool(last_first, first_last) && !equal_func_bool(middle_last, last_middle)) {
+	if(equal_func_bool(last_first, first_last) & !equal_func_bool(middle_last, last_middle)) {
 		out = middle;
 		return true;
-	}
-
-	//test for sorted ordering
-	if(less_equal_func_bool(last_first) && less_equal_func_bool(middle_first) && less_equal_func_bool(last_middle) &&
-	   stable_quick_sort_is_sorted(beg, first, last + 1, begidx, cmp)) {
-		//if the first is less than the last
-		//first is less equal to middle
-		//middle is less equal to last
-		return false;
-	}
-	//test for reverse ordering
-	if(greater_func_bool(last_first) && greater_equal_func_bool(first_middle) && greater_equal_func_bool(middle_last) &&
-	   stable_quick_sort_is_reverse_sorted(beg, first, last + 1, begidx, cmp)) {
-		//if the first is greater than the last
-		//first is greater equal to middle
-		//middle is greater equal to last
-		std::reverse(first, last + 1);
-		return false;
 	}
 
 	//choose the middle one
@@ -1141,6 +1092,7 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
+		unsigned swaps = 0;
 		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot)) continue;
 
 		do {
@@ -1155,6 +1107,7 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -1166,12 +1119,15 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
+				++swaps;
 				pivot = right;
 			}
 		}
 
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > 1) | (dist2 > 1)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > 1)
@@ -1208,6 +1164,7 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
+		unsigned swaps = 0;
 		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot)) continue;
 
 		do {
@@ -1222,6 +1179,7 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -1233,12 +1191,15 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
+				++swaps;
 				pivot = right;
 			}
 		}
 
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
@@ -1370,6 +1331,7 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
+		unsigned swaps = 0;
 		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot, cmp)) continue;
 
 		do {
@@ -1384,6 +1346,7 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -1395,12 +1358,15 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
+				++swaps;
 				pivot = right;
 			}
 		}
 
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > 1) | (dist2 > 1)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > 1)
@@ -1437,6 +1403,7 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
+		unsigned swaps = 0;
 		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot, cmp)) continue;
 
 		do {
@@ -1451,6 +1418,7 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 				break;
 
 			stable_quick_sort_swap(beg, left, right, begidx);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -1462,12 +1430,15 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 			//move the pivot into place
 			if(right != pivot) {
 				stable_quick_sort_swap(beg, right, pivot, begidx);
+				++swaps;
 				pivot = right;
 			}
 		}
 
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stable_quick_sort_is_sorted(beg, tmp.beg, tmp.end + 1, begidx, cmp)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
@@ -3181,6 +3152,861 @@ void zip_sort_rec2(Itr beg, Itr end, Comp cmp) {
 }
 
 
+
+enum class NEW_ZIP_MERGE_KIND : uint8_t {
+	NZMK_RECURSIVE,
+	//possibly slightly faster than above
+	NZMK_ROTATE_MERGE,
+	//slower than both of the above options (NZMK_INPLACE_MERGE + NZMK_CONSTANT_MEM)
+	NZMK_INPLACE_MERGE,
+	NZMK_CONSTANT_MEM
+};
+namespace stlib_internal {
+template<typename Itr>
+void inplace_merge(Itr beg1, Itr beg2, Itr end2);
+template<typename Itr, typename Comp>
+void inplace_merge(Itr beg1, Itr beg2, Itr end2, Comp cmp);
+template<typename Itr>
+void rotate_merge(Itr beg1, Itr beg2, Itr end2);
+template<typename Itr, typename Comp>
+void rotate_merge(Itr beg1, Itr beg2, Itr end2, Comp cmp);
+template<typename Itr>
+void new_zip_merge(Itr left, Itr right, Itr end, NEW_ZIP_MERGE_KIND kind, bool stable, int max_move);
+template<typename Itr, typename Comp>
+void new_zip_merge(Itr left, Itr right, Itr end, Comp cmp, NEW_ZIP_MERGE_KIND kind, bool stable, int max_move);
+
+struct zip_merge_indexes {
+	unsigned index;
+	unsigned count;
+};
+template<typename Itr>
+struct zip_merge_section {
+	Itr mdltop;
+	Itr mdlstart;
+};
+template<typename Itr>
+inline Itr get_end_iterator(zip_merge_section<Itr>* sections, unsigned idx, unsigned sec_pos, Itr right) {
+	//the end of this section is marked by the start of the next
+	if(idx == sec_pos - 1)
+		return right;
+	return sections[idx + 1].mdlstart;
+}
+zip_merge_indexes& get_current_indexes(zip_merge_indexes* indexes, unsigned indexes_end);
+void pop_indexes_count(zip_merge_indexes* indexes,
+					   unsigned& indexes_start);
+void push_indexes_count(unsigned idx, unsigned count,
+						zip_merge_indexes* indexes,
+						unsigned& indexes_end);
+unsigned calculate_index_total(unsigned indexes_start, unsigned indexes_end);
+bool indexes_full(unsigned indexes_start, unsigned indexes_end);
+template<typename Itr>
+void new_zip_sort_do_merge(Itr left, Itr right, Itr end, NEW_ZIP_MERGE_KIND kind, bool stable, int max_move) {
+	switch(kind) {
+	case NEW_ZIP_MERGE_KIND::NZMK_RECURSIVE:
+		new_zip_merge(left, right, end, kind, stable, max_move);
+		break;
+	case NEW_ZIP_MERGE_KIND::NZMK_ROTATE_MERGE:
+		rotate_merge(left, right, end);
+		break;
+	default:
+		stlib_internal::inplace_merge(left, right, end);
+		break;
+	}
+}
+template<typename Itr>
+void reorder_middle_sections(zip_merge_section<Itr>* sections,
+							 zip_merge_indexes* indexes,
+							 Itr right,
+							 unsigned& sec_pos,
+							 unsigned& indexes_start,
+							 unsigned& indexes_end,
+							 NEW_ZIP_MERGE_KIND kind, bool stable, int max_move) {
+	// we don't have any middle sections
+	if(sec_pos == 0)
+		return;
+
+	// go through each section rotate them
+	for(unsigned i = 0; i < sec_pos; ++i) {
+		stlib::stlib_internal::rotate(sections[i].mdlstart, sections[i].mdltop, get_end_iterator(sections, i, sec_pos, right));
+
+		// also update the top of this
+		sections[i].mdltop = sections[i].mdlstart;
+	}
+
+	// then merge them together
+	unsigned pos = 0;
+	while((sec_pos - pos) > 1) {
+		if((sec_pos - pos) == 2) {
+			unsigned Aidx = pos;
+			unsigned Bidx = pos + 1;
+
+			// merge them together
+			new_zip_sort_do_merge(sections[Aidx].mdlstart, sections[Bidx].mdlstart, get_end_iterator(sections, Bidx, sec_pos, right), kind, stable, max_move);
+
+			// expand this
+			sections[Bidx].mdlstart = sections[Aidx].mdlstart;
+			sections[Bidx].mdltop = sections[Aidx].mdlstart;
+			destruct(sections[Aidx]);
+		} else if((sec_pos - pos) == 3) {
+			// take the smaller difference in size of AB or BC
+			unsigned Aidx = pos;
+			unsigned Bidx = pos + 1;
+			unsigned Cidx = pos + 2;
+
+			ptrdiff_t distA = distance(sections[Aidx].mdlstart, get_end_iterator(sections, Aidx, sec_pos, right));
+			ptrdiff_t distB = distance(sections[Bidx].mdlstart, get_end_iterator(sections, Bidx, sec_pos, right));
+			ptrdiff_t distC = distance(sections[Cidx].mdlstart, get_end_iterator(sections, Cidx, sec_pos, right));
+
+			if(abs(distA - distB) < abs(distB - distC)) {
+				// merge A and B
+				// merge them together
+				new_zip_sort_do_merge(sections[Aidx].mdlstart, sections[Bidx].mdlstart, get_end_iterator(sections, Bidx, sec_pos, right), kind, stable, max_move);
+
+				// expand this
+				sections[Bidx].mdlstart = sections[Aidx].mdlstart;
+				sections[Bidx].mdltop = sections[Aidx].mdlstart;
+				destruct(sections[Aidx]);
+			} else {
+				// merge B and C
+				// merge them together
+				new_zip_sort_do_merge(sections[Bidx].mdlstart, sections[Cidx].mdlstart, get_end_iterator(sections, Cidx, sec_pos, right), kind, stable, max_move);
+
+				// expand this
+				sections[Cidx].mdlstart = sections[Bidx].mdlstart;
+				sections[Cidx].mdltop = sections[Bidx].mdlstart;
+				destruct(sections[Bidx]);
+
+				// move one forward
+				construct(sections[Bidx], std::move(sections[Aidx]));
+			}
+		} else {
+			// there are 4 or more
+			// take the smaller difference size of AB, BC or CD
+			unsigned Aidx = pos;
+			unsigned Bidx = pos + 1;
+			unsigned Cidx = pos + 2;
+			unsigned Didx = pos + 3;
+
+			ptrdiff_t distA = distance(sections[Aidx].mdlstart, get_end_iterator(sections, Aidx, sec_pos, right));
+			ptrdiff_t distB = distance(sections[Bidx].mdlstart, get_end_iterator(sections, Bidx, sec_pos, right));
+			ptrdiff_t distC = distance(sections[Cidx].mdlstart, get_end_iterator(sections, Cidx, sec_pos, right));
+			ptrdiff_t distD = distance(sections[Didx].mdlstart, get_end_iterator(sections, Didx, sec_pos, right));
+
+			ptrdiff_t diffAB = abs(distA - distB);
+			ptrdiff_t diffBC = abs(distB - distC);
+			ptrdiff_t diffCD = abs(distC - distD);
+
+			if(diffAB <= diffBC && diffAB <= diffCD) {
+				// merge A and B
+				// merge them together
+				new_zip_sort_do_merge(sections[Aidx].mdlstart, sections[Bidx].mdlstart, get_end_iterator(sections, Bidx, sec_pos, right), kind, stable, max_move);
+
+				// expand this
+				sections[Bidx].mdlstart = sections[Aidx].mdlstart;
+				sections[Bidx].mdltop = sections[Aidx].mdlstart;
+				destruct(sections[Aidx]);
+			} else if(diffBC <= diffCD) {
+				// merge B and C
+				// merge them together
+				new_zip_sort_do_merge(sections[Bidx].mdlstart, sections[Cidx].mdlstart, get_end_iterator(sections, Cidx, sec_pos, right), kind, stable, max_move);
+
+				// expand this
+				sections[Cidx].mdlstart = sections[Bidx].mdlstart;
+				sections[Cidx].mdltop = sections[Bidx].mdlstart;
+				destruct(sections[Bidx]);
+
+				// move one forward
+				construct(sections[Bidx], std::move(sections[Aidx]));
+			} else {
+				// merge C and D
+				// merge them together
+				new_zip_sort_do_merge(sections[Cidx].mdlstart, sections[Didx].mdlstart, get_end_iterator(sections, Didx, sec_pos, right), kind, stable, max_move);
+
+				// expand this
+				sections[Didx].mdlstart = sections[Cidx].mdlstart;
+				sections[Didx].mdltop = sections[Cidx].mdlstart;
+				destruct(sections[Cidx]);
+
+				// move one forward
+				construct(sections[Cidx], std::move(sections[Bidx]));
+				construct(sections[Bidx], std::move(sections[Aidx]));
+			}
+		}
+		// move forward through the input
+		++pos;
+	}
+
+	// move this to the front, there is only one ordered list now
+	if(pos != 0)
+		construct(sections[0], std::move(sections[pos]));
+
+	//set control variables
+	indexes[0].index = 0;
+	indexes[0].count = distance(sections[0].mdlstart, right);
+	indexes_start = 0;
+	indexes_end = 1;
+	sec_pos = 1;
+}
+template<typename Itr>
+void new_zip_merge(Itr left, Itr right, Itr end, NEW_ZIP_MERGE_KIND kind, bool stable, int max_move) {
+	// data for all of the middle sections
+	alignas(zip_merge_section<Itr>) char bufr[sizeof(zip_merge_section<Itr>) * NEW_ZIP_SORT_ARRAY_SIZE];
+	zip_merge_section<Itr>* sections = (zip_merge_section<Itr>*)bufr;
+	zip_merge_indexes indexes[NEW_ZIP_SORT_INDEX_ARRAY_SIZE];
+	unsigned sec_pos = 0;
+	unsigned indexes_start = 0;
+	unsigned indexes_end = 0;
+	Itr leftend = right;
+
+	while((left != right) & (right != end)) {
+		if(sec_pos > 0) {
+			unsigned idx = indexes[indexes_start].index;
+			if(less_func(*right, *sections[idx].mdltop)) {
+				// right is less than the left
+				// copy out the left, move in the right
+				typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*left);
+				construct(*left, std::move(*right));
+
+				Itr right_pos = right;
+				if(sections[sec_pos - 1].mdlstart == sections[sec_pos - 1].mdltop) {
+					// if possible add the right to the end section
+					construct(*right, std::move(val));
+
+					//always push before pop to prevent invalid circular queue
+					push_indexes_count(sec_pos - 1, 1,
+									   indexes,
+									   indexes_end);
+				} else if(distance(sections[sec_pos - 1].mdltop, right) < max_move) {
+					// small list optimisation
+					// if possible to add to the end of last
+					// move everything right by one
+					for( ; right_pos != sections[sec_pos - 1].mdltop; --right_pos)
+						construct(*right_pos, std::move(*(right_pos - 1)));
+					construct(*right_pos, std::move(val));
+					++sections[sec_pos - 1].mdltop;
+
+					//always push before pop to prevent invalid circular queue
+					push_indexes_count(sec_pos - 1, 1,
+									   indexes,
+									   indexes_end);
+				} else {
+					construct(*right, std::move(val));
+					// create a new end section
+					construct(sections[sec_pos].mdltop, right);
+					construct(sections[sec_pos].mdlstart, right);
+
+					indexes[indexes_end].index = sec_pos;
+					indexes[indexes_end].count = 1;
+
+					++sec_pos;
+					++indexes_end;
+					if(indexes_end == NEW_ZIP_SORT_INDEX_ARRAY_SIZE)
+						indexes_end = 0;
+				}
+
+				// if this is stable we have things avaliable on the left and
+				if(stable && distance(left, leftend) > 1 && equal_func(*(left + 1), *right_pos)) {
+					Itr tmp = left;
+					++tmp; ++tmp;
+					unsigned count = 1;
+					unsigned idx = sec_pos - 1;
+
+					// how any of these are equal?
+					for(; distance(tmp, leftend) > 0 && equal_func(*tmp, *right_pos); ++tmp, ++count);
+
+					// we have the number of equal elements, rotate the elements to the correct positions (after right_pos)
+					stlib::stlib_internal::rotate(left + 1, tmp, right_pos + 1);
+
+					// push count on the indexes
+					push_indexes_count(idx, count,
+									   indexes,
+									   indexes_end);
+
+					// move all of the iterators left by count (accounts for rotation)
+					sections[idx].mdlstart -= count;
+					if(sections[idx].mdltop <= right_pos)
+						sections[idx].mdltop -= count;
+
+					while(idx > 0) {
+						// go to the next one
+						--idx;
+						sections[idx].mdlstart -= count;
+						sections[idx].mdltop -= count;
+					}
+
+					// move left end by count
+					leftend -= count;
+				}
+
+				++right;
+			} else {
+				// left is less than the right
+				// swap in the middle top
+				std::swap(*left, *sections[idx].mdltop);
+				++sections[idx].mdltop;
+				if(sections[idx].mdltop == get_end_iterator(sections, idx, sec_pos, right))
+					sections[idx].mdltop = sections[idx].mdlstart;
+
+				//always push before pop to prevent invalid circular queue
+				push_indexes_count(idx, 1,
+								   indexes,
+								   indexes_end);
+				pop_indexes_count(indexes,
+								  indexes_start);
+			}
+		} else if(less_func(*right, *left)) {
+			std::swap(*left, *right);
+			// create a new end section
+			construct(sections[sec_pos].mdltop, right);
+			construct(sections[sec_pos].mdlstart, right);
+
+			indexes[indexes_end].index = sec_pos;
+			indexes[indexes_end].count = 1;
+
+			++sec_pos;
+			++indexes_end;
+			if(indexes_end == NEW_ZIP_SORT_INDEX_ARRAY_SIZE)
+				indexes_end = 0;
+			++right;
+		}
+
+		++left;
+		if(left == leftend || sec_pos == NEW_ZIP_SORT_ARRAY_SIZE || indexes_full(indexes_start, indexes_end)) {
+			// reorder the middle section into the new left
+			reorder_middle_sections(sections, indexes, right, sec_pos, indexes_start, indexes_end, kind, stable, max_move);
+			if(left == leftend) {
+				// zero this, middle section is now left
+				sec_pos = 0;
+				indexes_start = 0;
+				indexes_end = 0;
+				leftend = right;
+				destruct(sections[0]);
+			}
+		}
+	}
+
+	if(left != right) {
+		reorder_middle_sections(sections, indexes, right, sec_pos, indexes_start, indexes_end, kind, stable, max_move);
+		stlib::stlib_internal::rotate(left, leftend, right);
+	}
+}
+}
+template<typename Itr>
+void new_zip_sort(Itr beg, Itr end, NEW_ZIP_MERGE_KIND kind = NEW_ZIP_MERGE_KIND::NZMK_RECURSIVE, bool stable = true, int max_move = INSERTION_SORT_CUTOFF * 4) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = 1;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do zip merge
+			stlib_internal::new_zip_merge(cleft, cright, cend, kind, stable, max_move);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+template<typename Itr>
+void hybrid_new_zip_sort(Itr beg, Itr end, NEW_ZIP_MERGE_KIND kind = NEW_ZIP_MERGE_KIND::NZMK_RECURSIVE, bool stable = true, int max_move = INSERTION_SORT_CUTOFF * 4) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+	//sort small runs with insertion sort before doing merge
+	uint64_t insert_count = INSERTION_SORT_CUTOFF;
+	{
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			insertion_sort(bg, ed);
+			bg = ed;
+		}
+	}
+	if(sze <= insert_count)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = insert_count;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do zip merge
+			stlib_internal::new_zip_merge(cleft, cright, cend, kind, stable, max_move);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+template<typename Itr>
+void new_zip_sort_rec(Itr beg, Itr end, NEW_ZIP_MERGE_KIND kind = NEW_ZIP_MERGE_KIND::NZMK_RECURSIVE, bool stable = true, int max_move = INSERTION_SORT_CUTOFF * 4) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	sze /= 2;
+
+	new_zip_sort_rec(beg, beg + sze, kind, stable, max_move);
+	new_zip_sort_rec(beg + sze, end, kind, stable, max_move);
+
+	stlib_internal::new_zip_merge(beg, beg + sze, end, kind, stable, max_move);
+}
+template<typename Itr>
+void new_zip_sort_rec2(Itr beg, Itr end, NEW_ZIP_MERGE_KIND kind = NEW_ZIP_MERGE_KIND::NZMK_RECURSIVE, bool stable = true, int max_move = INSERTION_SORT_CUTOFF * 4) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	size_t idx = 0;
+	std::vector<stlib_internal::zip_sort_stk_data<Itr>> stk;
+	stk.resize(20);
+	stk[idx++] = stlib_internal::zip_sort_stk_data<Itr>{false, beg, end};
+
+	while(idx > 0) {
+		stlib_internal::zip_sort_stk_data<Itr>& tmp = stk[idx - 1];
+		sze = distance(tmp.beg, tmp.end);
+		if(sze < 2) {
+			--idx;
+			continue;
+		}
+		if(tmp.complete || sze <= 2) {
+			stlib_internal::new_zip_merge(tmp.beg, tmp.beg + (sze/2), tmp.end, kind, stable, max_move);
+			--idx;
+		} else {
+			//split this
+			tmp.complete = true;
+
+			if(idx == stk.size())
+				stk.resize(stk.size() * 2);
+			stk[idx++] = stlib_internal::zip_sort_stk_data<Itr>{false, tmp.beg + (sze/2), tmp.end};
+
+			if(idx == stk.size())
+				stk.resize(stk.size() * 2);
+			stk[idx++] = stlib_internal::zip_sort_stk_data<Itr>{false, tmp.beg, tmp.beg + (sze/2)};
+		}
+	}
+}
+
+namespace stlib_internal {
+template<typename Itr, typename Comp>
+void new_zip_sort_do_merge(Itr left, Itr right, Itr end, Comp cmp, NEW_ZIP_MERGE_KIND kind, bool stable, int max_move) {
+	switch(kind) {
+	case NEW_ZIP_MERGE_KIND::NZMK_RECURSIVE:
+		new_zip_merge(left, right, end, cmp, kind, stable, max_move);
+		break;
+	case NEW_ZIP_MERGE_KIND::NZMK_ROTATE_MERGE:
+		rotate_merge(left, right, end, cmp);
+		break;
+	default:
+		stlib_internal::inplace_merge(left, right, end, cmp);
+		break;
+	}
+}
+template<typename Itr, typename Comp>
+void reorder_middle_sections(zip_merge_section<Itr>* sections,
+							 zip_merge_indexes* indexes,
+							 Itr right,
+							 unsigned& sec_pos,
+							 unsigned& indexes_start,
+							 unsigned& indexes_end,
+							 Comp cmp, NEW_ZIP_MERGE_KIND kind, bool stable, int max_move) {
+	// we don't have any middle sections
+	if(sec_pos == 0)
+		return;
+
+	// go through each section rotate them
+	for(unsigned i = 0; i < sec_pos; ++i) {
+		stlib::stlib_internal::rotate(sections[i].mdlstart, sections[i].mdltop, get_end_iterator(sections, i, sec_pos, right));
+
+		// also update the top of this
+		sections[i].mdltop = sections[i].mdlstart;
+	}
+
+	// then merge them together
+	unsigned pos = 0;
+	while((sec_pos - pos) > 1) {
+		if((sec_pos - pos) == 2) {
+			unsigned Aidx = pos;
+			unsigned Bidx = pos + 1;
+
+			// merge them together
+			new_zip_sort_do_merge(sections[Aidx].mdlstart, sections[Bidx].mdlstart, get_end_iterator(sections, Bidx, sec_pos, right), cmp, kind, stable, max_move);
+
+			// expand this
+			sections[Bidx].mdlstart = sections[Aidx].mdlstart;
+			sections[Bidx].mdltop = sections[Aidx].mdlstart;
+			destruct(sections[Aidx]);
+		} else if((sec_pos - pos) == 3) {
+			// take the smaller difference in size of AB or BC
+			unsigned Aidx = pos;
+			unsigned Bidx = pos + 1;
+			unsigned Cidx = pos + 2;
+
+			ptrdiff_t distA = distance(sections[Aidx].mdlstart, get_end_iterator(sections, Aidx, sec_pos, right));
+			ptrdiff_t distB = distance(sections[Bidx].mdlstart, get_end_iterator(sections, Bidx, sec_pos, right));
+			ptrdiff_t distC = distance(sections[Cidx].mdlstart, get_end_iterator(sections, Cidx, sec_pos, right));
+
+			if(abs(distA - distB) < abs(distB - distC)) {
+				// merge A and B
+				// merge them together
+				new_zip_sort_do_merge(sections[Aidx].mdlstart, sections[Bidx].mdlstart, get_end_iterator(sections, Bidx, sec_pos, right), cmp, kind, stable, max_move);
+
+				// expand this
+				sections[Bidx].mdlstart = sections[Aidx].mdlstart;
+				sections[Bidx].mdltop = sections[Aidx].mdlstart;
+				destruct(sections[Aidx]);
+			} else {
+				// merge B and C
+				// merge them together
+				new_zip_sort_do_merge(sections[Bidx].mdlstart, sections[Cidx].mdlstart, get_end_iterator(sections, Cidx, sec_pos, right), cmp, kind, stable, max_move);
+
+				// expand this
+				sections[Cidx].mdlstart = sections[Bidx].mdlstart;
+				sections[Cidx].mdltop = sections[Bidx].mdlstart;
+				destruct(sections[Bidx]);
+
+				// move one forward
+				construct(sections[Bidx], std::move(sections[Aidx]));
+			}
+		} else {
+			// there are 4 or more
+			// take the smaller difference size of AB, BC or CD
+			unsigned Aidx = pos;
+			unsigned Bidx = pos + 1;
+			unsigned Cidx = pos + 2;
+			unsigned Didx = pos + 3;
+
+			ptrdiff_t distA = distance(sections[Aidx].mdlstart, get_end_iterator(sections, Aidx, sec_pos, right));
+			ptrdiff_t distB = distance(sections[Bidx].mdlstart, get_end_iterator(sections, Bidx, sec_pos, right));
+			ptrdiff_t distC = distance(sections[Cidx].mdlstart, get_end_iterator(sections, Cidx, sec_pos, right));
+			ptrdiff_t distD = distance(sections[Didx].mdlstart, get_end_iterator(sections, Didx, sec_pos, right));
+
+			ptrdiff_t diffAB = abs(distA - distB);
+			ptrdiff_t diffBC = abs(distB - distC);
+			ptrdiff_t diffCD = abs(distC - distD);
+
+			if(diffAB <= diffBC && diffAB <= diffCD) {
+				// merge A and B
+				// merge them together
+				new_zip_sort_do_merge(sections[Aidx].mdlstart, sections[Bidx].mdlstart, get_end_iterator(sections, Bidx, sec_pos, right), cmp, kind, stable, max_move);
+
+				// expand this
+				sections[Bidx].mdlstart = sections[Aidx].mdlstart;
+				sections[Bidx].mdltop = sections[Aidx].mdlstart;
+				destruct(sections[Aidx]);
+			} else if(diffBC <= diffCD) {
+				// merge B and C
+				// merge them together
+				new_zip_sort_do_merge(sections[Bidx].mdlstart, sections[Cidx].mdlstart, get_end_iterator(sections, Cidx, sec_pos, right), cmp, kind, stable, max_move);
+
+				// expand this
+				sections[Cidx].mdlstart = sections[Bidx].mdlstart;
+				sections[Cidx].mdltop = sections[Bidx].mdlstart;
+				destruct(sections[Bidx]);
+
+				// move one forward
+				construct(sections[Bidx], std::move(sections[Aidx]));
+			} else {
+				// merge C and D
+				// merge them together
+				new_zip_sort_do_merge(sections[Cidx].mdlstart, sections[Didx].mdlstart, get_end_iterator(sections, Didx, sec_pos, right), cmp, kind, stable, max_move);
+
+				// expand this
+				sections[Didx].mdlstart = sections[Cidx].mdlstart;
+				sections[Didx].mdltop = sections[Cidx].mdlstart;
+				destruct(sections[Cidx]);
+
+				// move one forward
+				construct(sections[Cidx], std::move(sections[Bidx]));
+				construct(sections[Bidx], std::move(sections[Aidx]));
+			}
+		}
+		// move forward through the input
+		++pos;
+	}
+
+	// move this to the front, there is only one ordered list now
+	if(pos != 0)
+		construct(sections[0], std::move(sections[pos]));
+
+	//set control variables
+	indexes[0].index = 0;
+	indexes[0].count = distance(sections[0].mdlstart, right);
+	indexes_start = 0;
+	indexes_end = 1;
+	sec_pos = 1;
+}
+template<typename Itr, typename Comp>
+void new_zip_merge(Itr left, Itr right, Itr end, Comp cmp, NEW_ZIP_MERGE_KIND kind, bool stable, int max_move) {
+	// data for all of the middle sections
+	alignas(zip_merge_section<Itr>) char bufr[sizeof(zip_merge_section<Itr>) * NEW_ZIP_SORT_ARRAY_SIZE];
+	zip_merge_section<Itr>* sections = (zip_merge_section<Itr>*)bufr;
+	zip_merge_indexes indexes[NEW_ZIP_SORT_INDEX_ARRAY_SIZE];
+	unsigned sec_pos = 0;
+	unsigned indexes_start = 0;
+	unsigned indexes_end = 0;
+	Itr leftend = right;
+
+	while((left != right) & (right != end)) {
+		if(sec_pos > 0) {
+			unsigned idx = indexes[indexes_start].index;
+			if(less_func(*right, *sections[idx].mdltop, cmp)) {
+				// right is less than the left
+				// copy out the left, move in the right
+				typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*left);
+				construct(*left, std::move(*right));
+
+				Itr right_pos = right;
+				if(sections[sec_pos - 1].mdlstart == sections[sec_pos - 1].mdltop) {
+					// if possible add the right to the end section
+					construct(*right, std::move(val));
+
+					//always push before pop to prevent invalid circular queue
+					push_indexes_count(sec_pos - 1, 1,
+									   indexes,
+									   indexes_end);
+				} else if(distance(sections[sec_pos - 1].mdltop, right) < max_move) {
+					// small list optimisation
+					// if possible to add to the end of last
+					// move everything right by one
+					for( ; right_pos != sections[sec_pos - 1].mdltop; --right_pos)
+						construct(*right_pos, std::move(*(right_pos - 1)));
+					construct(*right_pos, std::move(val));
+					++sections[sec_pos - 1].mdltop;
+
+					//always push before pop to prevent invalid circular queue
+					push_indexes_count(sec_pos - 1, 1,
+									   indexes,
+									   indexes_end);
+				} else {
+					construct(*right, std::move(val));
+					// create a new end section
+					construct(sections[sec_pos].mdltop, right);
+					construct(sections[sec_pos].mdlstart, right);
+
+					indexes[indexes_end].index = sec_pos;
+					indexes[indexes_end].count = 1;
+
+					++sec_pos;
+					++indexes_end;
+					if(indexes_end == NEW_ZIP_SORT_INDEX_ARRAY_SIZE)
+						indexes_end = 0;
+				}
+
+				// if this is stable we have things avaliable on the left and
+				if(stable && distance(left, leftend) > 1 && equal_func(*(left + 1), *right_pos, cmp)) {
+					Itr tmp = left;
+					++tmp; ++tmp;
+					unsigned count = 1;
+					unsigned idx = sec_pos - 1;
+
+					// how any of these are equal?
+					for(; distance(tmp, leftend) > 0 && equal_func(*tmp, *right_pos, cmp); ++tmp, ++count);
+
+					// we have the number of equal elements, rotate the elements to the correct positions (after right_pos)
+					stlib::stlib_internal::rotate(left + 1, tmp, right_pos + 1);
+
+					// push count on the indexes
+					push_indexes_count(idx, count,
+									   indexes,
+									   indexes_end);
+
+					// move all of the iterators left by count (accounts for rotation)
+					sections[idx].mdlstart -= count;
+					if(sections[idx].mdltop <= right_pos)
+						sections[idx].mdltop -= count;
+
+					while(idx > 0) {
+						// go to the next one
+						--idx;
+						sections[idx].mdlstart -= count;
+						sections[idx].mdltop -= count;
+					}
+
+					// move left end by count
+					leftend -= count;
+				}
+
+				++right;
+			} else {
+				// left is less than the right
+				// swap in the middle top
+				std::swap(*left, *sections[idx].mdltop);
+				++sections[idx].mdltop;
+				if(sections[idx].mdltop == get_end_iterator(sections, idx, sec_pos, right))
+					sections[idx].mdltop = sections[idx].mdlstart;
+
+				//always push before pop to prevent invalid circular queue
+				push_indexes_count(idx, 1,
+								   indexes,
+								   indexes_end);
+				pop_indexes_count(indexes,
+								  indexes_start);
+			}
+		} else if(less_func(*right, *left, cmp)) {
+			std::swap(*left, *right);
+			// create a new end section
+			construct(sections[sec_pos].mdltop, right);
+			construct(sections[sec_pos].mdlstart, right);
+
+			indexes[indexes_end].index = sec_pos;
+			indexes[indexes_end].count = 1;
+
+			++sec_pos;
+			++indexes_end;
+			if(indexes_end == NEW_ZIP_SORT_INDEX_ARRAY_SIZE)
+				indexes_end = 0;
+			++right;
+		}
+
+		++left;
+		if(left == leftend || sec_pos == NEW_ZIP_SORT_ARRAY_SIZE || indexes_full(indexes_start, indexes_end)) {
+			// reorder the middle section into the new left
+			reorder_middle_sections(sections, indexes, right, sec_pos, indexes_start, indexes_end, cmp, kind, stable, max_move);
+			if(left == leftend) {
+				// zero this, middle section is now left
+				sec_pos = 0;
+				indexes_start = 0;
+				indexes_end = 0;
+				leftend = right;
+				destruct(sections[0]);
+			}
+		}
+	}
+
+	if(left != right) {
+		reorder_middle_sections(sections, indexes, right, sec_pos, indexes_start, indexes_end, cmp, kind, stable, max_move);
+		stlib::stlib_internal::rotate(left, leftend, right);
+	}
+}
+}
+template<typename Itr, typename Comp>
+void new_zip_sort(Itr beg, Itr end, Comp cmp, NEW_ZIP_MERGE_KIND kind = NEW_ZIP_MERGE_KIND::NZMK_RECURSIVE, bool stable = true, int max_move = INSERTION_SORT_CUTOFF * 4) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = 1;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do zip merge
+			stlib_internal::new_zip_merge(cleft, cright, cend, cmp, kind, stable, max_move);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+template<typename Itr, typename Comp>
+void hybrid_new_zip_sort(Itr beg, Itr end, Comp cmp, NEW_ZIP_MERGE_KIND kind = NEW_ZIP_MERGE_KIND::NZMK_RECURSIVE, bool stable = true, int max_move = INSERTION_SORT_CUTOFF * 4) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+	//sort small runs with insertion sort before doing merge
+	uint64_t insert_count = INSERTION_SORT_CUTOFF;
+	{
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			insertion_sort(bg, ed, cmp);
+			bg = ed;
+		}
+	}
+	if(sze <= insert_count)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = insert_count;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, zip them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do zip merge
+			stlib_internal::new_zip_merge(cleft, cright, cend, cmp, kind, stable, max_move);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+template<typename Itr, typename Comp>
+void new_zip_sort_rec(Itr beg, Itr end, Comp cmp, NEW_ZIP_MERGE_KIND kind = NEW_ZIP_MERGE_KIND::NZMK_RECURSIVE, bool stable = true, int max_move = INSERTION_SORT_CUTOFF * 4) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	sze /= 2;
+
+	new_zip_sort_rec(beg, beg + sze, cmp, kind, stable, max_move);
+	new_zip_sort_rec(beg + sze, end, cmp, kind, stable, max_move);
+
+	stlib_internal::new_zip_merge(beg, beg + sze, end, cmp, kind, stable, max_move);
+}
+
+template<typename Itr, typename Comp>
+void new_zip_sort_rec2(Itr beg, Itr end, Comp cmp, NEW_ZIP_MERGE_KIND kind = NEW_ZIP_MERGE_KIND::NZMK_RECURSIVE, bool stable = true, int max_move = INSERTION_SORT_CUTOFF * 4) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	size_t idx = 0;
+	std::vector<stlib_internal::zip_sort_stk_data<Itr>> stk;
+	stk.resize(20);
+	stk[idx++] = stlib_internal::zip_sort_stk_data<Itr>{false, beg, end};
+
+	while(idx > 0) {
+		stlib_internal::zip_sort_stk_data<Itr>& tmp = stk[idx - 1];
+		sze = distance(tmp.beg, tmp.end);
+		if(sze < 2) {
+			--idx;
+			continue;
+		}
+		if(tmp.complete || sze <= 2) {
+			stlib_internal::new_zip_merge(tmp.beg, tmp.beg + (sze/2), tmp.end, cmp, kind, stable, max_move);
+			--idx;
+		} else {
+			//split this
+			tmp.complete = true;
+
+			if(idx == stk.size())
+				stk.resize(stk.size() * 2);
+			stk[idx++] = stlib_internal::zip_sort_stk_data<Itr>{false, tmp.beg + (sze/2), tmp.end};
+
+			if(idx == stk.size())
+				stk.resize(stk.size() * 2);
+			stk[idx++] = stlib_internal::zip_sort_stk_data<Itr>{false, tmp.beg, tmp.beg + (sze/2)};
+		}
+	}
+}
+
+
+
 template<typename Itr>
 void intro_quick_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
@@ -3337,6 +4163,7 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
+		unsigned swaps = 0;
 		if(!stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot)) continue;
 
 		do {
@@ -3351,6 +4178,7 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 				break;
 
 			std::swap(*left, *right);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -3362,12 +4190,15 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 			//move the pivot into place
 			if(right != pivot) {
 				std::swap(*right, *pivot);
+				++swaps;
 				pivot = right;
 			}
 		}
 
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stlib::is_sorted(tmp.beg, tmp.end + 1)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
@@ -3404,6 +4235,7 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
+		unsigned swaps = 0;
 		if(!stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp)) continue;
 
 		do {
@@ -3418,6 +4250,7 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 				break;
 
 			std::swap(*left, *right);
+			++swaps;
 			if(left == pivot)
 				pivot = right;
 		} while(left + 1 != right);
@@ -3429,12 +4262,15 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 			//move the pivot into place
 			if(right != pivot) {
 				std::swap(*right, *pivot);
+				++swaps;
 				pivot = right;
 			}
 		}
 
 		auto dist1 = distance(pivot + 1, tmp.end + 1);
 		auto dist2 = distance(tmp.beg, pivot);
+		if(swaps == 0 && ((dist1 > INSERTION_SORT_CUTOFF) | (dist2 > INSERTION_SORT_CUTOFF)) && stlib::is_sorted(tmp.beg, tmp.end + 1, cmp)) continue;
+
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
@@ -3482,4 +4318,3 @@ inline void sort(Itr beg, Itr end, Comp cmp) {
 }
 
 }
-
