@@ -51,6 +51,7 @@ int main() {
 	//just pick a random seed
 	srand(time(NULL));
 	size_t count = 700;
+	bool verbose = false;
 
 	//different sorting tests - sort 700 random numbers
     {
@@ -65,13 +66,15 @@ int main() {
             stlib::quick_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -87,13 +90,15 @@ int main() {
             stlib::stable_quick_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -109,13 +114,15 @@ int main() {
             stlib::adaptive_stable_quick_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -131,13 +138,15 @@ int main() {
             stlib::merge_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -153,13 +162,15 @@ int main() {
             stlib::hybrid_merge_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -175,13 +186,15 @@ int main() {
             stlib::inplace_merge_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -197,13 +210,15 @@ int main() {
             stlib::hybrid_inplace_merge_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -219,13 +234,15 @@ int main() {
             stlib::rotate_merge_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -241,13 +258,15 @@ int main() {
             stlib::hybrid_rotate_merge_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -263,13 +282,15 @@ int main() {
             stlib::zip_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -285,13 +306,63 @@ int main() {
             stlib::hybrid_zip_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test new zip sort" << std::endl;
+        //test zip sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < count; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::new_zip_sort(vec.begin(), vec.end());
         }
-        std::cout << "]" << std::endl;
+
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test hybrid new zip sort" << std::endl;
+        //test zip sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < count; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::hybrid_new_zip_sort(vec.begin(), vec.end());
+        }
+
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -307,13 +378,15 @@ int main() {
             stlib::merge_sweep_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -329,13 +402,15 @@ int main() {
             stlib::bubble_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -351,13 +426,15 @@ int main() {
             stlib::insertion_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -373,13 +450,15 @@ int main() {
             stlib::binary_insertion_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -395,13 +474,15 @@ int main() {
             stlib::intro_quick_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -417,13 +498,15 @@ int main() {
             stlib::intro_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -439,13 +522,15 @@ int main() {
             stlib::adaptive_stable_intro_sort(vec.begin(), vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -461,13 +546,15 @@ int main() {
             std::sort(&*vec.begin(), &*vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
@@ -483,13 +570,15 @@ int main() {
             std::stable_sort(&*vec.begin(), &*vec.end());
         }
 
-        std::cout << "[" << std::endl;
-        for(uint32_t i = 0; i < count; ++i) {
-            std::cout << "[ " << vec[i] << "], ";
-            if(i > 0 && i % 5 == 0)
-                std::cout << std::endl;
-        }
-        std::cout << "]" << std::endl;
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
 
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
