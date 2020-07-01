@@ -14,8 +14,8 @@ They have the following characteristics.
 | zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 91 | 53456 |
 | hybrid_zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 73 | 51774 |
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 252 | 30865 |
-| new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N) | - | 216 | 25388 |
-| hybrid_new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N) | - | 95 | 22077 |
+| new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N) | - | 205 | 25388 |
+| hybrid_new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N) | - | 92 | 22012 |
 | rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 176 | 21205 |
 | hybrid_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 104 | 18744 |
 | stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 66 | 7012 |
