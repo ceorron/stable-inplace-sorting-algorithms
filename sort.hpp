@@ -3418,8 +3418,25 @@ void new_zip_merge(Itr left, Itr right, Itr end, NEW_ZIP_MERGE_KIND kind, bool s
 									   indexes,
 									   indexes_end);
 
-					//go back one - accounts for future changes
-					--left;
+					if(!((count == buffer_count) | (left == leftend) | (right == end))) {
+						// left is less than the right
+						// swap in the middle top
+						std::swap(*left, *sections[idx].mdltop);
+						++sections[idx].mdltop;
+						if(sections[idx].mdltop == get_end_iterator(sections, idx, sec_pos, right))
+							sections[idx].mdltop = sections[idx].mdlstart;
+						if(idx == sec_pos - 1)
+							++right_pos;
+
+						//always push before pop to prevent invalid circular queue
+						push_indexes_count(idx, 1,
+										   indexes,
+										   indexes_end);
+						pop_indexes_count(indexes,
+										  indexes_start);
+					} else
+						//go back one - accounts for future changes
+						--left;
 					--right;
 				} else {
 					construct(*right, std::move(swapbufr[0]));
@@ -3851,8 +3868,25 @@ void new_zip_merge(Itr left, Itr right, Itr end, Comp cmp, NEW_ZIP_MERGE_KIND ki
 									   indexes,
 									   indexes_end);
 
-					//go back one - accounts for future changes
-					--left;
+					if(!((count == buffer_count) | (left == leftend) | (right == end))) {
+						// left is less than the right
+						// swap in the middle top
+						std::swap(*left, *sections[idx].mdltop);
+						++sections[idx].mdltop;
+						if(sections[idx].mdltop == get_end_iterator(sections, idx, sec_pos, right))
+							sections[idx].mdltop = sections[idx].mdlstart;
+						if(idx == sec_pos - 1)
+							++right_pos;
+
+						//always push before pop to prevent invalid circular queue
+						push_indexes_count(idx, 1,
+										   indexes,
+										   indexes_end);
+						pop_indexes_count(indexes,
+										  indexes_start);
+					} else
+						//go back one - accounts for future changes
+						--left;
 					--right;
 				} else {
 					construct(*right, std::move(swapbufr[0]));
@@ -4379,3 +4413,4 @@ inline void sort(Itr beg, Itr end, Comp cmp) {
 }
 
 }
+
