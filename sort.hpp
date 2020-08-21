@@ -739,42 +739,47 @@ bool binary_search(Itr beg, Itr end, const T& item,
 	return out != end && stlib_internal::greater_equal_func(*out, item, comp) && stlib_internal::less_equal_func(*out, item, comp);
 }
 
+
 template<typename Itr>
 void bubble_sort(Itr beg, Itr end) {
-	if(distance(beg, end) <= 1)
+	auto dist = distance(beg, end);
+	if(dist <= 1)
 		return;
-	bool sorted = false;
-	Itr ed = end; --ed;
-	while(!sorted) {
-		sorted = true;
-		for(Itr bg = beg; bg != ed; ++bg) {
+	//new optimisation, jumps the new end of this list to the last item swapped position in the list, as all greater must be larger
+	size_t ndist = dist;
+	while(ndist > 0) {
+		ndist = 0;
+		size_t pos = 0;
+		for(Itr bg = beg; pos < dist; ++bg, ++pos) {
 			Itr nxt = bg;
 			++nxt;
-			if(stlib_internal::less_func(*nxt, *bg)) {
+			if(less_func(*nxt, *bg)) {
 				std::swap(*bg, *nxt);
-				sorted = false;
+				ndist = pos + 1;
 			}
 		}
-		--ed;
+		dist = ndist;
 	}
 }
 template<typename Itr, typename Comp>
 void bubble_sort(Itr beg, Itr end, Comp cmp) {
-	if(distance(beg, end) <= 1)
+	auto dist = distance(beg, end);
+	if(dist <= 1)
 		return;
-	bool sorted = false;
-	Itr ed = end; --ed;
-	while(!sorted) {
-		sorted = true;
-		for(Itr bg = beg; bg != ed; ++bg) {
+	//new optimisation, jumps the new end of this list to the last item swapped position in the list, as all greater must be larger
+	size_t ndist = dist;
+	while(ndist > 0) {
+		ndist = 0;
+		size_t pos = 0;
+		for(Itr bg = beg; pos < dist; ++bg, ++pos) {
 			Itr nxt = bg;
 			++nxt;
-			if(stlib_internal::less_func(*nxt, *bg, cmp)) {
+			if(less_func(*nxt, *bg, cmp)) {
 				std::swap(*bg, *nxt);
-				sorted = false;
+				ndist = pos + 1;
 			}
 		}
-		--ed;
+		dist = ndist;
 	}
 }
 
