@@ -749,13 +749,13 @@ void bubble_sort(Itr beg, Itr end) {
 	size_t ndist = dist;
 	while(ndist > 0) {
 		ndist = 0;
-		size_t pos = 0;
+		size_t pos = 1;
 		for(Itr bg = beg; pos < dist; ++bg, ++pos) {
 			Itr nxt = bg;
 			++nxt;
 			if(less_func(*nxt, *bg)) {
 				std::swap(*bg, *nxt);
-				ndist = pos + 1;
+				ndist = pos;
 			}
 		}
 		dist = ndist;
@@ -770,13 +770,13 @@ void bubble_sort(Itr beg, Itr end, Comp cmp) {
 	size_t ndist = dist;
 	while(ndist > 0) {
 		ndist = 0;
-		size_t pos = 0;
+		size_t pos = 1;
 		for(Itr bg = beg; pos < dist; ++bg, ++pos) {
 			Itr nxt = bg;
 			++nxt;
 			if(less_func(*nxt, *bg, cmp)) {
 				std::swap(*bg, *nxt);
-				ndist = pos + 1;
+				ndist = pos;
 			}
 		}
 		dist = ndist;
