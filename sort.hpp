@@ -747,7 +747,7 @@ void bubble_sort(Itr beg, Itr end) {
 		return;
 	//new optimisation, jumps the new end of this list to the last item swapped position in the list, as all greater must be larger
 	size_t ndist = dist;
-	while(ndist > 0) {
+	while(ndist > 1) {
 		ndist = 0;
 		size_t pos = 1;
 		for(Itr bg = beg; pos < dist; ++bg, ++pos) {
@@ -768,7 +768,7 @@ void bubble_sort(Itr beg, Itr end, Comp cmp) {
 		return;
 	//new optimisation, jumps the new end of this list to the last item swapped position in the list, as all greater must be larger
 	size_t ndist = dist;
-	while(ndist > 0) {
+	while(ndist > 1) {
 		ndist = 0;
 		size_t pos = 1;
 		for(Itr bg = beg; pos < dist; ++bg, ++pos) {
