@@ -152,7 +152,7 @@ int main() {
     }
     {
         std::cout << "test hybrid merge sort" << std::endl;
-        //test merge sort
+        //test hybrid merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -176,7 +176,7 @@ int main() {
     }
     {
         std::cout << "test in-place merge sort" << std::endl;
-        //test merge sort
+        //test in-place merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -200,7 +200,7 @@ int main() {
     }
     {
         std::cout << "test hybrid in-place merge sort" << std::endl;
-        //test merge sort
+        //test hybrid in-place merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -224,7 +224,7 @@ int main() {
     }
     {
         std::cout << "test rotate merge sort" << std::endl;
-        //test merge sort
+        //test rotate merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -248,7 +248,7 @@ int main() {
     }
     {
         std::cout << "test hybrid rotate merge sort" << std::endl;
-        //test merge sort
+        //test hybrid rotate merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -296,7 +296,7 @@ int main() {
     }
     {
         std::cout << "test hybrid zip sort" << std::endl;
-        //test zip sort
+        //test hybrid zip sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -320,7 +320,7 @@ int main() {
     }
     {
         std::cout << "test new zip sort" << std::endl;
-        //test zip sort
+        //test new zip sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -344,7 +344,7 @@ int main() {
     }
     {
         std::cout << "test hybrid new zip sort" << std::endl;
-        //test zip sort
+        //test hybrid new zip sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -416,7 +416,7 @@ int main() {
     }
     {
         std::cout << "test cocktail shaker sort" << std::endl;
-        //test bubble sort
+        //test cocktail shaker sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -464,7 +464,7 @@ int main() {
     }
     {
         std::cout << "test binary insertion sort" << std::endl;
-        //test insertion sort
+        //test binary insertion sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -512,7 +512,7 @@ int main() {
     }
     {
         std::cout << "test adaptive intro sort" << std::endl;
-        //test intro sort
+        //test adaptive intro sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -536,7 +536,7 @@ int main() {
     }
     {
         std::cout << "test adaptive stable intro sort" << std::endl;
-        //test intro sort
+        //test adaptive stable intro sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
