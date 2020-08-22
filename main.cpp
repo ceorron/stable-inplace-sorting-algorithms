@@ -415,6 +415,30 @@ int main() {
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
+        std::cout << "test cocktail shaker sort" << std::endl;
+        //test bubble sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < count; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::cocktail_shaker_sort(vec.begin(), vec.end());
+        }
+
+		if(verbose) {
+			std::cout << "[" << std::endl;
+			for(uint32_t i = 0; i < count; ++i) {
+				std::cout << "[ " << vec[i] << "], ";
+				if(i > 0 && i % 5 == 0)
+					std::cout << std::endl;
+			}
+			std::cout << "]" << std::endl;
+		}
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
         std::cout << "test insertion sort" << std::endl;
         //test insertion sort
         std::vector<uint32_t> vec;
