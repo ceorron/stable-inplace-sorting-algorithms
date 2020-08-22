@@ -6,7 +6,8 @@ They have the following characteristics.
 
 | Name | Inplace | Stable | Average complexity (Big O) | Worst case complexity (Big O) | Stack memory | Additional memory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: |
-| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1040 | 8395577 |
+| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 735 | 8395577 |
+| cocktail_shaker_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 884 | 5872503 |
 | inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 260 | 946125 |
 | hybrid_inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 212 | 841530 |
 | insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 177 | 758073 |
@@ -146,7 +147,7 @@ int main() {
     }
     {
         std::cout << "test adaptive stable quick sort" << std::endl;
-        //test stable quick sort
+        //test adaptive stable quick sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -194,7 +195,7 @@ int main() {
     }
     {
         std::cout << "test hybrid merge sort" << std::endl;
-        //test merge sort
+        //test hybrid merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -218,7 +219,7 @@ int main() {
     }
     {
         std::cout << "test in-place merge sort" << std::endl;
-        //test merge sort
+        //test in-place merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -242,7 +243,7 @@ int main() {
     }
     {
         std::cout << "test hybrid in-place merge sort" << std::endl;
-        //test merge sort
+        //test hybrid in-place merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -266,7 +267,7 @@ int main() {
     }
     {
         std::cout << "test rotate merge sort" << std::endl;
-        //test merge sort
+        //test rotate merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -290,7 +291,7 @@ int main() {
     }
     {
         std::cout << "test hybrid rotate merge sort" << std::endl;
-        //test merge sort
+        //test hybrid rotate merge sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -338,7 +339,7 @@ int main() {
     }
     {
         std::cout << "test hybrid zip sort" << std::endl;
-        //test zip sort
+        //test hybrid zip sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -362,7 +363,7 @@ int main() {
     }
     {
         std::cout << "test new zip sort" << std::endl;
-        //test zip sort
+        //test new zip sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -386,7 +387,7 @@ int main() {
     }
     {
         std::cout << "test hybrid new zip sort" << std::endl;
-        //test zip sort
+        //test hybrid new zip sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -457,6 +458,30 @@ int main() {
         std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
     }
     {
+        std::cout << "test cocktail shaker sort" << std::endl;
+        //test cocktail shaker sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < count; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::cocktail_shaker_sort(vec.begin(), vec.end());
+        }
+
+        if(verbose) {
+            std::cout << "[" << std::endl;
+            for(uint32_t i = 0; i < count; ++i) {
+                std::cout << "[ " << vec[i] << "], ";
+                if(i > 0 && i % 5 == 0)
+                    std::cout << std::endl;
+            }
+            std::cout << "]" << std::endl;
+        }
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
         std::cout << "test insertion sort" << std::endl;
         //test insertion sort
         std::vector<uint32_t> vec;
@@ -482,7 +507,7 @@ int main() {
     }
     {
         std::cout << "test binary insertion sort" << std::endl;
-        //test insertion sort
+        //test binary insertion sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -530,7 +555,7 @@ int main() {
     }
     {
         std::cout << "test adaptive intro sort" << std::endl;
-        //test intro sort
+        //test adaptive intro sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
@@ -554,7 +579,7 @@ int main() {
     }
     {
         std::cout << "test adaptive stable intro sort" << std::endl;
-        //test intro sort
+        //test adaptive stable intro sort
         std::vector<uint32_t> vec;
         for(uint32_t i = 0; i < count; ++i)
             vec.push_back(rand());
