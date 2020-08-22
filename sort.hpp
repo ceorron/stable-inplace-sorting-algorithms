@@ -785,6 +785,104 @@ void bubble_sort(Itr beg, Itr end, Comp cmp) {
 
 
 template<typename Itr>
+void cocktail_shaker_sort(Itr beg, Itr end) {
+	auto dist = distance(beg, end);
+	if(dist <= 1)
+		return;
+	//optimisated cocktail shaker sort, cuts off the ends of the list, both the start and the end of the list depending on the sorting
+	Itr nbeg = beg - 1;
+	size_t pos = 0;
+	bool sorted = false;
+	while(sorted == false) {
+		sorted = true;
+		Itr bg = nbeg + 1;
+		++pos;
+		{
+			//do forward
+			size_t ndist = 0;
+			for(; pos < dist; ++bg, ++pos) {
+				Itr nxt = bg;
+				++nxt;
+				if(less_func(*nxt, *bg)) {
+					std::swap(*bg, *nxt);
+					ndist = pos;
+					sorted = false;
+				}
+			}
+			dist = ndist;
+		}
+
+		if(sorted == true)
+			break;
+		sorted = true;
+
+		{
+			//do backward
+			Itr tbeg = nbeg;
+			--bg; --pos;
+			for(; bg != tbeg; --bg, --pos) {
+				Itr nxt = bg;
+				++nxt;
+				if(less_func(*nxt, *bg)) {
+					std::swap(*bg, *nxt);
+					nbeg = bg;
+					sorted = false;
+				}
+			}
+		}
+	}
+}
+template<typename Itr, typename Comp>
+void cocktail_shaker_sort(Itr beg, Itr end, Comp cmp) {
+	auto dist = distance(beg, end);
+	if(dist <= 1)
+		return;
+	//optimisated cocktail shaker sort, cuts off the ends of the list, both the start and the end of the list depending on the sorting
+	Itr nbeg = beg - 1;
+	size_t pos = 0;
+	bool sorted = false;
+	while(sorted == false) {
+		sorted = true;
+		Itr bg = nbeg + 1;
+		++pos;
+		{
+			//do forward
+			size_t ndist = 0;
+			for(; pos < dist; ++bg, ++pos) {
+				Itr nxt = bg;
+				++nxt;
+				if(less_func(*nxt, *bg, cmp)) {
+					std::swap(*bg, *nxt);
+					ndist = pos;
+					sorted = false;
+				}
+			}
+			dist = ndist;
+		}
+
+		if(sorted == true)
+			break;
+		sorted = true;
+
+		{
+			//do backward
+			Itr tbeg = nbeg;
+			--bg; --pos;
+			for(; bg != tbeg; --bg, --pos) {
+				Itr nxt = bg;
+				++nxt;
+				if(less_func(*nxt, *bg, cmp)) {
+					std::swap(*bg, *nxt);
+					nbeg = bg;
+					sorted = false;
+				}
+			}
+		}
+	}
+}
+
+
+template<typename Itr>
 void insertion_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
