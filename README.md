@@ -31,7 +31,7 @@ They have the following characteristics.
 | std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 36 | 4738 |
 
 (All tests with MSVC compiler in release x64)
-(times in microseconds, times are only indicitive as they are sumwhat data dependant)
+(times in microseconds, times are only indicitive as they are somewhat data dependant)
 
 NOTE: as default zip_sort and merge_sort (and hybird_zip_sort, hybird_merge_sort) use the optimised constant stack memory algorithm (1).
 Also sweep_sort has since been removed entirely due to redundancy (slower than both zip_sort and merge_sweep_sort).
