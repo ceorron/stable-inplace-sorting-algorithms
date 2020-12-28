@@ -46,8 +46,8 @@ zip_sort gives the best overall performance for an in-place, stable sorting algo
 merge_sweep_sort could be said to be quick_sort like algorithm.
 
 zip_sort is a merge_sort like algorithm. It's merge function does everything in-place, unlike merge_sort, while also providing excellent speed (minimal moves).
-An video of zipsort at work can be found here:
-https://www.youtube.com/watch?v=P9qWTsUvMP8
+
+A video of zipsort at work can be found here: https://www.youtube.com/watch?v=P9qWTsUvMP8
 
 See below for an indepth description of both algorithms.
 
