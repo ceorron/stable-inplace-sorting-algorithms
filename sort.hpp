@@ -753,7 +753,7 @@ void bubble_sort(Itr beg, Itr end) {
 		for(Itr bg = beg; pos < dist; ++bg, ++pos) {
 			Itr nxt = bg;
 			++nxt;
-			if(less_func(*nxt, *bg)) {
+			if(stlib_internal::less_func(*nxt, *bg)) {
 				std::swap(*bg, *nxt);
 				ndist = pos;
 			}
@@ -774,7 +774,7 @@ void bubble_sort(Itr beg, Itr end, Comp cmp) {
 		for(Itr bg = beg; pos < dist; ++bg, ++pos) {
 			Itr nxt = bg;
 			++nxt;
-			if(less_func(*nxt, *bg, cmp)) {
+			if(stlib_internal::less_func(*nxt, *bg, cmp)) {
 				std::swap(*bg, *nxt);
 				ndist = pos;
 			}
@@ -803,7 +803,7 @@ void cocktail_shaker_sort(Itr beg, Itr end) {
 			for(; pos < dist; ++bg, ++pos) {
 				Itr nxt = bg;
 				++nxt;
-				if(less_func(*nxt, *bg)) {
+				if(stlib_internal::less_func(*nxt, *bg)) {
 					std::swap(*bg, *nxt);
 					ndist = pos;
 					sorted = false;
@@ -823,7 +823,7 @@ void cocktail_shaker_sort(Itr beg, Itr end) {
 			for(; bg != tbeg; --bg, --pos) {
 				Itr nxt = bg;
 				++nxt;
-				if(less_func(*nxt, *bg)) {
+				if(stlib_internal::less_func(*nxt, *bg)) {
 					std::swap(*bg, *nxt);
 					nbeg = bg;
 					sorted = false;
@@ -851,7 +851,7 @@ void cocktail_shaker_sort(Itr beg, Itr end, Comp cmp) {
 			for(; pos < dist; ++bg, ++pos) {
 				Itr nxt = bg;
 				++nxt;
-				if(less_func(*nxt, *bg, cmp)) {
+				if(stlib_internal::less_func(*nxt, *bg, cmp)) {
 					std::swap(*bg, *nxt);
 					ndist = pos;
 					sorted = false;
@@ -871,7 +871,7 @@ void cocktail_shaker_sort(Itr beg, Itr end, Comp cmp) {
 			for(; bg != tbeg; --bg, --pos) {
 				Itr nxt = bg;
 				++nxt;
-				if(less_func(*nxt, *bg, cmp)) {
+				if(stlib_internal::less_func(*nxt, *bg, cmp)) {
 					std::swap(*bg, *nxt);
 					nbeg = bg;
 					sorted = false;
