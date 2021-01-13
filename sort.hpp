@@ -4205,17 +4205,18 @@ void new_zip_sort_rec2(Itr beg, Itr end, Comp cmp, NEW_ZIP_MERGE_KIND kind = NEW
 
 
 
+namespace stlib_internal {
 template<typename Itr>
-void intro_quick_sort(Itr beg, Itr end) {
+void intro_quick_sort_internal(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
-	unsigned maxdepth = stlib_internal::get_depth(distance(beg, end));
+	unsigned maxdepth = get_depth(distance(beg, end));
 
 	//add a stack item
-	std::vector<stlib_internal::intro_stack_less_data<Itr>> stk;
+	std::vector<intro_stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stlib_internal::intro_stack_less_data<Itr> dat = {
+	intro_stack_less_data<Itr> dat = {
 		beg,
 		end - 1,
 		maxdepth
@@ -4223,18 +4224,18 @@ void intro_quick_sort(Itr beg, Itr end) {
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stlib_internal::intro_stack_less_data<Itr> tmp = stk[--idx];
+		intro_stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
-		Itr pivot = stlib_internal::middle_of_three(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end);
+		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end);
 
 		do {
 			++left;
 			--right;
 			//pivot goes to the right!!
-			while(left != right && left != pivot && stlib_internal::less_func(*left, *pivot))
+			while(left != right && left != pivot && less_func(*left, *pivot))
 				++left;
-			while(left != right && stlib_internal::greater_equal_func(*right, *pivot))
+			while(left != right && greater_equal_func(*right, *pivot))
 				--right;
 			if(left == right)
 				break;
@@ -4246,7 +4247,7 @@ void intro_quick_sort(Itr beg, Itr end) {
 
 		//if right is on the less side, move back
 		if(right != pivot) {
-			if(stlib_internal::less_func(*right, *pivot))
+			if(less_func(*right, *pivot))
 				++right;
 			//move the pivot into place
 			if(right != pivot) {
@@ -4260,28 +4261,28 @@ void intro_quick_sort(Itr beg, Itr end) {
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
+				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
 			if(dist1 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
+				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
 		} else {
 			if(dist1 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
+				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
 			if(dist2 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
+				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
 		}
 	}
 }
 template<typename Itr, typename Comp>
-void intro_quick_sort(Itr beg, Itr end, Comp cmp) {
+void intro_quick_sort_internal(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
-	unsigned maxdepth = stlib_internal::get_depth(distance(beg, end));
+	unsigned maxdepth = get_depth(distance(beg, end));
 
 	//add a stack item
-	std::vector<stlib_internal::intro_stack_less_data<Itr>> stk;
+	std::vector<intro_stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stlib_internal::intro_stack_less_data<Itr> dat = {
+	intro_stack_less_data<Itr> dat = {
 		beg,
 		end - 1,
 		maxdepth
@@ -4289,18 +4290,18 @@ void intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stlib_internal::intro_stack_less_data<Itr> tmp = stk[--idx];
+		intro_stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
-		Itr pivot = stlib_internal::middle_of_three(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, cmp);
+		Itr pivot = middle_of_three(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, cmp);
 
 		do {
 			++left;
 			--right;
 			//pivot goes to the right!!
-			while(left != right && left != pivot && stlib_internal::less_func(*left, *pivot, cmp))
+			while(left != right && left != pivot && less_func(*left, *pivot, cmp))
 				++left;
-			while(left != right && stlib_internal::greater_equal_func(*right, *pivot, cmp))
+			while(left != right && greater_equal_func(*right, *pivot, cmp))
 				--right;
 			if(left == right)
 				break;
@@ -4312,7 +4313,7 @@ void intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 
 		//if right is on the less side, move back
 		if(right != pivot) {
-			if(stlib_internal::less_func(*right, *pivot, cmp))
+			if(less_func(*right, *pivot, cmp))
 				++right;
 			//move the pivot into place
 			if(right != pivot) {
@@ -4326,30 +4327,44 @@ void intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
+				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
 			if(dist1 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
+				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
 		} else {
 			if(dist1 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
+				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
 			if(dist2 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
+				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
 		}
 	}
 }
+}
 
+template<typename Itr>
+void intro_quick_sort(Itr beg, Itr end) {
+	stlib_internal::intro_quick_sort_internal(beg, end);
 
+	insertion_sort(beg, end);
+}
+template<typename Itr, typename Comp>
+void intro_quick_sort(Itr beg, Itr end, Comp cmp) {
+	stlib_internal::intro_quick_sort_internal(beg, end, cmp);
+
+	insertion_sort(beg, end, cmp);
+}
+
+namespace stlib_internal {
 template<typename Itr>
 void adaptive_intro_quick_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
 		return;
-	unsigned maxdepth = stlib_internal::get_depth(distance(beg, end));
+	unsigned maxdepth = get_depth(distance(beg, end));
 
 	//add a stack item
-	std::vector<stlib_internal::intro_stack_less_data<Itr>> stk;
+	std::vector<intro_stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stlib_internal::intro_stack_less_data<Itr> dat = {
+	intro_stack_less_data<Itr> dat = {
 		beg,
 		end - 1,
 		maxdepth
@@ -4357,20 +4372,20 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stlib_internal::intro_stack_less_data<Itr> tmp = stk[--idx];
+		intro_stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
 		unsigned swaps = 0;
-		if(!stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot)) continue;
+		if(!middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot)) continue;
 
 		do {
 			++left;
 			--right;
 			//pivot goes to the right!!
-			while(left != right && left != pivot && stlib_internal::less_func(*left, *pivot))
+			while(left != right && left != pivot && less_func(*left, *pivot))
 				++left;
-			while(left != right && stlib_internal::greater_equal_func(*right, *pivot))
+			while(left != right && greater_equal_func(*right, *pivot))
 				--right;
 			if(left == right)
 				break;
@@ -4383,7 +4398,7 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 
 		//if right is on the less side, move back
 		if(right != pivot) {
-			if(stlib_internal::less_func(*right, *pivot))
+			if(less_func(*right, *pivot))
 				++right;
 			//move the pivot into place
 			if(right != pivot) {
@@ -4400,14 +4415,14 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
+				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
 			if(dist1 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
+				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
 		} else {
 			if(dist1 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
+				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
 			if(dist2 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
+				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
 		}
 	}
 }
@@ -4415,13 +4430,13 @@ template<typename Itr, typename Comp>
 void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return;
-	unsigned maxdepth = stlib_internal::get_depth(distance(beg, end));
+	unsigned maxdepth = get_depth(distance(beg, end));
 
 	//add a stack item
-	std::vector<stlib_internal::intro_stack_less_data<Itr>> stk;
+	std::vector<intro_stack_less_data<Itr>> stk;
 	stk.resize(15);
 	size_t idx = 0;
-	stlib_internal::intro_stack_less_data<Itr> dat = {
+	intro_stack_less_data<Itr> dat = {
 		beg,
 		end - 1,
 		maxdepth
@@ -4429,20 +4444,20 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 	stk[idx++] = std::move(dat);
 
 	while(idx > 0) {
-		stlib_internal::intro_stack_less_data<Itr> tmp = stk[--idx];
+		intro_stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
 		Itr pivot;
 		unsigned swaps = 0;
-		if(!stlib_internal::middle_of_four(tmp.beg, stlib_internal::half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp)) continue;
+		if(!middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp)) continue;
 
 		do {
 			++left;
 			--right;
 			//pivot goes to the right!!
-			while(left != right && left != pivot && stlib_internal::less_func(*left, *pivot, cmp))
+			while(left != right && left != pivot && less_func(*left, *pivot, cmp))
 				++left;
-			while(left != right && stlib_internal::greater_equal_func(*right, *pivot, cmp))
+			while(left != right && greater_equal_func(*right, *pivot, cmp))
 				--right;
 			if(left == right)
 				break;
@@ -4455,7 +4470,7 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 
 		//if right is on the less side, move back
 		if(right != pivot) {
-			if(stlib_internal::less_func(*right, *pivot, cmp))
+			if(less_func(*right, *pivot, cmp))
 				++right;
 			//move the pivot into place
 			if(right != pivot) {
@@ -4472,28 +4487,29 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
+				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
 			if(dist1 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
+				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
 		} else {
 			if(dist1 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
+				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
 			if(dist2 > INSERTION_SORT_CUTOFF)
-				stlib_internal::add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
+				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
 		}
 	}
+}
 }
 
 
 template<typename Itr>
 inline void intro_sort(Itr beg, Itr end) {
-	adaptive_intro_quick_sort(beg, end);
+	stlib_internal::adaptive_intro_quick_sort(beg, end);
 
 	insertion_sort(beg, end);
 }
 template<typename Itr, typename Comp>
 inline void intro_sort(Itr beg, Itr end, Comp cmp) {
-	adaptive_intro_quick_sort(beg, end, cmp);
+	stlib_internal::adaptive_intro_quick_sort(beg, end, cmp);
 
 	insertion_sort(beg, end, cmp);
 }
