@@ -342,7 +342,7 @@ template<typename Itr>
 void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
 					std::vector<intro_stack_less_data<Itr>>& stk, size_t& idx) {
 	if(depth == 1) {
-		//do O(n log n) zip sort if we have reached the maximum depth
+		//do O(n log n) rotate merge if we have reached the maximum depth
 		rotate_merge_sort(beg1, end1);
 	} else {
 		intro_stack_less_data<Itr> dat = {
@@ -359,7 +359,7 @@ template<typename Itr, typename Comp>
 void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
 					std::vector<intro_stack_less_data<Itr>>& stk, size_t& idx, Comp cmp) {
 	if(depth == 1) {
-		//do O(n log n) zip sort if we have reached the maximum depth
+		//do O(n log n) rotate merge if we have reached the maximum depth
 		rotate_merge_sort(beg1, end1, cmp);
 	} else {
 		intro_stack_less_data<Itr> dat = {
