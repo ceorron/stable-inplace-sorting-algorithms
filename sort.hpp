@@ -976,6 +976,105 @@ void binary_insertion_sort(Itr beg, Itr end, Comp cmp) {
 	}
 }
 
+
+template<typename Itr>
+void selection_sort(Itr beg, Itr end) {
+	auto dist = distance(beg, end);
+	if(dist <= 1)
+		return;
+
+	Itr endp = end; --endp;
+	for(; endp != beg; --endp) {
+		Itr largest = endp;
+		for(Itr bg = beg; bg != endp; ++bg)
+			if(stlib_internal::greater_equal_func(*bg, *largest))
+				largest = bg;
+		//swap endp with largest
+		if(endp != largest)
+			std::swap(*endp, *largest);
+	}
+}
+template<typename Itr, typename Comp>
+void selection_sort(Itr beg, Itr end, Comp cmp) {
+	auto dist = distance(beg, end);
+	if(dist <= 1)
+		return;
+
+	Itr endp = end; --endp;
+	for(; endp != beg; --endp) {
+		Itr largest = endp;
+		for(Itr bg = beg; bg != endp; ++bg)
+			if(stlib_internal::greater_equal_func(*bg, *largest, cmp))
+				largest = bg;
+		//swap endp with largest
+		if(endp != largest)
+			std::swap(*endp, *largest);
+	}
+}
+template<typename Itr>
+void double_selection_sort(Itr beg, Itr end) {
+	auto dist = distance(beg, end);
+	if(dist <= 1)
+		return;
+
+	Itr endp = end; --endp;
+	for(; beg + 1 != endp && endp != beg; ++beg, --endp) {
+		//ensure we have the larger and the smaller of the end items tested with each other
+		if(stlib_internal::less_func(*endp, *beg))
+			std::swap(*beg, *endp);
+		//find the smallest and the largest
+		Itr smallest = beg;
+		Itr largest = endp;
+		for(Itr bg = beg + 1; bg != endp; ++bg) {
+			if(stlib_internal::less_func(*bg, *smallest))
+				smallest = bg;
+			if(stlib_internal::greater_equal_func(*bg, *largest))
+				largest = bg;
+		}
+		//swap beg with smallest
+		if(beg != smallest)
+			std::swap(*beg, *smallest);
+		//swap endp with largest
+		if(endp != largest)
+			std::swap(*endp, *largest);
+	}
+
+	if(beg + 1 == endp && stlib_internal::less_func(*endp, *beg))
+		std::swap(*beg, *endp);
+}
+template<typename Itr, typename Comp>
+void double_selection_sort(Itr beg, Itr end, Comp cmp) {
+	auto dist = distance(beg, end);
+	if(dist <= 1)
+		return;
+
+	Itr endp = end; --endp;
+	for(; beg + 1 != endp && endp != beg; ++beg, --endp) {
+		//ensure we have the larger and the smaller of the end items tested with each other
+		if(stlib_internal::less_func(*endp, *beg, cmp))
+			std::swap(*beg, *endp);
+		//find the smallest and the largest
+		Itr smallest = beg;
+		Itr largest = endp;
+		for(Itr bg = beg + 1; bg != endp; ++bg) {
+			if(stlib_internal::less_func(*bg, *smallest, cmp))
+				smallest = bg;
+			if(stlib_internal::greater_equal_func(*bg, *largest, cmp))
+				largest = bg;
+		}
+		//swap beg with smallest
+		if(beg != smallest)
+			std::swap(*beg, *smallest);
+		//swap endp with largest
+		if(endp != largest)
+			std::swap(*endp, *largest);
+	}
+
+	if(beg + 1 == endp && stlib_internal::less_func(*endp, *beg, cmp))
+		std::swap(*beg, *endp);
+}
+
+
 template<typename Itr>
 void quick_sort(Itr beg, Itr end) {
 	if(distance(beg, end) <= 1)
