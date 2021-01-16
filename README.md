@@ -6,10 +6,10 @@ They have the following characteristics.
 
 | Name | Inplace | Stable | Average complexity (Big O) | Worst case complexity (Big O) | Stack memory | Additional memory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: |
-| selection_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1860 | 9042992 |
+| selection_sort | Yes | No | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1860 | 9042992 |
 | bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 735 | 8395577 |
 | cocktail_shaker_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 884 | 5872503 |
-| double_selection_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 941 | 4546028 |
+| double_selection_sort | Yes | No | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 941 | 4546028 |
 | inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 260 | 946125 |
 | hybrid_inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 212 | 841530 |
 | insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 177 | 758073 |
