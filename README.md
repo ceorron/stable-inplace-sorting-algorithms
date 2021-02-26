@@ -43,7 +43,7 @@ This is presented for those looking to study some new sorting techniques and who
 The idea for merge_sweep_sort and zip_sort came from the idea of using std::rotate as part of a recursive decent sorting algorithm, and so merge_sweep_sort and zip_sort make use of the rotate function. zip_sort came later and was added in May 2020.
 
 hybrid_rotate_merge_sort gives the best overall performance for an in-place, stable sorting algorithm that uses no additional memory.
-zip_sort gives the best overall performance for an in-place, stable sorting algorithm that uses constant memory space, as well as giving O(n log n) worst case performance. As of June 2020 a new much faster version of zip_sort was created, named new_zip_sort, this is new a version of the original idea but instead of appending to the end of the middle buffer new_zip_sort simply keeps track of the contents of the middle buffer as it is built, this gives new_zip_sort a different memory/performance profile than zip_sort that can be seen in the table above.
+zip_sort gives the best overall performance for an in-place, stable sorting algorithm that uses constant memory space, as well as giving O(n log n) worst case performance. As of June 2020 a new much faster version of zip_sort was created, named new_zip_sort, this is a new version of the original idea but instead of appending to the end of the middle buffer new_zip_sort simply keeps track of the contents of the middle buffer as it is built, this gives new_zip_sort a different memory/performance profile than zip_sort that can be seen in the table above.
 
 merge_sweep_sort could be said to be quick_sort like algorithm.
 
