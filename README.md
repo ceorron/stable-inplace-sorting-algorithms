@@ -35,7 +35,7 @@ They have the following characteristics.
 (All tests with MSVC compiler in release x64)
 (times in microseconds, times are only indicitive as they are somewhat data dependant)
 
-NOTE: as default zip_sort and merge_sort (and hybird_zip_sort, hybird_merge_sort) use the optimised constant stack memory algorithm (1).
+NOTE: as default zip_sort and merge_sort (and hybrid_zip_sort, hybrid_merge_sort) use the optimised constant stack memory algorithm (1).
 Also sweep_sort has since been removed entirely due to redundancy (slower than both zip_sort and merge_sweep_sort).
 
 This is presented for those looking to study some new sorting techniques and who are interested in sorting algorithms in general.
@@ -57,7 +57,7 @@ As of May 2020 we introduced intro_sort, this is an implementation similar to st
 
 Adaptive version of stable_quick_sort and intro_sort use a more complex function for finding a pivot, this has a minor, but non-zero, overhead. This is to avoid the probable worst case performance that occurs in quick_sort when the input data is flat (aka many items in the input list are equal) or when the input is already sorted/partially sorted. Meaning these versions of algorithms stable_quick_sort and intro_sort perform much better in scenarios where there are some equal/sorted items in the input list, and so should be prefered, but are otherwise identical to those algorithms.
 
-hybrid_rotate_merge_sort, hybrid_zip_sort, hybrid_new_zip_sort and hybrid_merge_sort are hybird sorting algorithms, combining insertion_sort with their respective algorithms, and as a result are faster variations of rotate_merge_sort, zip_sort, new_zip_sort and merge_sort respectively.
+hybrid_rotate_merge_sort, hybrid_zip_sort, hybrid_new_zip_sort and hybrid_merge_sort are hybrid sorting algorithms, combining insertion_sort with their respective algorithms, and as a result are faster variations of rotate_merge_sort, zip_sort, new_zip_sort and merge_sort respectively.
 
 binary_insertion_sort is a re-thought insertion_sort that searches in the sorted part of the list using binary search to find the insertion point. The algorithm is still does O(n<sup>2</sup>) writes, best and worst case, but now only does O(n log n) comparisons and so is faster in some cases. NOTE binary_insertion_sort is still slower than insertion_sort when sorting a small number of items.
 
@@ -254,7 +254,7 @@ int main() {
 
         {
             timer tmr;
-            stlib::hybird_inplace_merge_sort(vec.begin(), vec.end());
+            stlib::hybrid_inplace_merge_sort(vec.begin(), vec.end());
         }
 
         if(verbose) {
@@ -302,7 +302,7 @@ int main() {
 
         {
             timer tmr;
-            stlib::hybird_rotate_merge_sort(vec.begin(), vec.end());
+            stlib::hybrid_rotate_merge_sort(vec.begin(), vec.end());
         }
 
         if(verbose) {
