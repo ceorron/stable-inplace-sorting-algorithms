@@ -50,6 +50,55 @@ template<typename Itr, typename Comp>
 void rotate_merge_sort(Itr beg, Itr end, Comp cmp);
 
 namespace stlib_internal {
+
+template<typename Itr, typename IdxItr>
+void stable_rotate_merge_sort(Itr strt, Itr beg, Itr end, IdxItr begidx);
+template<typename Itr, typename IdxItr, typename Comp>
+void stable_rotate_merge_sort(Itr strt, Itr beg, Itr end, IdxItr begidx, Comp cmp);
+
+
+template<typename Itr, typename IdxItr>
+void stable_insertion_sort(Itr beg, Itr end, IdxItr begidx) {
+	if(distance(beg, end) <= 1)
+		return;
+	Itr strt = beg + 1;
+	for(; strt != end; ++strt) {
+		Itr crnt = strt;
+
+		//move this to the correct place (do insert)
+		while(crnt != beg && stable_quick_sort_greater_func(beg, crnt - 1, crnt, begidx)) {
+			//swap if in wrong order
+			std::swap(*crnt, *(crnt - 1));
+			//also swap the indexes
+			auto dista = distance(beg, crnt);
+			auto distb = distance(beg, crnt - 1);
+			std::swap(*(begidx + dista), *(begidx + distb));
+			--crnt;
+		}
+	}
+}
+template<typename Itr, typename IdxItr, typename Comp>
+void stable_insertion_sort(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	Itr strt = beg + 1;
+	for(; strt != end; ++strt) {
+		Itr crnt = strt;
+
+		//move this to the correct place (do insert)
+		while(crnt != beg && stable_quick_sort_greater_func(beg, crnt - 1, crnt, begidx, cmp)) {
+			//swap if in wrong order
+			std::swap(*crnt, *(crnt - 1));
+			//also swap the indexes
+			auto dista = distance(beg, crnt);
+			auto distb = distance(beg, crnt - 1);
+			std::swap(*(begidx + dista), *(begidx + distb));
+			--crnt;
+		}
+	}
+}
+
+
 template<typename T>
 struct value_for {
     //for iterators
@@ -136,6 +185,25 @@ void rotate(Itr first, Itr middle, Itr last) {
 	Itr next = middle;
 	while(first != next) {
 		std::swap(*first++, *next++);
+		if(next == last) next = middle;
+		else if(first == middle) middle = next;
+	}
+}
+template<typename Itr, typename IdxItr>
+void stable_rotate(Itr strt, Itr first, Itr middle, Itr last, IdxItr begidx) {
+	if(middle == last)
+		return;
+	Itr next = middle;
+	while(first != next) {
+		//swap
+		std::swap(*first, *next);
+		//also swap the indexes
+		auto dista = distance(strt, first);
+		auto distb = distance(strt, next);
+		std::swap(*(begidx + dista), *(begidx + distb));
+
+		++first;
+		++next;
 		if(next == last) next = middle;
 		else if(first == middle) middle = next;
 	}
@@ -361,6 +429,40 @@ void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
 	if(depth == 1) {
 		//do O(n log n) rotate merge if we have reached the maximum depth
 		rotate_merge_sort(beg1, end1, cmp);
+	} else {
+		intro_stack_less_data<Itr> dat = {
+			beg2,
+			end2,
+			depth - 1
+		};
+		stk[idx++] = std::move(dat);
+		if(idx == stk.size())
+			stk.resize(stk.size() * 2);
+	}
+}
+template<typename Itr, typename IdxItr>
+void stable_add_stack_item(Itr beg, Itr beg1, Itr end1, Itr beg2, Itr end2, IdxItr begidx, unsigned depth,
+						   vector<intro_stack_less_data<Itr>>& stk, size_t& idx) {
+	if(depth == 1) {
+		//do O(n log n) inplace rotate merge sort if we have reached the maximum depth
+		stable_rotate_merge_sort(beg, beg1, end1, begidx);
+	} else {
+		intro_stack_less_data<Itr> dat = {
+			beg2,
+			end2,
+			depth - 1
+		};
+		stk[idx++] = std::move(dat);
+		if(idx == stk.size())
+			stk.resize(stk.size() * 2);
+	}
+}
+template<typename Itr, typename IdxItr, typename Comp>
+void stable_add_stack_item(Itr beg, Itr beg1, Itr end1, Itr beg2, Itr end2, IdxItr begidx, unsigned depth,
+						   vector<intro_stack_less_data<Itr>>& stk, size_t& idx, Comp cmp) {
+	if(depth == 1) {
+		//do O(n log n) inplace rotate merge sort if we have reached the maximum depth
+		stable_rotate_merge_sort(beg, beg1, end1, begidx, cmp);
 	} else {
 		intro_stack_less_data<Itr> dat = {
 			beg2,
@@ -737,6 +839,62 @@ bool binary_search(Itr beg, Itr end, const T& item,
 			count = step;
 	}
 	return out != end && stlib_internal::greater_equal_func(*out, item, comp) && stlib_internal::less_equal_func(*out, item, comp);
+}
+namespace stlib_internal {
+template<typename Itr, typename IdxItr>
+bool stable_binary_search(Itr strt, Itr beg, Itr end, Itr item, IdxItr begidx,
+						  Itr& out) {
+	//binary search return the insertion point, in both the found and not found case
+	ptrdiff_t sze = distance(beg, end);
+	if(sze == 0) {
+		out = end;
+		return false;
+	}
+
+	out = beg;
+	ptrdiff_t step = 0;
+	ptrdiff_t count = sze;
+
+	//returns first element greater than or equal to the element
+	while(count > 0) {
+		auto it = out;
+		step = count / 2;
+		it += step;
+		if(stable_quick_sort_less_func(strt, it, item, begidx)) {
+			out = ++it;
+			count -= step + 1;
+		} else
+			count = step;
+	}
+	return out != end && stable_quick_sort_greater_equal_func(strt, out, item, begidx) && stable_quick_sort_less_equal_func(strt, out, item, begidx);
+}
+template<typename Itr, typename IdxItr, typename Less>
+bool stable_binary_search(Itr strt, Itr beg, Itr end, Itr item, IdxItr begidx,
+						  Less comp, Itr& out) {
+	//binary search return the insertion point, in both the found and not found case
+	ptrdiff_t sze = distance(beg, end);
+	if(sze == 0) {
+		out = end;
+		return false;
+	}
+
+	out = beg;
+	ptrdiff_t step = 0;
+	ptrdiff_t count = sze;
+
+	//returns first element greater than or equal to the element
+	while(count > 0) {
+		auto it = out;
+		step = count / 2;
+		it += step;
+		if(stable_quick_sort_less_func(strt, it, item, begidx, comp)) {
+			out = ++it;
+			count -= step + 1;
+		} else
+			count = step;
+	}
+	return out != end && stable_quick_sort_greater_equal_func(strt, out, item, begidx, comp) && stable_quick_sort_less_equal_func(strt, out, item, begidx, comp);
+}
 }
 
 
@@ -1405,14 +1563,14 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
-				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
+				stable_add_stack_item(beg, tmp.beg, pivot, tmp.beg, pivot - 1, begidx, tmp.depth, stk, idx);
 			if(dist1 > INSERTION_SORT_CUTOFF)
-				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
+				stable_add_stack_item(beg, pivot + 1, tmp.end + 1, pivot + 1, tmp.end, begidx, tmp.depth, stk, idx);
 		} else {
 			if(dist1 > INSERTION_SORT_CUTOFF)
-				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx);
+				stable_add_stack_item(beg, pivot + 1, tmp.end + 1, pivot + 1, tmp.end, begidx, tmp.depth, stk, idx);
 			if(dist2 > INSERTION_SORT_CUTOFF)
-				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx);
+				stable_add_stack_item(beg, tmp.beg, pivot, tmp.beg, pivot - 1, begidx, tmp.depth, stk, idx);
 		}
 	}
 }
@@ -1437,7 +1595,7 @@ void adaptive_stable_intro_sort(Itr beg, Itr end) {
 		idxs[i] = i;
 	stlib_internal::adaptive_stable_intro_sort_internal(beg, end, idxs.begin());
 
-	insertion_sort(beg, end);
+	stlib_internal::stable_insertion_sort(beg, end, idxs.begin());
 }
 namespace stlib_internal {
 template<typename Itr, typename IdxItr, typename Comp>
@@ -1644,14 +1802,14 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		//implements sort shorter first optimisation
 		if(dist1 < dist2) {
 			if(dist2 > INSERTION_SORT_CUTOFF)
-				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
+				stable_add_stack_item(beg, tmp.beg, pivot, tmp.beg, pivot - 1, begidx, tmp.depth, stk, idx, cmp);
 			if(dist1 > INSERTION_SORT_CUTOFF)
-				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
+				stable_add_stack_item(beg, pivot + 1, tmp.end + 1, pivot + 1, tmp.end, begidx, tmp.depth, stk, idx, cmp);
 		} else {
 			if(dist1 > INSERTION_SORT_CUTOFF)
-				add_stack_item(pivot + 1, tmp.end + 1, pivot + 1, tmp.end, tmp.depth, stk, idx, cmp);
+				stable_add_stack_item(beg, pivot + 1, tmp.end + 1, pivot + 1, tmp.end, begidx, tmp.depth, stk, idx, cmp);
 			if(dist2 > INSERTION_SORT_CUTOFF)
-				add_stack_item(tmp.beg, pivot, tmp.beg, pivot - 1, tmp.depth, stk, idx, cmp);
+				stable_add_stack_item(beg, tmp.beg, pivot, tmp.beg, pivot - 1, begidx, tmp.depth, stk, idx, cmp);
 		}
 	}
 }
@@ -1676,7 +1834,7 @@ void adaptive_stable_intro_sort(Itr beg, Itr end, Comp cmp) {
 		idxs[i] = i;
 	stlib_internal::adaptive_stable_intro_sort_internal(beg, end, idxs.begin(), cmp);
 
-	insertion_sort(beg, end, cmp);
+	stlib_internal::stable_insertion_sort(beg, end, idxs.begin(), cmp);
 }
 
 
@@ -2913,6 +3071,173 @@ void hybrid_rotate_merge_sort(Itr beg, Itr end, Comp cmp) {
 		}
 		len *= 2;
 	}
+}
+
+
+namespace stlib_internal {
+//for use with stable intro sort (depth > maxdepth)
+template<typename Itr, typename IdxItr>
+void stable_inner_rotate_merge(Itr strt, Itr beg1, Itr beg2, Itr end2, IdxItr begidx, Itr& out) {
+	//if size == 0 return
+	uint64_t sze = distance(beg1, beg2);
+	if(sze == 0)
+		return;
+
+	//search through the right for the position of the first from the left hand side
+	Itr tmp;
+	bool found = stable_binary_search(strt, beg2, end2, beg1, begidx, tmp);
+	if(found) {
+		//if we are moving in an equal item, move to the left while we are looking at equal items (ensures stable ordering)
+		--tmp;
+		for(; tmp != (beg2 - 1) && stable_quick_sort_equal_func(strt, beg1, tmp, begidx); --tmp);
+		++tmp;
+	}
+	uint64_t pos = distance(beg2, tmp);
+
+	//rotate so that all of the left is in the correct position
+	stable_rotate(strt, beg1, beg2, tmp, begidx);
+	out = beg1 + pos;
+
+	if(sze == 1) return;
+
+	//call rotate merge on top half of the left side
+	Itr nbeg1_1 = out + sze / 2;
+	Itr nbeg2_1 = out + sze;
+	Itr nend2_1 = end2;
+	Itr nout_1;
+	stable_inner_rotate_merge(strt, nbeg1_1, nbeg2_1, nend2_1, begidx, nout_1);
+
+	if(sze >= 2) {
+		//call rotate merge on bottom half of the left side (also advance 1 forward as this is now in the correct place)
+		Itr nbeg1_2 = out + 1;
+		Itr nbeg2_2 = out + sze / 2;
+		Itr nend2_2 = nout_1;
+		Itr nout_2;
+		stable_inner_rotate_merge(strt, nbeg1_2, nbeg2_2, nend2_2, begidx, nout_2);
+	}
+}
+template<typename Itr, typename IdxItr>
+void stable_rotate_merge(Itr strt, Itr beg1, Itr beg2, Itr end2, IdxItr begidx) {
+	//half the left, do this before doing rotate merge (reduces initial rotate cost considerably)
+	uint64_t sze = distance(beg1, beg2);
+	if(sze == 0)
+		return;
+
+	Itr nout_1 = end2;
+	while(sze > 0) {
+		Itr nbeg1_1 = beg1 + sze / 2;
+		Itr nbeg2_1 = beg1 + sze;
+		Itr nend2_1 = nout_1;
+		stable_inner_rotate_merge(strt, nbeg1_1, nbeg2_1, nend2_1, begidx, nout_1);
+		sze /= 2;
+	}
+}
+template<typename Itr, typename IdxItr>
+void stable_rotate_merge_sort(Itr strt, Itr beg, Itr end, IdxItr begidx) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = 1;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, merge them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do rotate merge
+			stable_rotate_merge(strt, cleft, cright, cend, begidx);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
+
+
+template<typename Itr, typename IdxItr, typename Comp>
+void stable_inner_rotate_merge(Itr strt, Itr beg1, Itr beg2, Itr end2, IdxItr begidx, Comp cmp, Itr& out) {
+	//if size == 0 return
+	uint64_t sze = distance(beg1, beg2);
+	if(sze == 0)
+		return;
+
+	//search through the right for the position of the first from the left hand side
+	Itr tmp;
+	bool found = stable_binary_search(strt, beg2, end2, beg1, begidx, cmp, tmp);
+	if(found) {
+		//if we are moving in an equal item, move to the left while we are looking at equal items (ensures stable ordering)
+		--tmp;
+		for(; tmp != (beg2 - 1) && stable_quick_sort_equal_func(strt, beg1, tmp, begidx, cmp); --tmp);
+		++tmp;
+	}
+	uint64_t pos = distance(beg2, tmp);
+
+	//rotate so that all of the left is in the correct position
+	stable_rotate(strt, beg1, beg2, tmp, begidx);
+	out = beg1 + pos;
+
+	if(sze == 1) return;
+
+	//call rotate merge on top half of the left side
+	Itr nbeg1_1 = out + sze / 2;
+	Itr nbeg2_1 = out + sze;
+	Itr nend2_1 = end2;
+	Itr nout_1;
+	stable_inner_rotate_merge(strt, nbeg1_1, nbeg2_1, nend2_1, begidx, cmp, nout_1);
+
+	if(sze >= 2) {
+		//call rotate merge on bottom half of the left side (also advance 1 forward as this is now in the correct place)
+		Itr nbeg1_2 = out + 1;
+		Itr nbeg2_2 = out + sze / 2;
+		Itr nend2_2 = nout_1;
+		Itr nout_2;
+		stable_inner_rotate_merge(strt, nbeg1_2, nbeg2_2, nend2_2, begidx, cmp, nout_2);
+	}
+}
+template<typename Itr, typename IdxItr, typename Comp>
+void stable_rotate_merge(Itr strt, Itr beg1, Itr beg2, Itr end2, IdxItr begidx, Comp cmp) {
+	//half the left, do this before doing rotate merge (reduces initial rotate cost considerably)
+	uint64_t sze = distance(beg1, beg2);
+	if(sze == 0)
+		return;
+
+	Itr nout_1 = end2;
+	while(sze > 0) {
+		Itr nbeg1_1 = beg1 + sze / 2;
+		Itr nbeg2_1 = beg1 + sze;
+		Itr nend2_1 = nout_1;
+		stable_inner_rotate_merge(strt, nbeg1_1, nbeg2_1, nend2_1, begidx, cmp, nout_1);
+		sze /= 2;
+	}
+}
+template<typename Itr, typename IdxItr, typename Comp>
+void stable_rotate_merge_sort(Itr strt, Itr beg, Itr end, IdxItr begidx, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//go through all of the lengths starting at 1 doubling
+	uint64_t len = 1;
+	while(len < sze) {
+		uint64_t pos = 0;
+		//go through all of the sorted sublists, merge them together
+		while(pos + len < sze) {
+			//make the two halves
+			Itr cleft = beg + pos;
+			Itr cright = cleft + len;
+			Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+			//do rotate merge
+			stable_rotate_merge(strt, cleft, cright, cend, begidx, cmp);
+			pos += (len * 2);
+		}
+		len *= 2;
+	}
+}
 }
 
 
