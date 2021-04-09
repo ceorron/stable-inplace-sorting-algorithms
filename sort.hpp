@@ -55,6 +55,8 @@ template<typename Itr, typename IdxItr>
 void stable_rotate_merge_sort(Itr strt, Itr beg, Itr end, IdxItr begidx);
 template<typename Itr, typename IdxItr, typename Comp>
 void stable_rotate_merge_sort(Itr strt, Itr beg, Itr end, IdxItr begidx, Comp cmp);
+template<typename Itr, typename IdxItr>
+void stable_quick_sort_swap(Itr beg, Itr left, Itr right, IdxItr begidx);
 
 
 template<typename Itr, typename IdxItr>
@@ -68,11 +70,7 @@ void stable_insertion_sort(Itr beg, Itr end, IdxItr begidx) {
 		//move this to the correct place (do insert)
 		while(crnt != beg && stable_quick_sort_greater_func(beg, crnt - 1, crnt, begidx)) {
 			//swap if in wrong order
-			std::swap(*crnt, *(crnt - 1));
-			//also swap the indexes
-			auto dista = distance(beg, crnt);
-			auto distb = distance(beg, crnt - 1);
-			std::swap(*(begidx + dista), *(begidx + distb));
+			stable_quick_sort_swap(beg, crnt, crnt - 1, begidx);
 			--crnt;
 		}
 	}
@@ -88,11 +86,7 @@ void stable_insertion_sort(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
 		//move this to the correct place (do insert)
 		while(crnt != beg && stable_quick_sort_greater_func(beg, crnt - 1, crnt, begidx, cmp)) {
 			//swap if in wrong order
-			std::swap(*crnt, *(crnt - 1));
-			//also swap the indexes
-			auto dista = distance(beg, crnt);
-			auto distb = distance(beg, crnt - 1);
-			std::swap(*(begidx + dista), *(begidx + distb));
+			stable_quick_sort_swap(beg, crnt, crnt - 1, begidx);
 			--crnt;
 		}
 	}
@@ -196,12 +190,7 @@ void stable_rotate(Itr strt, Itr first, Itr middle, Itr last, IdxItr begidx) {
 	Itr next = middle;
 	while(first != next) {
 		//swap
-		std::swap(*first, *next);
-		//also swap the indexes
-		auto dista = distance(strt, first);
-		auto distb = distance(strt, next);
-		std::swap(*(begidx + dista), *(begidx + distb));
-
+		stable_quick_sort_swap(strt, first, next, begidx);
 		++first;
 		++next;
 		if(next == last) next = middle;
@@ -230,6 +219,11 @@ bool stable_quick_sort_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
 	return false;
 }
 template<typename Itr, typename IdxItr>
+bool stable_quick_sort_not_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
+	//items are never equal in stable sort as indexes are always unique
+	return true;
+}
+template<typename Itr, typename IdxItr>
 bool stable_quick_sort_less_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
 	if(less_func(*left, *right))
 		return true;
@@ -255,11 +249,8 @@ bool stable_quick_sort_less_equal_func(Itr beg, Itr left, Itr right, IdxItr begi
 		return true;
 	if(greater_func(*left, *right))
 		return false;
-	size_t lidx = distance(beg, left);
-	size_t ridx = distance(beg, right);
-	if(*(begidx + lidx) < *(begidx + ridx))
-		return true;
-	return *(begidx + lidx) == *(begidx + ridx);
+	//never equal
+	return false;
 }
 template<typename Itr, typename IdxItr>
 bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
@@ -267,11 +258,8 @@ bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr b
 		return false;
 	if(greater_func(*left, *right))
 		return true;
-	size_t lidx = distance(beg, left);
-	size_t ridx = distance(beg, right);
-	if(*(begidx + lidx) > *(begidx + ridx))
-		return true;
-	return *(begidx + lidx) == *(begidx + ridx);
+	//never equal
+	return false;
 }
 template<typename Itr, typename IdxItr>
 bool stable_quick_sort_is_sorted(Itr start, Itr beg, Itr end, IdxItr begidx) {
@@ -318,11 +306,8 @@ bool stable_quick_sort_less_equal_func(Itr beg, Itr left, Itr right, IdxItr begi
 		return true;
 	if(greater_func(*left, *right, cmp))
 		return false;
-	size_t lidx = distance(beg, left);
-	size_t ridx = distance(beg, right);
-	if(*(begidx + lidx) < *(begidx + ridx))
-		return true;
-	return *(begidx + lidx) == *(begidx + ridx);
+	//never equal
+	return false;
 }
 template<typename Itr, typename IdxItr, typename Comp>
 bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx, Comp cmp) {
@@ -330,11 +315,8 @@ bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr b
 		return false;
 	if(greater_func(*left, *right, cmp))
 		return true;
-	size_t lidx = distance(beg, left);
-	size_t ridx = distance(beg, right);
-	if(*(begidx + lidx) > *(begidx + ridx))
-		return true;
-	return *(begidx + lidx) == *(begidx + ridx);
+	//never equal
+	return false;
 }
 template<typename Itr, typename IdxItr, typename Comp>
 bool stable_quick_sort_is_sorted(Itr start, Itr beg, Itr end, IdxItr begidx, Comp cmp) {
