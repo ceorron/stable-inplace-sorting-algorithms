@@ -250,7 +250,9 @@ bool stable_quick_sort_less_equal_func(Itr beg, Itr left, Itr right, IdxItr begi
 	if(greater_func(*left, *right))
 		return false;
 	//never equal
-	return false;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	return *(begidx + lidx) < *(begidx + ridx);
 }
 template<typename Itr, typename IdxItr>
 bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr begidx) {
@@ -259,7 +261,9 @@ bool stable_quick_sort_greater_equal_func(Itr beg, Itr left, Itr right, IdxItr b
 	if(greater_func(*left, *right))
 		return true;
 	//never equal
-	return false;
+	size_t lidx = distance(beg, left);
+	size_t ridx = distance(beg, right);
+	return *(begidx + lidx) > *(begidx + ridx);
 }
 template<typename Itr, typename IdxItr>
 bool stable_quick_sort_is_sorted(Itr start, Itr beg, Itr end, IdxItr begidx) {
