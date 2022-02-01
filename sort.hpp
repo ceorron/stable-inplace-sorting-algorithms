@@ -513,7 +513,7 @@ Itr middle_of_three(Itr first, Itr middle, Itr last, Comp cmp) {
 	}
 }
 template<typename Itr>
-bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out) {
+bool middle_of_four(Itr first, Itr middle, Itr last) {
 	//do upfront comparison
 	bool first_middle = less_func(*first, *middle);
 	bool middle_first = less_func(*middle, *first);
@@ -525,44 +525,30 @@ bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out) {
 	bool first_last = less_func(*first, *last);
 
 	//if two of them are the same then choose the other one
-	if(equal_func_bool(first_middle, middle_first) & !equal_func_bool(middle_last, last_middle)) {
-		out = last;
-		return true;
-	}
-	if(equal_func_bool(middle_last, last_middle) & !equal_func_bool(first_middle, middle_first)) {
-		out = first;
-		return true;
-	}
-	if(equal_func_bool(last_first, first_last) & !equal_func_bool(middle_last, last_middle)) {
-		out = middle;
-		return true;
-	}
+	if(equal_func_bool(first_middle, middle_first) & !equal_func_bool(middle_last, last_middle))
+		return last;
+	if(equal_func_bool(middle_last, last_middle) & !equal_func_bool(first_middle, middle_first))
+		return first;
+	if(equal_func_bool(last_first, first_last) & !equal_func_bool(middle_last, last_middle))
+		return middle;
 
 	//choose the middle one
 	if(less_func_bool(middle_first)) {
-		if(less_func_bool(last_middle)) {
-			out = middle;
-			return true;
-		} else if(less_func_bool(last_first)) {
-			out = last;
-			return true;
-		}
-		out = first;
-		return true;
+		if(less_func_bool(last_middle))
+			return middle;
+		else if(less_func_bool(last_first))
+			return last;
+		return first;
 	} else {
-		if(less_func_bool(middle_last)) {
-			out = middle;
-			return true;
-		} else if(less_func_bool(last_first)) {
-			out = first;
-			return true;
-		}
-		out = last;
-		return true;
+		if(less_func_bool(middle_last))
+			return middle;
+		else if(less_func_bool(last_first))
+			return first;
+		return last;
 	}
 }
 template<typename Itr, typename Comp>
-bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out, Comp cmp) {
+bool middle_of_four(Itr first, Itr middle, Itr last, Comp cmp) {
 	//do upfront comparison
 	bool first_middle = less_func(*first, *middle, cmp);
 	bool middle_first = less_func(*middle, *first, cmp);
@@ -574,44 +560,30 @@ bool middle_of_four(Itr first, Itr middle, Itr last, Itr& out, Comp cmp) {
 	bool first_last = less_func(*first, *last, cmp);
 
 	//if two of them are the same then choose the other one
-	if(equal_func_bool(first_middle, middle_first) & !equal_func_bool(middle_last, last_middle)) {
-		out = last;
-		return true;
-	}
-	if(equal_func_bool(middle_last, last_middle) & !equal_func_bool(first_middle, middle_first)) {
-		out = first;
-		return true;
-	}
-	if(equal_func_bool(last_first, first_last) & !equal_func_bool(middle_last, last_middle)) {
-		out = middle;
-		return true;
-	}
+	if(equal_func_bool(first_middle, middle_first) & !equal_func_bool(middle_last, last_middle))
+		return last;
+	if(equal_func_bool(middle_last, last_middle) & !equal_func_bool(first_middle, middle_first))
+		return first;
+	if(equal_func_bool(last_first, first_last) & !equal_func_bool(middle_last, last_middle))
+		return middle;
 
 	//choose the middle one
 	if(less_func_bool(middle_first)) {
-		if(less_func_bool(last_middle)) {
-			out = middle;
-			return true;
-		} else if(less_func_bool(last_first)) {
-			out = last;
-			return true;
-		}
-		out = first;
-		return true;
+		if(less_func_bool(last_middle))
+			return middle;
+		else if(less_func_bool(last_first))
+			return last;
+		return first;
 	} else {
-		if(less_func_bool(middle_last)) {
-			out = middle;
-			return true;
-		} else if(less_func_bool(last_first)) {
-			out = first;
-			return true;
-		}
-		out = last;
-		return true;
+		if(less_func_bool(middle_last))
+			return middle;
+		else if(less_func_bool(last_first))
+			return first;
+		return last;
 	}
 }
 template<typename Itr, typename IdxItr>
-bool stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begidx, Itr& out) {
+bool stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begidx) {
 	//do upfront comparison
 	bool first_middle = stable_quick_sort_less_func(beg, first, middle, begidx);
 	bool middle_first = stable_quick_sort_less_func(beg, middle, first, begidx);
@@ -623,44 +595,30 @@ bool stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begi
 	bool first_last = stable_quick_sort_less_func(beg, first, last, begidx);
 
 	//if two of them are the same then choose the other one
-	if(equal_func_bool(first_middle, middle_first) & !equal_func_bool(middle_last, last_middle)) {
-		out = last;
-		return true;
-	}
-	if(equal_func_bool(middle_last, last_middle) & !equal_func_bool(first_middle, middle_first)) {
-		out = first;
-		return true;
-	}
-	if(equal_func_bool(last_first, first_last) & !equal_func_bool(middle_last, last_middle)) {
-		out = middle;
-		return true;
-	}
+	if(equal_func_bool(first_middle, middle_first) & !equal_func_bool(middle_last, last_middle))
+		return last;
+	if(equal_func_bool(middle_last, last_middle) & !equal_func_bool(first_middle, middle_first))
+		return first;
+	if(equal_func_bool(last_first, first_last) & !equal_func_bool(middle_last, last_middle))
+		return middle;
 
 	//choose the middle one
 	if(less_func_bool(middle_first)) {
-		if(less_func_bool(last_middle)) {
-			out = middle;
-			return true;
-		} else if(less_func_bool(last_first)) {
-			out = last;
-			return true;
-		}
-		out = first;
-		return true;
+		if(less_func_bool(last_middle))
+			return middle;
+		else if(less_func_bool(last_first))
+			return last;
+		return first;
 	} else {
-		if(less_func_bool(middle_last)) {
-			out = middle;
-			return true;
-		} else if(less_func_bool(last_first)) {
-			out = first;
-			return true;
-		}
-		out = last;
-		return true;
+		if(less_func_bool(middle_last))
+			return middle;
+		else if(less_func_bool(last_first))
+			return first;
+		return last;
 	}
 }
 template<typename Itr, typename IdxItr, typename Comp>
-bool stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begidx, Itr& out, Comp cmp) {
+bool stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begidx, Comp cmp) {
 	//do upfront comparison
 	bool first_middle = stable_quick_sort_less_func(beg, first, middle, begidx, cmp);
 	bool middle_first = stable_quick_sort_less_func(beg, middle, first, begidx, cmp);
@@ -672,40 +630,26 @@ bool stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begi
 	bool first_last = stable_quick_sort_less_func(beg, first, last, begidx, cmp);
 
 	//if two of them are the same then choose the other one
-	if(equal_func_bool(first_middle, middle_first) & !equal_func_bool(middle_last, last_middle)) {
-		out = last;
-		return true;
-	}
-	if(equal_func_bool(middle_last, last_middle) & !equal_func_bool(first_middle, middle_first)) {
-		out = first;
-		return true;
-	}
-	if(equal_func_bool(last_first, first_last) & !equal_func_bool(middle_last, last_middle)) {
-		out = middle;
-		return true;
-	}
+	if(equal_func_bool(first_middle, middle_first) & !equal_func_bool(middle_last, last_middle))
+		return last;
+	if(equal_func_bool(middle_last, last_middle) & !equal_func_bool(first_middle, middle_first))
+		return first;
+	if(equal_func_bool(last_first, first_last) & !equal_func_bool(middle_last, last_middle))
+		return middle;
 
 	//choose the middle one
 	if(less_func_bool(middle_first)) {
-		if(less_func_bool(last_middle)) {
-			out = middle;
-			return true;
-		} else if(less_func_bool(last_first)) {
-			out = last;
-			return true;
-		}
-		out = first;
-		return true;
+		if(less_func_bool(last_middle))
+			return middle;
+		else if(less_func_bool(last_first))
+			return last;
+		return first;
 	} else {
-		if(less_func_bool(middle_last)) {
-			out = middle;
-			return true;
-		} else if(less_func_bool(last_first)) {
-			out = first;
-			return true;
-		}
-		out = last;
-		return true;
+		if(less_func_bool(middle_last))
+			return middle;
+		else if(less_func_bool(last_first))
+			return first;
+		return last;
 	}
 }
 
@@ -1441,9 +1385,8 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
-		Itr pivot;
 		unsigned swaps = 0;
-		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot)) continue;
+		Itr pivot = stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx);
 
 		do {
 			++left;
@@ -1513,9 +1456,8 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx) {
 		intro_stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
-		Itr pivot;
 		unsigned swaps = 0;
-		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot)) continue;
+		Itr pivot = stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx);
 
 		do {
 			++left;
@@ -1680,9 +1622,8 @@ void adaptive_stable_quick_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
-		Itr pivot;
 		unsigned swaps = 0;
-		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot, cmp)) continue;
+		Itr pivot = stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, cmp);
 
 		do {
 			++left;
@@ -1752,9 +1693,8 @@ void adaptive_stable_intro_sort_internal(Itr beg, Itr end, IdxItr begidx, Comp c
 		intro_stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
-		Itr pivot;
 		unsigned swaps = 0;
-		if(!stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, pivot, cmp)) continue;
+		Itr pivot = stable_middle_of_four(beg, tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, begidx, cmp);
 
 		do {
 			++left;
@@ -4789,9 +4729,8 @@ void adaptive_intro_quick_sort(Itr beg, Itr end) {
 		intro_stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
-		Itr pivot;
 		unsigned swaps = 0;
-		if(!middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot)) continue;
+		Itr pivot = middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end);
 
 		do {
 			++left;
@@ -4861,9 +4800,8 @@ void adaptive_intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 		intro_stack_less_data<Itr> tmp = stk[--idx];
 		Itr left = tmp.beg - 1;
 		Itr right = tmp.end + 1;
-		Itr pivot;
 		unsigned swaps = 0;
-		if(!middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, pivot, cmp)) continue;
+		Itr pivot = middle_of_four(tmp.beg, half_point(tmp.beg, tmp.end + 1), tmp.end, cmp);
 
 		do {
 			++left;
