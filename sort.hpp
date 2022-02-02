@@ -513,7 +513,7 @@ Itr middle_of_three(Itr first, Itr middle, Itr last, Comp cmp) {
 	}
 }
 template<typename Itr>
-bool middle_of_four(Itr first, Itr middle, Itr last) {
+Itr middle_of_four(Itr first, Itr middle, Itr last) {
 	//do upfront comparison
 	bool first_middle = less_func(*first, *middle);
 	bool middle_first = less_func(*middle, *first);
@@ -548,7 +548,7 @@ bool middle_of_four(Itr first, Itr middle, Itr last) {
 	}
 }
 template<typename Itr, typename Comp>
-bool middle_of_four(Itr first, Itr middle, Itr last, Comp cmp) {
+Itr middle_of_four(Itr first, Itr middle, Itr last, Comp cmp) {
 	//do upfront comparison
 	bool first_middle = less_func(*first, *middle, cmp);
 	bool middle_first = less_func(*middle, *first, cmp);
@@ -583,7 +583,7 @@ bool middle_of_four(Itr first, Itr middle, Itr last, Comp cmp) {
 	}
 }
 template<typename Itr, typename IdxItr>
-bool stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begidx) {
+Itr stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begidx) {
 	//do upfront comparison
 	bool first_middle = stable_quick_sort_less_func(beg, first, middle, begidx);
 	bool middle_first = stable_quick_sort_less_func(beg, middle, first, begidx);
@@ -618,7 +618,7 @@ bool stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begi
 	}
 }
 template<typename Itr, typename IdxItr, typename Comp>
-bool stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begidx, Comp cmp) {
+Itr stable_middle_of_four(Itr beg, Itr first, Itr middle, Itr last, IdxItr begidx, Comp cmp) {
 	//do upfront comparison
 	bool first_middle = stable_quick_sort_less_func(beg, first, middle, begidx, cmp);
 	bool middle_first = stable_quick_sort_less_func(beg, middle, first, begidx, cmp);
