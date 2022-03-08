@@ -983,7 +983,11 @@ void insertion_sort(Itr beg, Itr end) {
 		Itr crnt = strt;
 
 		//move this to the correct place (do insert)
-		typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*crnt);
+		using valueof = typename stdlib::value_for<Itr>::value_type;
+		alignas(valueof) char item[sizeof(valueof)];
+		valueof& val = *(valueof*)item;
+		construct(val, std::move(*crnt));
+
 		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), val)) {
 			stlib_internal::construct(*crnt, std::move(*(crnt - 1)));
 			--crnt;
@@ -1000,7 +1004,11 @@ void insertion_sort(Itr beg, Itr end, Comp cmp) {
 		Itr crnt = strt;
 
 		//move this to the correct place (do insert)
-		typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*crnt);
+		using valueof = typename stdlib::value_for<Itr>::value_type;
+		alignas(valueof) char item[sizeof(valueof)];
+		valueof& val = *(valueof*)item;
+		construct(val, std::move(*crnt));
+
 		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), val, cmp)) {
 			stlib_internal::construct(*crnt, std::move(*(crnt - 1)));
 			--crnt;
@@ -1026,13 +1034,21 @@ void binary_insertion_sort(Itr beg, Itr end) {
 			--out;
 
 			Itr c = strt;
-			typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*c);
+			using valueof = typename stdlib::value_for<Itr>::value_type;
+			alignas(valueof) char item[sizeof(valueof)];
+			valueof& val = *(valueof*)item;
+			construct(val, std::move(*c));
+
 			for(; c != out; --c)
 				stlib_internal::construct(*c, std::move(*(c - 1)));
 			stlib_internal::construct(*c, std::move(val));
 		} else if(out != strt) {
 			Itr c = strt;
-			typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*c);
+			using valueof = typename stdlib::value_for<Itr>::value_type;
+			alignas(valueof) char item[sizeof(valueof)];
+			valueof& val = *(valueof*)item;
+			construct(val, std::move(*c));
+
 			for(; c != out; --c)
 				stlib_internal::construct(*c, std::move(*(c - 1)));
 			stlib_internal::construct(*c, std::move(val));
@@ -1054,13 +1070,21 @@ void binary_insertion_sort(Itr beg, Itr end, Comp cmp) {
 			--out;
 
 			Itr c = strt;
-			typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*c);
+			using valueof = typename stdlib::value_for<Itr>::value_type;
+			alignas(valueof) char item[sizeof(valueof)];
+			valueof& val = *(valueof*)item;
+			construct(val, std::move(*c));
+
 			for(; c != out; --c)
 				stlib_internal::construct(*c, std::move(*(c - 1)));
 			stlib_internal::construct(*c, std::move(val));
 		} else if(out != strt) {
 			Itr c = strt;
-			typename stlib::stlib_internal::value_for<Itr>::value_type val = std::move(*c);
+			using valueof = typename stdlib::value_for<Itr>::value_type;
+			alignas(valueof) char item[sizeof(valueof)];
+			valueof& val = *(valueof*)item;
+			construct(val, std::move(*c));
+
 			for(; c != out; --c)
 				stlib_internal::construct(*c, std::move(*(c - 1)));
 			stlib_internal::construct(*c, std::move(val));
@@ -2322,15 +2346,41 @@ bool merge_sort(Itr beg, Itr end, Comp cmp) {
 	return false;
 }
 namespace stlib_internal {
+bool start_out_of_place_merge(uint64_t sze, uint64_t insert_count);
+template<typename Itr, typename T, typename Comp>
+void out_of_place_insertion_sort(Itr beg, Itr end, T* buf, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+
+	//do an insertion sort but copying the array to a different destination
+	T* lsted = buf;
+	for(Itr strt = beg; strt != end; ++strt, ++lsted) {
+		T* led = lsted;
+		while(led != buf && greater_func(*(led - 1), *strt), cmp) {
+			construct(*led, std::move(*(led - 1)));
+			--led;
+		}
+		construct(*led, std::move(*strt));
+	}
+}
 template<typename Itr, typename T, typename Comp>
 void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 	uint64_t sze = distance(beg, end);
 	if(sze <= 1)
 		return;
 
-	//sort small runs with insertion sort before doing merge
 	uint64_t insert_count = INSERTION_SORT_CUTOFF;
-	{
+	bool out_of_place = start_out_of_place_merge(sze, insert_count);
+	//sort small runs with insertion sort before doing merge
+	if(out_of_place) {
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			out_of_place_insertion_sort(bg, ed, buf + count, cmp);
+			bg = ed;
+		}
+	} else {
 		uint64_t len = insert_count;
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
@@ -2345,32 +2395,13 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 	T* bfrend = buf + sze;
 	//go through all of the lengths starting at 1 doubling
 	uint64_t len = insert_count;
-	bool first = true;
 	while(len < sze) {
 		uint64_t pos = 0;
 		//go through all of the sorted sublists, zip them together
 		//which way are we copying this?
-		if(first) {
-			T* bufbeg = buf;
-			//T* bufend = bfrend;
-			while(pos + len < sze) {
-				//make the two halves
-				Itr cleft = beg + pos;
-				Itr cright = cleft + len;
-				Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
-
-				//do merge
-				merge_internal(cleft, cright, cend, bufbeg, cmp);
-				pos += (len * 2);
-			}
-			//move the rest of the buffer across (needed as we swap buffers)
-			if(pos < sze) {
-				Itr cleft = beg + pos;
-				copy_buffers(cleft, end, bufbeg);
-			}
-		} else {
+		if(out_of_place) {
 			Itr bufbeg = beg;
-			//Itr bufend = end;
+			Itr bufend = end;
 			while(pos + len < sze) {
 				//make the two halves
 				T* cleft = buf + pos;
@@ -2386,14 +2417,32 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 				T* cleft = buf + pos;
 				copy_buffers(cleft, bfrend, bufbeg);
 			}
+		} else {
+			T* bufbeg = buf;
+			T* bufend = bfrend;
+			while(pos + len < sze) {
+				//make the two halves
+				Itr cleft = beg + pos;
+				Itr cright = cleft + len;
+				Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+				//do merge
+				merge_internal(cleft, cright, cend, bufbeg, cmp);
+				pos += (len * 2);
+			}
+			//move the rest of the buffer across (needed as we swap buffers)
+			if(pos < sze) {
+				Itr cleft = beg + pos;
+				copy_buffers(cleft, end, bufbeg);
+			}
 		}
 
 		len *= 2;
-		first = !first;
+		out_of_place = !out_of_place;
 	}
 
-	//ensure we copy this back at the original buffer if needed
-	if(!first)
+	//ensure we copy this back at the original buffer if needed, (should never happen because of start_out_of_place_merge)
+	if(out_of_place)
 		copy_buffers(buf, bfrend, beg);
 }
 }
@@ -2509,14 +2558,39 @@ bool merge_sort(Itr beg, Itr end) {
 }
 namespace stlib_internal {
 template<typename Itr, typename T>
+void out_of_place_insertion_sort(Itr beg, Itr end, T* buf) {
+	if(distance(beg, end) <= 1)
+		return;
+
+	//do an insertion sort but copying the array to a different destination
+	T* lsted = buf;
+	for(Itr strt = beg; strt != end; ++strt, ++lsted) {
+		T* led = lsted;
+		while(led != buf && greater_func(*(led - 1), *strt)) {
+			construct(*led, std::move(*(led - 1)));
+			--led;
+		}
+		construct(*led, std::move(*strt));
+	}
+}
+template<typename Itr, typename T>
 void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf) {
 	uint64_t sze = distance(beg, end);
 	if(sze <= 1)
 		return;
 
-	//sort small runs with insertion sort before doing merge
 	uint64_t insert_count = INSERTION_SORT_CUTOFF;
-	{
+	bool out_of_place = start_out_of_place_merge(sze, insert_count);
+	//sort small runs with insertion sort before doing merge
+	if(out_of_place) {
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			out_of_place_insertion_sort(bg, ed, buf + count);
+			bg = ed;
+		}
+	} else {
 		uint64_t len = insert_count;
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
@@ -2531,32 +2605,13 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf) {
 	T* bfrend = buf + sze;
 	//go through all of the lengths starting at 1 doubling
 	uint64_t len = insert_count;
-	bool first = true;
 	while(len < sze) {
 		uint64_t pos = 0;
 		//go through all of the sorted sublists, zip them together
 		//which way are we copying this?
-		if(first) {
-			T* bufbeg = buf;
-			//T* bufend = bfrend;
-			while(pos + len < sze) {
-				//make the two halves
-				Itr cleft = beg + pos;
-				Itr cright = cleft + len;
-				Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
-
-				//do merge
-				merge_internal(cleft, cright, cend, bufbeg);
-				pos += (len * 2);
-			}
-			//move the rest of the buffer across (needed as we swap buffers)
-			if(pos < sze) {
-				Itr cleft = beg + pos;
-				copy_buffers(cleft, end, bufbeg);
-			}
-		} else {
+		if(out_of_place) {
 			Itr bufbeg = beg;
-			//Itr bufend = end;
+			Itr bufend = end;
 			while(pos + len < sze) {
 				//make the two halves
 				T* cleft = buf + pos;
@@ -2572,15 +2627,32 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf) {
 				T* cleft = buf + pos;
 				copy_buffers(cleft, bfrend, bufbeg);
 			}
+		} else {
+			T* bufbeg = buf;
+			T* bufend = bfrend;
+			while(pos + len < sze) {
+				//make the two halves
+				Itr cleft = beg + pos;
+				Itr cright = cleft + len;
+				Itr cend = (pos + (len * 2) > sze ? end : cleft + (len * 2));
+
+				//do merge
+				merge_internal(cleft, cright, cend, bufbeg);
+				pos += (len * 2);
+			}
+			//move the rest of the buffer across (needed as we swap buffers)
+			if(pos < sze) {
+				Itr cleft = beg + pos;
+				copy_buffers(cleft, end, bufbeg);
+			}
 		}
 
 		len *= 2;
-		first = !first;
+		out_of_place = !out_of_place;
 	}
 
-	//ensure we copy this back at the original buffer if needed
-	//note that we calculate the number of iterations so this doesn't happen
-	if(!first)
+	//ensure we copy this back at the original buffer if needed (should never happen because of start_out_of_place_merge)
+	if(out_of_place)
 		copy_buffers(buf, bfrend, beg);
 }
 }
