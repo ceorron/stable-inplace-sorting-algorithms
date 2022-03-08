@@ -53,6 +53,20 @@ bool greater_equal_func_bool(const bool less) {
 	return !less;
 }
 
+bool start_out_of_place_merge(uint64_t sze, uint64_t insert_count) {
+	//no merge done (early exit)
+	if(sze <= insert_count)
+		return false;
+	//how many times do we need to merge until we are finished?
+	unsigned count = 0;
+	while(insert_count < sze) {
+		++count;
+		insert_count *= 2;
+	}
+	//if this is odd then we need to start out of place, as we need to move it back to the original array
+	return count % 2 == 1;
+}
+
 zip_merge_indexes& get_current_indexes(zip_merge_indexes* indexes, unsigned indexes_end) {
 	if(indexes_end == 0)
 		return indexes[NEW_ZIP_SORT_INDEX_ARRAY_SIZE - 1];
