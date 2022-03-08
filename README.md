@@ -27,7 +27,7 @@ They have the following characteristics.
 | adaptive_stable_intro_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | (N) | 57 | 6048 |
 | merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 45 | 6041 |
 | std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 44 | 5421 |
-| hybrid_merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 37 | 5228 |
+| hybrid_merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 37 | 5067 |
 | intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 36 | 4894 |
 | adaptive_intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 37 | 4755 |
 | std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 36 | 4738 |
