@@ -997,7 +997,7 @@ void insertion_sort(Itr beg, Itr end) {
 		using valueof = typename stdlib::value_for<Itr>::value_type;
 		alignas(valueof) char item[sizeof(valueof)];
 		valueof& val = *(valueof*)item;
-		construct(val, std::move(*crnt));
+		stlib_internal::construct(val, std::move(*crnt));
 
 		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), val)) {
 			stlib_internal::construct(*crnt, std::move(*(crnt - 1)));
@@ -1018,7 +1018,7 @@ void insertion_sort(Itr beg, Itr end, Comp cmp) {
 		using valueof = typename stdlib::value_for<Itr>::value_type;
 		alignas(valueof) char item[sizeof(valueof)];
 		valueof& val = *(valueof*)item;
-		construct(val, std::move(*crnt));
+		stlib_internal::construct(val, std::move(*crnt));
 
 		while(crnt != beg && stlib_internal::greater_func(*(crnt - 1), val, cmp)) {
 			stlib_internal::construct(*crnt, std::move(*(crnt - 1)));
@@ -1048,7 +1048,7 @@ void binary_insertion_sort(Itr beg, Itr end) {
 			using valueof = typename stdlib::value_for<Itr>::value_type;
 			alignas(valueof) char item[sizeof(valueof)];
 			valueof& val = *(valueof*)item;
-			construct(val, std::move(*c));
+			stlib_internal::construct(val, std::move(*c));
 
 			for(; c != out; --c)
 				stlib_internal::construct(*c, std::move(*(c - 1)));
@@ -1058,7 +1058,7 @@ void binary_insertion_sort(Itr beg, Itr end) {
 			using valueof = typename stdlib::value_for<Itr>::value_type;
 			alignas(valueof) char item[sizeof(valueof)];
 			valueof& val = *(valueof*)item;
-			construct(val, std::move(*c));
+			stlib_internal::construct(val, std::move(*c));
 
 			for(; c != out; --c)
 				stlib_internal::construct(*c, std::move(*(c - 1)));
@@ -1084,7 +1084,7 @@ void binary_insertion_sort(Itr beg, Itr end, Comp cmp) {
 			using valueof = typename stdlib::value_for<Itr>::value_type;
 			alignas(valueof) char item[sizeof(valueof)];
 			valueof& val = *(valueof*)item;
-			construct(val, std::move(*c));
+			stlib_internal::construct(val, std::move(*c));
 
 			for(; c != out; --c)
 				stlib_internal::construct(*c, std::move(*(c - 1)));
@@ -1094,7 +1094,7 @@ void binary_insertion_sort(Itr beg, Itr end, Comp cmp) {
 			using valueof = typename stdlib::value_for<Itr>::value_type;
 			alignas(valueof) char item[sizeof(valueof)];
 			valueof& val = *(valueof*)item;
-			construct(val, std::move(*c));
+			stlib_internal::construct(val, std::move(*c));
 
 			for(; c != out; --c)
 				stlib_internal::construct(*c, std::move(*(c - 1)));
