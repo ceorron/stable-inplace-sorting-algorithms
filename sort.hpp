@@ -197,6 +197,13 @@ void stable_rotate(Itr strt, Itr first, Itr middle, Itr last, IdxItr begidx) {
 		else if(first == middle) middle = next;
 	}
 }
+template<typename Itr>
+void reverse(Itr first, Itr last) {
+	while(first != last && first != --last) {
+		std::swap(*first, *last);
+		++first;
+	}
+}
 template<typename Itr1, typename Itr2>
 void copy_buffers(Itr1 beg, Itr1 end, Itr2& out) {
 	//found to be faster then memcpy!!!
@@ -3085,6 +3092,432 @@ void hybrid_rotate_merge_sort(Itr beg, Itr end, Comp cmp) {
 		len *= 2;
 	}
 }
+
+
+namespace stlib_internal {
+constexpr unsigned stackless_rotate_range_array_len = 24;
+template<typename Itr>
+struct stackless_range {
+	Itr bg;
+	Itr ed;
+};
+template<typename Itr>
+bool should_stackless_rotate_merge(const stackless_range<Itr>& first, const stackless_range<Itr>& second) {
+	//if this second distance is 7/8 the size of the first then merge is considered good
+	auto dist1 = distance(first.bg, first.ed);
+	auto dist2 = distance(second.bg, second.ed);
+
+	dist1 = (float)dist1 * ((1.0f / 8.0f) * 7.0f);
+	return dist2 >= dist1;
+}
+template<typename Itr>
+bool first_best_merge(const stackless_range<Itr>& first, const stackless_range<Itr>& second, const stackless_range<Itr>& third) {
+	//get sizes
+	auto dist1 = distance(first.bg, first.ed);
+	auto dist2 = distance(second.bg, second.ed);
+	auto dist3 = distance(third.bg, third.ed);
+
+	//which of the two is the most similar in length, merge the closest in size
+	return labs(dist1 - dist2) <= abs(dist2 - dist3);
+}
+template<typename Itr>
+void do_stackless_rotate_merge(stackless_range<Itr>* stk, const stackless_range<Itr>& first, const stackless_range<Itr>& second,
+							   unsigned idx, unsigned& stack_pos) {
+	//merge them
+	rotate_merge(first.bg, second.bg, second.ed);
+
+	//record the merge
+	stk[idx].ed = stk[idx + 1].ed;
+	++idx;
+	for(; idx < (stack_pos - 1); ++idx)
+		stk[idx] = stk[idx + 1];
+	--stack_pos;
+}
+template<typename Itr>
+void do_stackless_rotate_callapse(stackless_range<Itr>* stk, Itr beg, Itr end, unsigned& stack_pos) {
+	while(stack_pos > 1)
+		if(stack_pos >= 3) {
+			//test the last two elements/second to last two elements against each other to see which we need to merge
+			if(first_best_merge(stk[stack_pos - 3], stk[stack_pos - 2], stk[stack_pos - 1]))
+				do_stackless_rotate_merge(stk, stk[stack_pos - 3], stk[stack_pos - 2],
+										  stack_pos - 3, stack_pos);
+			else
+				do_stackless_rotate_merge(stk, stk[stack_pos - 2], stk[stack_pos - 1],
+										  stack_pos - 2, stack_pos);
+		} else
+			do_stackless_rotate_merge(stk, stk[0], stk[1], 0, stack_pos);
+}
+template<typename Itr>
+stackless_range<Itr> get_ascending_descending(Itr beg, Itr end, bool& ascending, bool& some_equal) {
+	unsigned unknown_ascending = 0; //0 == unknown, 1 == ascending, 2 == descending
+	Itr lst = beg;
+	Itr tmp = beg;
+	++tmp;
+
+	for(; tmp != end; ++tmp) {
+		if(some_equal == false && equal_func(*lst, *tmp)) {
+			some_equal = true;
+		} else if(less_func(*lst, *tmp)) {
+			//this is less, must be ascending
+			if(unknown_ascending == 2)
+				break;
+			unknown_ascending = 1;
+		} else {
+			//this is greater, must be descending
+			if(unknown_ascending == 1)
+				break;
+			unknown_ascending = 2;
+		}
+		lst = tmp;
+	}
+
+	stackless_range<Itr> rtn = {beg, tmp};
+	ascending = (unknown_ascending != 2);
+	return rtn;
+}
+template<typename Itr>
+Itr equal_run(Itr& beg, Itr end) {
+	//find any equal runs, move beg forward so passing equal items by
+	Itr strt = beg;
+	Itr tmp = beg;
+	++tmp;
+	for(; tmp != end && equal_func(*beg, *tmp); ++tmp);
+	beg = tmp;
+	return strt;
+}
+template<typename Itr>
+void do_stackless_rotate_identify(stackless_range<Itr>* stk, Itr beg, Itr end, unsigned& stack_pos) {
+	bool ascending = true;
+	bool some_equal = false;
+	stackless_range<Itr> rslt = get_ascending_descending(beg, end, ascending, some_equal);
+
+	//do reverse of this if we are not a
+	if(!ascending) {
+		reverse(rslt.bg, rslt.ed);
+		//to ensure stable ordering we must reverse again on any equal elements
+		if(some_equal) {
+			//go through them re-reverse any that we need
+			stackless_range<Itr> strt = rslt;
+			while(strt.bg != strt.ed) {
+				Itr it = equal_run(strt.bg, strt.ed);
+				reverse(it, strt.bg);
+			}
+		}
+	}
+
+	stk[stack_pos] = rslt;
+	++stack_pos;
+}
+template<typename Itr>
+void stackless_rotate_merge_sort_internal(Itr beg, Itr end) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//the central loop, decides what we need to do each iteration
+	stackless_range<Itr> stk[stackless_rotate_range_array_len];
+	unsigned stack_pos = 0;
+	Itr bg = beg;
+	while(stack_pos == 0 || !(stack_pos == 1 && stk[stack_pos - 1].ed == end))
+		if(stack_pos == stackless_rotate_range_array_len || (stack_pos > 0 && stk[stack_pos - 1].ed == end))
+			//should we collapse?
+			//if so then collapse to a single complete sorted list
+			do_stackless_rotate_callapse(stk, beg, end, stack_pos);
+		else if(stack_pos >= 4 && should_stackless_rotate_merge(stk[stack_pos - 4], stk[stack_pos - 3]))
+			//should we merge?
+			//if so then do a merge of the top two lists then
+			do_stackless_rotate_merge(stk, stk[stack_pos - 4], stk[stack_pos - 3], stack_pos - 4, stack_pos);
+		else if(stack_pos >= 3 && should_stackless_rotate_merge(stk[stack_pos - 3], stk[stack_pos - 2]))
+			//should we merge?
+			//if so then do a merge of the top two lists then
+			do_stackless_rotate_merge(stk, stk[stack_pos - 3], stk[stack_pos - 2], stack_pos - 3, stack_pos);
+		else if(stack_pos >= 2 && should_stackless_rotate_merge(stk[stack_pos - 2], stk[stack_pos - 1]))
+			//should we merge?
+			//if so then do a merge of the top two lists then
+			do_stackless_rotate_merge(stk, stk[stack_pos - 2], stk[stack_pos - 1], stack_pos - 2, stack_pos);
+		else {
+			//do identify to add something to the stack (reverse if this needs to be reversed)
+			do_stackless_rotate_identify(stk, bg, end, stack_pos);
+			bg = stk[stack_pos - 1].ed;
+		}
+}
+}
+template<typename Itr>
+void stackless_rotate_merge_sort(Itr beg, Itr end) {
+	stlib_internal::stackless_rotate_merge_sort_internal(beg, end);
+}
+
+namespace stlib_internal {
+template<typename Itr, typename Comp>
+void do_stackless_rotate_merge(stackless_range<Itr>* stk, const stackless_range<Itr>& first, const stackless_range<Itr>& second,
+							   unsigned idx, unsigned& stack_pos, Comp cmp) {
+	//merge them
+	rotate_merge(first.bg, second.bg, second.ed, cmp);
+
+	//record the merge
+	stk[idx].ed = stk[idx + 1].ed;
+	++idx;
+	for(; idx < (stack_pos - 1); ++idx)
+		stk[idx] = stk[idx + 1];
+	--stack_pos;
+}
+template<typename Itr, typename Comp>
+void do_stackless_rotate_callapse(stackless_range<Itr>* stk, Itr beg, Itr end, unsigned& stack_pos, Comp cmp) {
+	while(stack_pos > 1)
+		if(stack_pos >= 3) {
+			//test the last two elements/second to last two elements against each other to see which we need to merge
+			if(first_best_merge(stk[stack_pos - 3], stk[stack_pos - 2], stk[stack_pos - 1]))
+				do_stackless_rotate_merge(stk, stk[stack_pos - 3], stk[stack_pos - 2],
+										  stack_pos - 3, stack_pos, cmp);
+			else
+				do_stackless_rotate_merge(stk, stk[stack_pos - 2], stk[stack_pos - 1],
+										  stack_pos - 2, stack_pos, cmp);
+		} else
+			do_stackless_rotate_merge(stk, stk[0], stk[1], 0, stack_pos, cmp);
+}
+template<typename Itr, typename Comp>
+stackless_range<Itr> get_ascending_descending(Itr beg, Itr end, bool& ascending, bool& some_equal, Comp cmp) {
+	unsigned unknown_ascending = 0; //0 == unknown, 1 == ascending, 2 == descending
+	Itr lst = beg;
+	Itr tmp = beg;
+	++tmp;
+
+	for(; tmp != end; ++tmp) {
+		if(some_equal == false && equal_func(*lst, *tmp, cmp)) {
+			some_equal = true;
+		} else if(less_func(*lst, *tmp, cmp)) {
+			//this is less, must be ascending
+			if(unknown_ascending == 2)
+				break;
+			unknown_ascending = 1;
+		} else {
+			//this is greater, must be descending
+			if(unknown_ascending == 1)
+				break;
+			unknown_ascending = 2;
+		}
+		lst = tmp;
+	}
+
+	stackless_range<Itr> rtn = {beg, tmp};
+	ascending = (unknown_ascending != 2);
+	return rtn;
+}
+template<typename Itr, typename Comp>
+Itr equal_run(Itr& beg, Itr end, Comp cmp) {
+	//find any equal runs, move beg forward so passing equal items by
+	Itr strt = beg;
+	Itr tmp = beg;
+	++tmp;
+	for(; tmp != end && equal_func(*beg, *tmp, cmp); ++tmp);
+	beg = tmp;
+	return strt;
+}
+template<typename Itr, typename Comp>
+void do_stackless_rotate_identify(stackless_range<Itr>* stk, Itr beg, Itr end, unsigned& stack_pos, Comp cmp) {
+	bool ascending = true;
+	bool some_equal = false;
+	stackless_range<Itr> rslt = get_ascending_descending(beg, end, ascending, some_equal, cmp);
+
+	//do reverse of this if we are not a
+	if(!ascending) {
+		reverse(rslt.bg, rslt.ed);
+		//to ensure stable ordering we must reverse again on any equal elements
+		if(some_equal) {
+			//go through them re-reverse any that we need
+			stackless_range<Itr> strt = rslt;
+			while(strt.bg != strt.ed) {
+				Itr it = equal_run(strt.bg, strt.ed, cmp);
+				reverse(it, strt.bg);
+			}
+		}
+	}
+
+	stk[stack_pos] = rslt;
+	++stack_pos;
+}
+template<typename Itr, typename Comp>
+void stackless_rotate_merge_sort_internal(Itr beg, Itr end, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+
+	//the central loop, decides what we need to do each iteration
+	stackless_range<Itr> stk[stackless_rotate_range_array_len];
+	unsigned stack_pos = 0;
+	Itr bg = beg;
+	while(stack_pos == 0 || !(stack_pos == 1 && stk[stack_pos - 1].ed == end))
+		if(stack_pos == stackless_rotate_range_array_len || (stack_pos > 0 && stk[stack_pos - 1].ed == end))
+			//should we collapse?
+			//if so then collapse to a single complete sorted list
+			do_stackless_rotate_callapse(stk, beg, end, stack_pos, cmp);
+		else if(stack_pos >= 4 && should_stackless_rotate_merge(stk[stack_pos - 4], stk[stack_pos - 3]))
+			//should we merge?
+			//if so then do a merge of the top two lists then
+			do_stackless_rotate_merge(stk, stk[stack_pos - 4], stk[stack_pos - 3], stack_pos - 4, stack_pos, cmp);
+		else if(stack_pos >= 3 && should_stackless_rotate_merge(stk[stack_pos - 3], stk[stack_pos - 2]))
+			//should we merge?
+			//if so then do a merge of the top two lists then
+			do_stackless_rotate_merge(stk, stk[stack_pos - 3], stk[stack_pos - 2], stack_pos - 3, stack_pos, cmp);
+		else if(stack_pos >= 2 && should_stackless_rotate_merge(stk[stack_pos - 2], stk[stack_pos - 1]))
+			//should we merge?
+			//if so then do a merge of the top two lists then
+			do_stackless_rotate_merge(stk, stk[stack_pos - 2], stk[stack_pos - 1], stack_pos - 2, stack_pos, cmp);
+		else {
+			//do identify to add something to the stack (reverse if this needs to be reversed)
+			do_stackless_rotate_identify(stk, bg, end, stack_pos, cmp);
+			bg = stk[stack_pos - 1].ed;
+		}
+}
+}
+template<typename Itr, typename Comp>
+void stackless_rotate_merge_sort(Itr beg, Itr end, Comp cmp) {
+	stlib_internal::stackless_rotate_merge_sort_internal(beg, end, cmp);
+}
+
+
+namespace stlib_internal {
+template<typename Itr>
+uint64_t get_last_size(Itr beg, Itr cbeg, uint64_t block_count) {
+	uint64_t sze = distance(beg, cbeg);
+	if(sze == 0)
+		return 0;
+
+	//this is the last fitting region
+	uint64_t last_count = 0;
+	do {
+		//grow this to fill the area (as large as it can be)
+		uint64_t tcount = block_count;
+		while(tcount * 2 <= sze)
+			tcount *= 2;
+		last_count = tcount;
+		sze -= tcount;
+	} while(sze > 0);
+	return last_count;
+}
+template<typename Itr>
+void hybrid_stackless_rotate_merge_sort_internal(Itr beg, Itr end) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+	//sort small runs with insertion sort before doing merge
+	uint64_t insert_count = INSERTION_SORT_CUTOFF;
+	{
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			insertion_sort(bg, ed);
+			bg = ed;
+		}
+	}
+	if(sze <= insert_count)
+		return;
+
+	//start this as the second block
+	Itr cbeg = beg + insert_count;
+	uint64_t current_count = (insert_count < sze - insert_count ? insert_count : sze - insert_count);
+	uint64_t last_count = insert_count;
+
+	while(current_count >= insert_count && cbeg != end) {
+		//work out the last size that fits in the space, compare this, this ensures we only merge with blocks of the same size
+		if(last_count == current_count) {
+			//do merge
+			rotate_merge(cbeg - last_count, cbeg, cbeg + current_count);
+
+			current_count += last_count;
+			cbeg -= last_count;
+			last_count = get_last_size(beg, cbeg, insert_count);
+		} else {
+			//advance
+			cbeg += current_count;
+			last_count = current_count;
+			current_count = (insert_count < distance(cbeg, end) ? insert_count : distance(cbeg, end));
+		}
+	}
+
+	//this is the finish, do callapse
+	if(cbeg == end) {
+		//take a step "back"
+		cbeg -= last_count;
+		last_count = get_last_size(beg, cbeg, insert_count);
+	}
+
+	while(cbeg != beg) {
+		//do merge until we reach the beginning of the list again
+		rotate_merge(cbeg - last_count, cbeg, end);
+		cbeg -= last_count;
+		last_count = get_last_size(beg, cbeg, insert_count);
+	}
+}
+}
+template<typename Itr>
+void hybrid_stackless_rotate_merge_sort(Itr beg, Itr end) {
+	stlib_internal::hybrid_stackless_rotate_merge_sort_internal(beg, end);
+}
+
+namespace stlib_internal {
+template<typename Itr, typename Comp>
+void hybrid_stackless_rotate_merge_sort_internal(Itr beg, Itr end, Comp cmp) {
+	uint64_t sze = distance(beg, end);
+	if(sze <= 1)
+		return;
+	//sort small runs with insertion sort before doing merge
+	uint64_t insert_count = INSERTION_SORT_CUTOFF;
+	{
+		uint64_t len = insert_count;
+		uint64_t count = 0;
+		for(Itr bg = beg; bg != end; count+=len) {
+			Itr ed = (count + len > sze ? end : bg + len);
+			insertion_sort(bg, ed, cmp);
+			bg = ed;
+		}
+	}
+	if(sze <= insert_count)
+		return;
+
+	//start this as the second block
+	Itr cbeg = beg + insert_count;
+	uint64_t current_count = (insert_count < sze - insert_count ? insert_count : sze - insert_count);
+	uint64_t last_count = insert_count;
+
+	while(current_count >= insert_count && cbeg != end) {
+		//work out the last size that fits in the space, compare this, this ensures we only merge with blocks of the same size
+		if(last_count == current_count) {
+			//do merge
+			rotate_merge(cbeg - last_count, cbeg, cbeg + current_count, cmp);
+
+			current_count += last_count;
+			cbeg -= last_count;
+			last_count = get_last_size(beg, cbeg, insert_count);
+		} else {
+			//advance
+			cbeg += current_count;
+			last_count = current_count;
+			current_count = (insert_count < distance(cbeg, end) ? insert_count : distance(cbeg, end));
+		}
+	}
+
+	//this is the finish, do callapse
+	if(cbeg == end) {
+		//take a step "back"
+		cbeg -= last_count;
+		last_count = get_last_size(beg, cbeg, insert_count);
+	}
+
+	while(cbeg != beg) {
+		//do merge until we reach the beginning of the list again
+		rotate_merge(cbeg - last_count, cbeg, end, cmp);
+		cbeg -= last_count;
+		last_count = get_last_size(beg, cbeg, insert_count);
+	}
+}
+}
+template<typename Itr, typename Comp>
+void hybrid_stackless_rotate_merge_sort(Itr beg, Itr end, Comp cmp) {
+	stlib_internal::hybrid_stackless_rotate_merge_sort_internal(beg, end, cmp);
+}
+
 
 
 namespace stlib_internal {
