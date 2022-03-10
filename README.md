@@ -19,8 +19,10 @@ They have the following characteristics.
 | merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 252 | 30865 |
 | new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N)<sup>(optionally 1)</sup> | - | 205 | 25388 |
 | hybrid_new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N)<sup>(optionally 1)</sup> | - | 92 | 22012 |
-| rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 176 | 21205 |
+| stackless_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 155 | 21450 |
+| rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 144 | 21205 |
 | hybrid_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 104 | 18744 |
+| hybrid_stackless_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 106 | 18716 |
 | stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 66 | 7012 |
 | quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 52 | 6908 |
 | adaptive_stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 74 | 6714 |
@@ -43,21 +45,21 @@ This is presented for those looking to study some new sorting techniques and who
 The idea for merge_sweep_sort and zip_sort came from the idea of using std::rotate as part of a recursive decent sorting algorithm, and so merge_sweep_sort and zip_sort make use of the rotate function. zip_sort came later and was added in May 2020.
 
 hybrid_rotate_merge_sort gives the best overall performance for an in-place, stable sorting algorithm that uses no additional memory.
-zip_sort gives the best overall performance for an in-place, stable sorting algorithm that uses constant memory space, as well as giving O(n log n) worst case performance. As of June 2020 a new much faster version of zip_sort was created, named new_zip_sort, this is a new version of the original idea but instead of appending to the end of the middle buffer new_zip_sort simply keeps track of the contents of the middle buffer as it is built, this gives new_zip_sort a different memory/performance profile than zip_sort that can be seen in the table above.
+hybrid_stackless_rotate_merge_sort gives the best overall performance for an in-place, stable sorting algorithm that uses constant memory space, as well as giving O(n log n) worst case performance.
 
 merge_sweep_sort could be said to be quick_sort like algorithm.
 
-zip_sort is a merge_sort like algorithm. It's merge function does everything in-place, unlike merge_sort, while also providing excellent speed (minimal moves).
+zip_sort is a merge_sort like algorithm. It's merge function does everything in-place, unlike merge_sort, while also providing excellent speed (minimal moves). As of June 2020 a new much faster version of zip_sort was created, named new_zip_sort, this is a new version of the original idea but instead of appending to the end of the middle buffer new_zip_sort simply keeps track of the contents of the middle buffer as it is built, this gives new_zip_sort a different memory/performance profile than zip_sort that can be seen in the table above.
 
 A video of zipsort at work can be found here: https://www.youtube.com/watch?v=P9qWTsUvMP8
 
-See below for an indepth description of both algorithms.
+See below for an indepth description of some of the algorithms.
 
 As of May 2020 we introduced intro_sort, this is an implementation similar to std::sort. However our intro_sort algorithm is commonly faster than both std::sort and std::stable_sort in our tests. See table above. (NOTE intro_sort is not a stable sorting algorithm as it builds from quick_sort.)
 
 Adaptive version of stable_quick_sort and intro_sort use a more complex function for finding a pivot, this has a minor, but non-zero, overhead. This is to avoid the probable worst case performance that occurs in quick_sort when the input data is flat (aka many items in the input list are equal) or when the input is already sorted/partially sorted. Meaning these versions of algorithms stable_quick_sort and intro_sort perform much better in scenarios where there are some equal/sorted items in the input list, and so should be prefered, but are otherwise identical to those algorithms.
 
-hybrid_rotate_merge_sort, hybrid_zip_sort, hybrid_new_zip_sort and hybrid_merge_sort are hybrid sorting algorithms, combining insertion_sort with their respective algorithms, and as a result are faster variations of rotate_merge_sort, zip_sort, new_zip_sort and merge_sort respectively.
+hybrid_rotate_merge_sort, hybrid_zip_sort, hybrid_new_zip_sort, hybrid_merge_sort and hybrid_stackless_rotate_merge_sort are hybrid sorting algorithms, combining insertion_sort with their respective algorithms, and as a result are faster variations of rotate_merge_sort, zip_sort, new_zip_sort, merge_sort respectively. However hybrid_stackless_rotate_merge_sort is a completely different algorithm than stackless_rotate_merge_sort.
 
 binary_insertion_sort is a re-thought insertion_sort that searches in the sorted part of the list using binary search to find the insertion point. The algorithm is still does O(n<sup>2</sup>) writes, best and worst case, but now only does O(n log n) comparisons and so is faster in some cases. NOTE binary_insertion_sort is still slower than insertion_sort when sorting a small number of items.
 
@@ -65,6 +67,8 @@ rotate_merge_sort (and hybrid_rotate_merge_sort), are merge sort like algorithms
 These implementation were inspired by this video https://www.youtube.com/watch?v=AgnSL2ohk2M&t=971s but are simpler implementations of this idea.
 
 inplace_merge_sort and hybrid_inplace_merge_sort were added for comparison with zip_sort and merge_sweep_sort. As the most common in-place merge sort algorithms in use. They have O(n log n) comparisons/time complexity, but perform many more swaps/moves to be efficient when compared with those algorithms.
+
+Added in March 2022 stackless_rotate_merge_sort and hybrid_stackless_rotate_merge_sort are both variations of rotate_merge_sort, however that is where the similarities end, both are of very different designs but both are in-place, worst/average O(n log n) and use constant stack space. hybrid_stackless_rotate_merge_sort is the faster algorithm in almost all cases. stackless_rotate_merge_sort has been designed to take advantage of places where the input data is already partially/fully/reverse sorted.
 
 # Example use - C++
 
@@ -303,6 +307,54 @@ int main() {
         {
             timer tmr;
             stlib::hybrid_rotate_merge_sort(vec.begin(), vec.end());
+        }
+
+        if(verbose) {
+            std::cout << "[" << std::endl;
+            for(uint32_t i = 0; i < count; ++i) {
+                std::cout << "[ " << vec[i] << "], ";
+                if(i > 0 && i % 5 == 0)
+                    std::cout << std::endl;
+            }
+            std::cout << "]" << std::endl;
+        }
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test stackless rotate merge sort" << std::endl;
+        //test hybrid rotate merge sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < count; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::stackless_rotate_merge_sort(vec.begin(), vec.end());
+        }
+
+        if(verbose) {
+            std::cout << "[" << std::endl;
+            for(uint32_t i = 0; i < count; ++i) {
+                std::cout << "[ " << vec[i] << "], ";
+                if(i > 0 && i % 5 == 0)
+                    std::cout << std::endl;
+            }
+            std::cout << "]" << std::endl;
+        }
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test hybrid stackless rotate merge sort" << std::endl;
+        //test hybrid rotate merge sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < count; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::hybrid_stackless_rotate_merge_sort(vec.begin(), vec.end());
         }
 
         if(verbose) {
