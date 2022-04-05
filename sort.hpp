@@ -3118,7 +3118,7 @@ bool first_best_merge(const stackless_range<Itr>& first, const stackless_range<I
 	auto dist3 = distance(third.bg, third.ed);
 
 	//which of the two is the most similar in length, merge the closest in size
-	return labs(dist1 - dist2) <= abs(dist2 - dist3);
+	return labs(dist1 - dist2) <= labs(dist2 - dist3);
 }
 template<typename Itr>
 void do_stackless_rotate_merge(stackless_range<Itr>* stk, const stackless_range<Itr>& first, const stackless_range<Itr>& second,
