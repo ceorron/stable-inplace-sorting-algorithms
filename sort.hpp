@@ -3689,13 +3689,6 @@ void stable_rotate_merge_sort(Itr strt, Itr beg, Itr end, IdxItr begidx, Comp cm
 
 namespace stlib_internal {
 template<typename Itr>
-inline bool needs_middle_reorder(uint64_t movecounttotal, Itr mdlstart, Itr right) {
-	//when the move count is greater equal to the middle size then we should re-order
-	//middle size is the estimate for the number of write a rotate would take
-	//estimates the best time to reorder to minimise total writes
-	return movecounttotal >= (uint64_t)distance(mdlstart, right);
-}
-template<typename Itr>
 struct zip_sort_stk_data {
 	bool complete = false;
 	Itr beg;
@@ -3715,7 +3708,6 @@ void zip_merge(Itr left, Itr right, Itr end) {
 	uint64_t movecounttotal = 0;
 
 	while((left != right) & (right != end)) {
-		bool reorder = false;
 		if(mdltop != right) {
 			//if we have a middle section test the middle against the right - long run optimisation
 			if(less_func(*right, *mdltop)) {
@@ -3756,9 +3748,6 @@ void zip_merge(Itr left, Itr right, Itr end) {
 							movecounttotal = 0;
 						}
 					}
-
-					//test for reorder optimisation, reorder when it is most optimal to do so to reduce the total number of write
-					reorder = (mdltop != mdlstart && needs_middle_reorder(movecounttotal, mdlstart, right));
 				} else {
 					std::swap(*left, *right);
 					++right;
@@ -3780,7 +3769,7 @@ void zip_merge(Itr left, Itr right, Itr end) {
 		}
 
 		++left;
-		if((left == mdlstart) | reorder) {
+		if(left == mdlstart) {
 			//if the left reaches the middle, re-order the middle section so smallest first
 			stlib_internal::rotate(mdlstart, mdltop, right);
 			if(left == mdlstart) {
@@ -3927,7 +3916,6 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 	uint64_t movecounttotal = 0;
 
 	while((left != right) & (right != end)) {
-		bool reorder = false;
 		if(mdltop != right) {
 			//if we have a middle section test the middle against the right - long run optimisation
 			if(less_func(*right, *mdltop, cmp)) {
@@ -3968,9 +3956,6 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 							movecounttotal = 0;
 						}
 					}
-
-					//test for reorder optimisation, reorder when it is most optimal to do so to reduce the total number of write
-					reorder = (mdltop != mdlstart && needs_middle_reorder(movecounttotal, mdlstart, right));
 				} else {
 					std::swap(*left, *right);
 					++right;
@@ -3992,7 +3977,7 @@ void zip_merge(Itr left, Itr right, Itr end, Comp cmp) {
 		}
 
 		++left;
-		if((left == mdlstart) | reorder) {
+		if(left == mdlstart) {
 			//if the left reaches the middle, re-order the middle section so smallest first
 			stlib_internal::rotate(mdlstart, mdltop, right);
 			if(left == mdlstart) {
