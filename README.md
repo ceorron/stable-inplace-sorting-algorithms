@@ -60,7 +60,7 @@ Adaptive version of stable_quick_sort and intro_sort use a more complex function
 
 hybrid_rotate_merge_sort, hybrid_zip_sort, hybrid_new_zip_sort, hybrid_merge_sort and hybrid_stackless_rotate_merge_sort are hybrid sorting algorithms, combining insertion_sort with their respective algorithms, and as a result are faster variations of rotate_merge_sort, zip_sort, new_zip_sort, merge_sort respectively. However hybrid_stackless_rotate_merge_sort is a completely different algorithm than stackless_rotate_merge_sort.
 
-binary_insertion_sort is a re-thought insertion_sort that searches in the sorted part of the list using binary search to find the insertion point. The algorithm is still does O(n<sup>2</sup>) writes, best and worst case, but now only does O(n log n) comparisons and so is faster in some cases. NOTE binary_insertion_sort is still slower than insertion_sort when sorting a small number of items.
+binary_insertion_sort is a re-thought insertion_sort that searches in the sorted part of the list using binary search to find the insertion point. The algorithm still does O(n<sup>2</sup>) writes, best and worst case, but now only does O(n log n) comparisons and so is faster in some cases. NOTE binary_insertion_sort is still slower than insertion_sort when sorting a small number of items.
 
 rotate_merge_sort (and hybrid_rotate_merge_sort), are merge sort like algorithms that use binary search and rotate to merge 2 sorted lists in-place. They are both faster than zip_sort/hybrid_zip_sort/new_zip_sort/hybrid_new_zip_sort and merge_sweep_sort.
 These implementation were inspired by this video https://www.youtube.com/watch?v=AgnSL2ohk2M&t=971s but are simpler implementations of this idea.
