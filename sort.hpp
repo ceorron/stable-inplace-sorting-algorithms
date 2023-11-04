@@ -450,7 +450,7 @@ void add_stack_item(Itr beg1, Itr end1, Itr beg2, Itr end2, unsigned depth,
 }
 template<typename Itr, typename IdxItr>
 void stable_add_stack_item(Itr beg, Itr beg1, Itr end1, Itr beg2, Itr end2, IdxItr begidx, unsigned depth,
-						   vector<intro_stack_less_data<Itr>>& stk, size_t& idx) {
+						   std::vector<intro_stack_less_data<Itr>>& stk, size_t& idx) {
 	if(depth == 1) {
 		//do O(n log n) inplace rotate merge sort if we have reached the maximum depth
 		stable_rotate_merge_sort(beg, beg1, end1, begidx);
@@ -467,7 +467,7 @@ void stable_add_stack_item(Itr beg, Itr beg1, Itr end1, Itr beg2, Itr end2, IdxI
 }
 template<typename Itr, typename IdxItr, typename Comp>
 void stable_add_stack_item(Itr beg, Itr beg1, Itr end1, Itr beg2, Itr end2, IdxItr begidx, unsigned depth,
-						   vector<intro_stack_less_data<Itr>>& stk, size_t& idx, Comp cmp) {
+						   std::vector<intro_stack_less_data<Itr>>& stk, size_t& idx, Comp cmp) {
 	if(depth == 1) {
 		//do O(n log n) inplace rotate merge sort if we have reached the maximum depth
 		stable_rotate_merge_sort(beg, beg1, end1, begidx, cmp);
