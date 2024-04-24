@@ -58,41 +58,6 @@ void stable_rotate_merge_sort(Itr strt, Itr beg, Itr end, IdxItr begidx, Comp cm
 template<typename Itr, typename IdxItr>
 void stable_quick_sort_swap(Itr beg, Itr left, Itr right, IdxItr begidx);
 
-
-template<typename Itr, typename IdxItr>
-void stable_insertion_sort(Itr beg, Itr end, IdxItr begidx) {
-	if(distance(beg, end) <= 1)
-		return;
-	Itr strt = beg + 1;
-	for(; strt != end; ++strt) {
-		Itr crnt = strt;
-
-		//move this to the correct place (do insert)
-		while(crnt != beg && stable_quick_sort_greater_func(beg, crnt - 1, crnt, begidx)) {
-			//swap if in wrong order
-			stable_quick_sort_swap(beg, crnt, crnt - 1, begidx);
-			--crnt;
-		}
-	}
-}
-template<typename Itr, typename IdxItr, typename Comp>
-void stable_insertion_sort(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
-	if(distance(beg, end) <= 1)
-		return;
-	Itr strt = beg + 1;
-	for(; strt != end; ++strt) {
-		Itr crnt = strt;
-
-		//move this to the correct place (do insert)
-		while(crnt != beg && stable_quick_sort_greater_func(beg, crnt - 1, crnt, begidx, cmp)) {
-			//swap if in wrong order
-			stable_quick_sort_swap(beg, crnt, crnt - 1, begidx);
-			--crnt;
-		}
-	}
-}
-
-
 template<typename T>
 struct value_for {
     //for iterators
@@ -357,6 +322,39 @@ bool stable_quick_sort_is_reverse_sorted(Itr start, Itr beg, Itr end, IdxItr beg
 		if(stable_quick_sort_greater_func(start, (beg + 1), beg, begidx, cmp))
 			return false;
 	return true;
+}
+
+template<typename Itr, typename IdxItr>
+void stable_insertion_sort(Itr beg, Itr end, IdxItr begidx) {
+	if(distance(beg, end) <= 1)
+		return;
+	Itr strt = beg + 1;
+	for(; strt != end; ++strt) {
+		Itr crnt = strt;
+
+		//move this to the correct place (do insert)
+		while(crnt != beg && stable_quick_sort_greater_func(beg, crnt - 1, crnt, begidx)) {
+			//swap if in wrong order
+			stable_quick_sort_swap(beg, crnt, crnt - 1, begidx);
+			--crnt;
+		}
+	}
+}
+template<typename Itr, typename IdxItr, typename Comp>
+void stable_insertion_sort(Itr beg, Itr end, IdxItr begidx, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+	Itr strt = beg + 1;
+	for(; strt != end; ++strt) {
+		Itr crnt = strt;
+
+		//move this to the correct place (do insert)
+		while(crnt != beg && stable_quick_sort_greater_func(beg, crnt - 1, crnt, begidx, cmp)) {
+			//swap if in wrong order
+			stable_quick_sort_swap(beg, crnt, crnt - 1, begidx);
+			--crnt;
+		}
+	}
 }
 
 }
@@ -1851,7 +1849,7 @@ bool stack_quick_sort(Itr beg, Itr end, uint32_t limit = 100) {
 	return rtn;
 }
 template<typename Itr, typename Comp>
-bool stack_quick_sort(Itr beg, Itr end, Comp cmp, uint32_t limit = 100) {
+bool stack_quick_sort(Itr beg, Itr end, uint32_t limit, Comp cmp) {
 	if(distance(beg, end) <= 1)
 		return true;
 	if(limit == 0)
@@ -1882,11 +1880,11 @@ bool stack_quick_sort(Itr beg, Itr end, Comp cmp, uint32_t limit = 100) {
 	auto dist2 = distance(beg, left);
 	//implements sort shorter first optimisation
 	if(dist1 < dist2) {
-		if(left != rend) rtn &= stack_quick_sort(left, end, limit - 1);
-		if(beg != left) rtn &= stack_quick_sort(beg, left, limit - 1);
+		if(left != rend) rtn &= stack_quick_sort(left, end, limit - 1, cmp);
+		if(beg != left) rtn &= stack_quick_sort(beg, left, limit - 1, cmp);
 	} else {
-		if(beg != left) rtn &= stack_quick_sort(beg, left, limit - 1);
-		if(left != rend) rtn &= stack_quick_sort(left, end, limit - 1);
+		if(beg != left) rtn &= stack_quick_sort(beg, left, limit - 1, cmp);
+		if(left != rend) rtn &= stack_quick_sort(left, end, limit - 1, cmp);
 	}
 	return rtn;
 }
