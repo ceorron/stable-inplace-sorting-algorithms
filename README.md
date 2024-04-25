@@ -119,7 +119,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -143,7 +143,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -167,7 +167,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -191,7 +191,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -215,7 +215,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -239,7 +239,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -263,7 +263,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -287,7 +287,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -311,7 +311,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -335,7 +335,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -359,7 +359,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -383,7 +383,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -407,7 +407,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -431,7 +431,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -455,7 +455,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -479,7 +479,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -503,7 +503,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -527,7 +527,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -551,7 +551,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -575,7 +575,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -599,7 +599,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -623,7 +623,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -647,7 +647,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -671,7 +671,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -695,7 +695,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -719,7 +719,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
@@ -743,7 +743,7 @@ int main() {
         if(verbose) {
             std::cout << "[" << std::endl;
             for(uint32_t i = 0; i < count; ++i) {
-                std::cout << "[ " << vec[i] << "], ";
+                std::cout << "[ " << vec[i] << " ], ";
                 if(i > 0 && i % 5 == 0)
                     std::cout << std::endl;
             }
