@@ -1,38 +1,39 @@
 # stable-in place-sorting-algorithms
 
-Included are implementations of common sorting algorithms as well as new sorting algorithms merge_sweep_sort and zip_sort.
+Included are implementations of common sorting algorithms as well as new sorting algorithms merge_sweep_sort, zip_sort and multi_insertion_sort.
 
 They have the following characteristics.
 
-| Name | Inplace | Stable | Average complexity (Big O) | Worst case complexity (Big O) | Stack memory | Additional memory | time sorting 1000 random numbers | time sorting 80,000 random numbers |
+| Name | Inplace | Stable | Average complexity (Big O) | Worst case complexity (Big O) | Stack memory | Additional memory | time sorting 2000 random numbers | time sorting 100,000 random numbers |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: |
-| selection_sort | Yes | No | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1860 | 9042992 |
-| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 735 | 8395577 |
-| cocktail_shaker_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 884 | 5872503 |
-| double_selection_sort | Yes | No | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 941 | 4546028 |
-| inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 260 | 946125 |
-| hybrid_inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 212 | 841530 |
-| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 177 | 758073 |
-| binary_insertion_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 216 | 636183 |
-| zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 91 | 53456 |
-| hybrid_zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 73 | 51774 |
-| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 252 | 30865 |
-| new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N)<sup>(optionally 1)</sup> | - | 205 | 25388 |
-| hybrid_new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N)<sup>(optionally 1)</sup> | - | 92 | 22012 |
-| stackless_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 155 | 21450 |
-| rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 144 | 21205 |
-| hybrid_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 104 | 18744 |
-| hybrid_stackless_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 106 | 18716 |
-| stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 66 | 7012 |
-| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 52 | 6908 |
-| adaptive_stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 74 | 6714 |
-| adaptive_stable_intro_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | (N) | 57 | 6048 |
-| merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 45 | 6041 |
-| std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 44 | 5421 |
-| hybrid_merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 37 | 5067 |
-| intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 36 | 4894 |
-| adaptive_intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 37 | 4755 |
-| std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 36 | 4738 |
+| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1713 | 10904298 |
+| selection_sort | Yes | No | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 3404 | 10380187 |
+| cocktail_shaker_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1714 | 9778722 |
+| double_selection_sort | Yes | No | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1702 | 4181987 |
+| new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N)<sup>(optionally 1)</sup> | - | 306 | 1869181 |
+| hybrid_new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N)<sup>(optionally 1)</sup> | - | 183 | 1606590 |
+| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 514 | 1117538 |
+| binary_insertion_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 594 | 1104301 |
+| multi_insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 360 | 705001 |
+| inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 471 | 519085 |
+| hybrid_inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 422 | 428299 |
+| hybrid_zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 142 | 37572 |
+| zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 170 | 37434 |
+| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 479 | 30865 |
+| stackless_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 286 | 23016 |
+| rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 265 | 22240 |
+| hybrid_stackless_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 194 | 19109 |
+| hybrid_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 196 | 18744 |
+| adaptive_stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 130 | 8196 |
+| stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 173 | 7875 |
+| adaptive_stable_intro_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | (N) | 92 | 7672 |
+| merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 80 | 7167 |
+| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 115 | 5602 |
+| hybrid_merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 73 | 5067 |
+| adaptive_intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 68 | 4489 |
+| intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 67 | 4388 |
+| std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 76 | 4346 |
+| std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 63 | 4192 |
 
 (All tests with MSVC compiler in release x64)
 (times in microseconds, times are only indicitive as they are somewhat data dependant)
@@ -67,7 +68,9 @@ These implementation were inspired by this video https://www.youtube.com/watch?v
 
 inplace_merge_sort and hybrid_inplace_merge_sort were added for comparison with zip_sort and merge_sweep_sort. As the most common in-place merge sort algorithms in use. They have O(n log n) comparisons/time complexity, but perform many more swaps/moves to be efficient when compared with those algorithms.
 
-Added in March 2022 stackless_rotate_merge_sort and hybrid_stackless_rotate_merge_sort are both variations of rotate_merge_sort, however that is where the similarities end, both are of very different designs but both are in-place, worst/average O(n log n) and use constant stack space. hybrid_stackless_rotate_merge_sort is the faster algorithm in almost all cases. stackless_rotate_merge_sort has been designed to take advantage of places where the input data is already partially/fully/reverse sorted.
+Added in March 2022, stackless_rotate_merge_sort and hybrid_stackless_rotate_merge_sort are both variations of rotate_merge_sort, however that is where the similarities end, both are of very different designs but both are in-place, worst/average O(n log n) and use constant stack space. hybrid_stackless_rotate_merge_sort is the faster algorithm in almost all cases. stackless_rotate_merge_sort has been designed to take advantage of places where the input data is already partially/fully/reverse sorted.
+
+Added in April 2024, multi_insertion_sort is a modification to the insertion sort algorithm that moves multiple items at a time. The algorithm moves, at minimum, 2 items at a time meaning the algorithm nearly halves the total number of writes compared with insertion_sort at the cost of a more complex algorithm. This makes multi_insertion_sort a much faster version of insertion_sort an should be prefered if using insertion_sort to sort data.
 
 # Example use - C++
 
@@ -618,6 +621,30 @@ int main() {
         {
             timer tmr;
             stlib::binary_insertion_sort(vec.begin(), vec.end());
+        }
+
+        if(verbose) {
+            std::cout << "[" << std::endl;
+            for(uint32_t i = 0; i < count; ++i) {
+                std::cout << "[ " << vec[i] << " ], ";
+                if(i > 0 && i % 5 == 0)
+                    std::cout << std::endl;
+            }
+            std::cout << "]" << std::endl;
+        }
+
+        std::cout << "sorted : " << stlib::is_sorted(vec.begin(), vec.end()) << std::endl;
+    }
+    {
+        std::cout << "test multi insertion sort" << std::endl;
+        //test multi insertion sort
+        std::vector<uint32_t> vec;
+        for(uint32_t i = 0; i < count; ++i)
+            vec.push_back(rand());
+
+        {
+            timer tmr;
+            stlib::multi_insertion_sort(vec.begin(), vec.end());
         }
 
         if(verbose) {
