@@ -70,7 +70,7 @@ inplace_merge_sort and hybrid_inplace_merge_sort were added for comparison with 
 
 Added in March 2022, stackless_rotate_merge_sort and hybrid_stackless_rotate_merge_sort are both variations of rotate_merge_sort, however that is where the similarities end, both are of very different designs but both are in-place, worst/average O(n log n) and use constant stack space. hybrid_stackless_rotate_merge_sort is the faster algorithm in almost all cases. stackless_rotate_merge_sort has been designed to take advantage of places where the input data is already partially/fully/reverse sorted.
 
-Added in April 2024, multi_insertion_sort is a modification to the insertion sort algorithm that moves multiple items at a time. The algorithm moves, at minimum, 2 items at a time meaning the algorithm nearly halves the total number of writes compared with insertion_sort at the cost of a more complex algorithm. This makes multi_insertion_sort a much faster version of insertion_sort an should be prefered if using insertion_sort to sort data.
+Added in April 2024, multi_insertion_sort is a modification to the insertion sort algorithm that moves multiple items at a time. The algorithm moves, at minimum, 2 items at a time meaning the algorithm nearly halves the total number of writes compared with insertion_sort at the cost of a more complex algorithm. This makes multi_insertion_sort a much faster version of insertion_sort and should be prefered if using insertion_sort to sort data.
 
 # Example use - C++
 
