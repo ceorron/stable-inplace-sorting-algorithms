@@ -2825,7 +2825,7 @@ void hybrid_inplace_merge_sort(Itr beg, Itr end, Comp cmp) {
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			insertion_sort(bg, ed);
+			insertion_sort(bg, ed, cmp);
 			bg = ed;
 		}
 	}
