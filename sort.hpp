@@ -999,7 +999,7 @@ void insertion_sort(Itr beg, Itr end) {
 		Itr crnt = strt;
 
 		//move this to the correct place (do insert)
-		using valueof = typename stdlib::value_for<Itr>::value_type;
+		using valueof = typename stlib_internal::value_for<Itr>::value_type;
 		alignas(valueof) char item[sizeof(valueof)];
 		valueof& val = *(valueof*)item;
 		stlib_internal::construct(val, std::move(*crnt));
@@ -1020,7 +1020,7 @@ void insertion_sort(Itr beg, Itr end, Comp cmp) {
 		Itr crnt = strt;
 
 		//move this to the correct place (do insert)
-		using valueof = typename stdlib::value_for<Itr>::value_type;
+		using valueof = typename stlib_internal::value_for<Itr>::value_type;
 		alignas(valueof) char item[sizeof(valueof)];
 		valueof& val = *(valueof*)item;
 		stlib_internal::construct(val, std::move(*crnt));
@@ -1039,13 +1039,13 @@ void move_past_larger(Itr& beg, Itr end) {
 	//beg separates the sorted from the unsorted, keep adding items to the sorted if they are greater or equal to the end item
 	while(beg != end) {
 		Itr tmp = beg - 1;
-		if(stdlib_internal::less_func(*beg, *tmp))
+		if(stlib_internal::less_func(*beg, *tmp))
 			break;
 		++beg;
 	}
 }
 template<typename Itr>
-unsigned make_auxiliary_array(Itr strt, Itr end, typename stdlib::value_for<Itr>::value_type* arr, unsigned item_count) {
+unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_for<Itr>::value_type* arr, unsigned item_count) {
 	//there must be atleast one item in the list in order for us to be here
 	//move values from the array into the auxiliary array
 
@@ -1054,20 +1054,20 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stdlib::value_for<Itr>
 	unsigned count = 1;
 	unsigned up_down = 0; // 0 is unknown, 1 if ascending, 2 is decending
 	if(beg != end) {
-		if(stdlib_internal::less_func(*beg, *strt)) {
+		if(stlib_internal::less_func(*beg, *strt)) {
 			//we are decending
 			up_down = 2;
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stdlib_internal::less_func(*beg, *(beg - 1)));
+			} while(beg != end && count < item_count && stlib_internal::less_func(*beg, *(beg - 1)));
 		} else {
 			//we are ascending
 			up_down = 1;
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stdlib_internal::greater_equal_func(*beg, *(beg - 1)));
+			} while(beg != end && count < item_count && stlib_internal::greater_equal_func(*beg, *(beg - 1)));
 		}
 	}
 
@@ -1077,7 +1077,7 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stdlib::value_for<Itr>
 		unsigned idx = 0;
 		while(cnt > 0) {
 			Itr itr = strt + (cnt - 1);
-			stdlib::construct(arr[idx], stdlib::move(*itr));
+			stlib_internal::construct(arr[idx], std::move(*itr));
 			--cnt;
 			++idx;
 		}
@@ -1086,7 +1086,7 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stdlib::value_for<Itr>
 		unsigned idx = 0;
 		while(cnt > 0) {
 			Itr itr = strt + idx;
-			stdlib::construct(arr[idx], stdlib::move(*itr));
+			stlib_internal::construct(arr[idx], std::move(*itr));
 			--cnt;
 			++idx;
 		}
@@ -1094,7 +1094,7 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stdlib::value_for<Itr>
 	return count;
 }
 template<typename Itr>
-void multi_insert(Itr beg, Itr strt_to, Itr strt, typename stdlib::value_for<Itr>::value_type* arr, unsigned items) {
+void multi_insert(Itr beg, Itr strt_to, Itr strt, typename stlib_internal::value_for<Itr>::value_type* arr, unsigned items) {
 	//go backwards insert into the output all of the items from array, stop when we run out of items
 	unsigned count = distance(beg, strt);
 	--strt;
@@ -1104,21 +1104,21 @@ void multi_insert(Itr beg, Itr strt_to, Itr strt, typename stdlib::value_for<Itr
 			//do all of the comparisons on one go
 			//if the existing buffer is greater then, otherwise copy from the array
 			Itr tmp = strt;
-			while(count > 0 && stdlib_internal::greater_func(*tmp, arr[items - 1])) {
+			while(count > 0 && stlib_internal::greater_func(*tmp, arr[items - 1])) {
 				--tmp;
 				--count;
 			}
 			//do all of the moves after that
 			Itr tmp2 = strt;
 			while(tmp2 != tmp) {
-				stdlib::construct(*strt_to, stdlib::move(*tmp2));
+				stlib_internal::construct(*strt_to, std::move(*tmp2));
 				--tmp2;
 				--strt_to;
 			}
 			strt = tmp;
 		}
 		//move one of the items from the array into it's final position
-		stdlib::construct(*strt_to, stdlib::move(arr[items - 1]));
+		stlib_internal::construct(*strt_to, std::move(arr[items - 1]));
 		--items;
 		--strt_to;
 	}
@@ -1129,7 +1129,7 @@ void multi_insertion_sort(Itr beg, Itr end) {
 		return;
 
 	//move this to the correct place (do insert)
-	using valueof = typename stdlib::value_for<Itr>::value_type;
+	using valueof = typename stlib_internal::value_for<Itr>::value_type;
 	constexpr unsigned itm_num = (((1024 / sizeof(valueof)) + (1024 % sizeof(valueof) ? 1 : 0)) < 10 ? ((1024 / sizeof(valueof)) + (1024 % sizeof(valueof) ? 1 : 0)) : 10);
 	constexpr unsigned items = (itm_num < 5 ? 5 : itm_num);
 	alignas(valueof) char item[sizeof(valueof) * items];
@@ -1155,13 +1155,13 @@ void move_past_larger(Itr& beg, Itr end, Comp cmp) {
 	//beg separates the sorted from the unsorted, keep adding items to the sorted if they are greater or equal to the end item
 	while(beg != end) {
 		Itr tmp = beg - 1;
-		if(stdlib_internal::less_func(*beg, *tmp, cmp))
+		if(stlib_internal::less_func(*beg, *tmp, cmp))
 			break;
 		++beg;
 	}
 }
 template<typename Itr, typename Comp>
-unsigned make_auxiliary_array(Itr strt, Itr end, typename stdlib::value_for<Itr>::value_type* arr, unsigned item_count, Comp cmp) {
+unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_for<Itr>::value_type* arr, unsigned item_count, Comp cmp) {
 	//there must be atleast one item in the list in order for us to be here
 	//move values from the array into the auxiliary array
 
@@ -1170,20 +1170,20 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stdlib::value_for<Itr>
 	unsigned count = 1;
 	unsigned up_down = 0; // 0 is unknown, 1 if ascending, 2 is decending
 	if(beg != end) {
-		if(stdlib_internal::less_func(*beg, *strt, cmp)) {
+		if(stlib_internal::less_func(*beg, *strt, cmp)) {
 			//we are decending
 			up_down = 2;
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stdlib_internal::less_func(*beg, *(beg - 1), cmp));
+			} while(beg != end && count < item_count && stlib_internal::less_func(*beg, *(beg - 1), cmp));
 		} else {
 			//we are ascending
 			up_down = 1;
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stdlib_internal::greater_equal_func(*beg, *(beg - 1), cmp));
+			} while(beg != end && count < item_count && stlib_internal::greater_equal_func(*beg, *(beg - 1), cmp));
 		}
 	}
 
@@ -1193,7 +1193,7 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stdlib::value_for<Itr>
 		unsigned idx = 0;
 		while(cnt > 0) {
 			Itr itr = strt + (cnt - 1);
-			stdlib::construct(arr[idx], stdlib::move(*itr));
+			stlib_internal::construct(arr[idx], std::move(*itr));
 			--cnt;
 			++idx;
 		}
@@ -1202,7 +1202,7 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stdlib::value_for<Itr>
 		unsigned idx = 0;
 		while(cnt > 0) {
 			Itr itr = strt + idx;
-			stdlib::construct(arr[idx], stdlib::move(*itr));
+			stlib_internal::construct(arr[idx], std::move(*itr));
 			--cnt;
 			++idx;
 		}
@@ -1210,7 +1210,7 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stdlib::value_for<Itr>
 	return count;
 }
 template<typename Itr, typename Comp>
-void multi_insert(Itr beg, Itr strt_to, Itr strt, typename stdlib::value_for<Itr>::value_type* arr, unsigned items, Comp cmp) {
+void multi_insert(Itr beg, Itr strt_to, Itr strt, typename stlib_internal::value_for<Itr>::value_type* arr, unsigned items, Comp cmp) {
 	//go backwards insert into the output all of the items from array, stop when we run out of items
 	unsigned count = distance(beg, strt);
 	--strt;
@@ -1220,21 +1220,21 @@ void multi_insert(Itr beg, Itr strt_to, Itr strt, typename stdlib::value_for<Itr
 			//do all of the comparisons on one go
 			//if the existing buffer is greater then, otherwise copy from the array
 			Itr tmp = strt;
-			while(count > 0 && stdlib_internal::greater_func(*tmp, arr[items - 1], cmp)) {
+			while(count > 0 && stlib_internal::greater_func(*tmp, arr[items - 1], cmp)) {
 				--tmp;
 				--count;
 			}
 			//do all of the moves after that
 			Itr tmp2 = strt;
 			while(tmp2 != tmp) {
-				stdlib::construct(*strt_to, stdlib::move(*tmp2));
+				stlib_internal::construct(*strt_to, std::move(*tmp2));
 				--tmp2;
 				--strt_to;
 			}
 			strt = tmp;
 		}
 		//move one of the items from the array into it's final position
-		stdlib::construct(*strt_to, stdlib::move(arr[items - 1]));
+		stlib_internal::construct(*strt_to, std::move(arr[items - 1]));
 		--items;
 		--strt_to;
 	}
@@ -1245,7 +1245,7 @@ void multi_insertion_sort(Itr beg, Itr end, Comp cmp) {
 		return;
 
 	//move this to the correct place (do insert)
-	using valueof = typename stdlib::value_for<Itr>::value_type;
+	using valueof = typename stlib_internal::value_for<Itr>::value_type;
 	constexpr unsigned itm_num = (((1024 / sizeof(valueof)) + (1024 % sizeof(valueof) ? 1 : 0)) < 10 ? ((1024 / sizeof(valueof)) + (1024 % sizeof(valueof) ? 1 : 0)) : 10);
 	constexpr unsigned items = (itm_num < 5 ? 5 : itm_num);
 	alignas(valueof) char item[sizeof(valueof) * items];
@@ -1283,7 +1283,7 @@ void binary_insertion_sort(Itr beg, Itr end) {
 			--out;
 
 			Itr c = strt;
-			using valueof = typename stdlib::value_for<Itr>::value_type;
+			using valueof = typename stlib_internal::value_for<Itr>::value_type;
 			alignas(valueof) char item[sizeof(valueof)];
 			valueof& val = *(valueof*)item;
 			stlib_internal::construct(val, std::move(*c));
@@ -1293,7 +1293,7 @@ void binary_insertion_sort(Itr beg, Itr end) {
 			stlib_internal::construct(*c, std::move(val));
 		} else if(out != strt) {
 			Itr c = strt;
-			using valueof = typename stdlib::value_for<Itr>::value_type;
+			using valueof = typename stlib_internal::value_for<Itr>::value_type;
 			alignas(valueof) char item[sizeof(valueof)];
 			valueof& val = *(valueof*)item;
 			stlib_internal::construct(val, std::move(*c));
@@ -1319,7 +1319,7 @@ void binary_insertion_sort(Itr beg, Itr end, Comp cmp) {
 			--out;
 
 			Itr c = strt;
-			using valueof = typename stdlib::value_for<Itr>::value_type;
+			using valueof = typename stlib_internal::value_for<Itr>::value_type;
 			alignas(valueof) char item[sizeof(valueof)];
 			valueof& val = *(valueof*)item;
 			stlib_internal::construct(val, std::move(*c));
@@ -1329,7 +1329,7 @@ void binary_insertion_sort(Itr beg, Itr end, Comp cmp) {
 			stlib_internal::construct(*c, std::move(val));
 		} else if(out != strt) {
 			Itr c = strt;
-			using valueof = typename stdlib::value_for<Itr>::value_type;
+			using valueof = typename stlib_internal::value_for<Itr>::value_type;
 			alignas(valueof) char item[sizeof(valueof)];
 			valueof& val = *(valueof*)item;
 			stlib_internal::construct(val, std::move(*c));
