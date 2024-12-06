@@ -1106,7 +1106,7 @@ void multi_insert(Itr beg, Itr strt_to, Itr strt, typename stlib_internal::value
 			Itr tmp = strt;
 			while(count > 0 && stlib_internal::greater_func(*tmp, arr[items - 1])) {
 				//do move after we know that this is greater
-				stlib_internal::construct(*strt_to, stdlib::move(*tmp));
+				stlib_internal::construct(*strt_to, std::move(*tmp));
 				--tmp;
 				--count;
 				--strt_to;
@@ -1217,7 +1217,7 @@ void multi_insert(Itr beg, Itr strt_to, Itr strt, typename stlib_internal::value
 			//if the existing buffer is greater then, otherwise copy from the array
 			while(count > 0 && stlib_internal::greater_func(*tmp, arr[items - 1], cmp)) {
 				//do move after we know that this is greater
-				stlib_internal::construct(*strt_to, stdlib::move(*tmp));
+				stlib_internal::construct(*strt_to, std::move(*tmp));
 				--tmp;
 				--count;
 				--strt_to;
