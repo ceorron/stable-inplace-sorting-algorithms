@@ -2629,7 +2629,7 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			insertion_sort(bg, ed, cmp);
+			multi_insertion_sort(bg, ed, cmp);
 			bg = ed;
 		}
 	}
@@ -2839,7 +2839,7 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf) {
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			insertion_sort(bg, ed);
+			multi_insertion_sort(bg, ed);
 			bg = ed;
 		}
 	}
@@ -2972,7 +2972,7 @@ void hybrid_inplace_merge_sort(Itr beg, Itr end) {
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			insertion_sort(bg, ed);
+			multi_insertion_sort(bg, ed);
 			bg = ed;
 		}
 	}
@@ -3053,7 +3053,7 @@ void hybrid_inplace_merge_sort(Itr beg, Itr end, Comp cmp) {
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			insertion_sort(bg, ed, cmp);
+			multi_insertion_sort(bg, ed, cmp);
 			bg = ed;
 		}
 	}
@@ -3174,7 +3174,7 @@ void hybrid_rotate_merge_sort(Itr beg, Itr end) {
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			insertion_sort(bg, ed);
+			multi_insertion_sort(bg, ed);
 			bg = ed;
 		}
 	}
@@ -3293,7 +3293,7 @@ void hybrid_rotate_merge_sort(Itr beg, Itr end, Comp cmp) {
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			insertion_sort(bg, ed, cmp);
+			multi_insertion_sort(bg, ed, cmp);
 			bg = ed;
 		}
 	}
@@ -3633,7 +3633,7 @@ void hybrid_stackless_rotate_merge_sort_internal(Itr beg, Itr end) {
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			insertion_sort(bg, ed);
+			multi_insertion_sort(bg, ed);
 			bg = ed;
 		}
 	}
@@ -3695,7 +3695,7 @@ void hybrid_stackless_rotate_merge_sort_internal(Itr beg, Itr end, Comp cmp) {
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			insertion_sort(bg, ed, cmp);
+			multi_insertion_sort(bg, ed, cmp);
 			bg = ed;
 		}
 	}
@@ -4052,7 +4052,7 @@ void hybrid_zip_sort(Itr beg, Itr end) {
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			insertion_sort(bg, ed);
+			multi_insertion_sort(bg, ed);
 			bg = ed;
 		}
 	}
@@ -4260,7 +4260,7 @@ void hybrid_zip_sort(Itr beg, Itr end, Comp cmp) {
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			insertion_sort(bg, ed, cmp);
+			multi_insertion_sort(bg, ed, cmp);
 			bg = ed;
 		}
 	}
@@ -4759,7 +4759,7 @@ void hybrid_new_zip_sort(Itr beg, Itr end, NEW_ZIP_MERGE_KIND kind = NEW_ZIP_MER
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			insertion_sort(bg, ed);
+			multi_insertion_sort(bg, ed);
 			bg = ed;
 		}
 	}
@@ -5209,7 +5209,7 @@ void hybrid_new_zip_sort(Itr beg, Itr end, Comp cmp, NEW_ZIP_MERGE_KIND kind = N
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			insertion_sort(bg, ed, cmp);
+			multi_insertion_sort(bg, ed, cmp);
 			bg = ed;
 		}
 	}
@@ -5425,13 +5425,13 @@ template<typename Itr>
 void intro_quick_sort(Itr beg, Itr end) {
 	stlib_internal::intro_quick_sort_internal(beg, end);
 
-	insertion_sort(beg, end);
+	multi_insertion_sort(beg, end);
 }
 template<typename Itr, typename Comp>
 void intro_quick_sort(Itr beg, Itr end, Comp cmp) {
 	stlib_internal::intro_quick_sort_internal(beg, end, cmp);
 
-	insertion_sort(beg, end, cmp);
+	multi_insertion_sort(beg, end, cmp);
 }
 
 namespace stlib_internal {
@@ -5584,13 +5584,13 @@ template<typename Itr>
 inline void intro_sort(Itr beg, Itr end) {
 	stlib_internal::adaptive_intro_quick_sort(beg, end);
 
-	insertion_sort(beg, end);
+	multi_insertion_sort(beg, end);
 }
 template<typename Itr, typename Comp>
 inline void intro_sort(Itr beg, Itr end, Comp cmp) {
 	stlib_internal::adaptive_intro_quick_sort(beg, end, cmp);
 
-	insertion_sort(beg, end, cmp);
+	multi_insertion_sort(beg, end, cmp);
 }
 
 template<typename Itr>
