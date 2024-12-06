@@ -30,10 +30,10 @@ They have the following characteristics.
 | quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 101 | 5544 |
 | merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 70 | 5216 |
 | intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 58 | 4859 |
-| adaptive_intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 60 | 4717 |
 | hybrid_merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 60 | 4687 |
 | std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 71 | 4682 |
 | std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 93 | 4440 |
+| adaptive_intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 60 | 4192 |
 
 (All tests with MSVC compiler in release x64)
 (times in microseconds, times are only indicitive as they are somewhat data dependant)
