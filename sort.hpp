@@ -1221,7 +1221,7 @@ void multi_insert(Itr beg, Itr strt_to, Itr strt, typename stlib_internal::value
 				--tmp;
 				--count;
 				--strt_to;
-			}			
+			}
 			strt = tmp;
 		}
 		//move one of the items from the array into it's final position
