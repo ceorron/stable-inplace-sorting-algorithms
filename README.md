@@ -6,34 +6,34 @@ They have the following characteristics.
 
 | Name | Inplace | Stable | Average complexity (Big O) | Worst case complexity (Big O) | Stack memory | Additional memory | time sorting 2000 random numbers | time sorting 100,000 random numbers |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: |
-| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1713 | 10904298 |
-| selection_sort | Yes | No | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 3404 | 10380187 |
-| cocktail_shaker_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1714 | 9778722 |
-| double_selection_sort | Yes | No | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1702 | 4181987 |
-| new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N)<sup>(optionally 1)</sup> | - | 306 | 1869181 |
-| hybrid_new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N)<sup>(optionally 1)</sup> | - | 183 | 1606590 |
-| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 514 | 1117538 |
-| binary_insertion_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 594 | 1104301 |
-| multi_insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 360 | 705001 |
-| inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 471 | 519085 |
-| hybrid_inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 422 | 428299 |
-| hybrid_zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 142 | 37572 |
-| zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 170 | 37434 |
-| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 479 | 30865 |
-| stackless_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 286 | 23016 |
-| rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 265 | 22240 |
-| hybrid_stackless_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 194 | 19109 |
-| hybrid_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 196 | 18744 |
-| adaptive_stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 130 | 8196 |
-| stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 173 | 7875 |
-| adaptive_stable_intro_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | (N) | 92 | 7672 |
-| merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 80 | 7167 |
-| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 115 | 5602 |
-| hybrid_merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 73 | 5067 |
-| adaptive_intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 68 | 4489 |
-| intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 67 | 4388 |
-| std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 76 | 4346 |
-| std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 63 | 4192 |
+| bubble_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1741 | 12268450 |
+| selection_sort | Yes | No | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 3381 | 9062682 |
+| cocktail_shaker_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1449 | 8049956 |
+| double_selection_sort | Yes | No | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 1704 | 4551150 |
+| new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N)<sup>(optionally 1)</sup> | - | 302 | 1569224 |
+| hybrid_new_zip_sort | Yes | Yes<sup>(optional)</sup> | O(n log n) | O(n log n) | approx (log N)<sup>(optionally 1)</sup> | - | 182 | 1344653 |
+| insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 515 | 1141233 |
+| binary_insertion_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 594 | 1102238 |
+| multi_insertion_sort | Yes | Yes | O(n<sup>2</sup>) | O(n<sup>2</sup>) | (1) | - | 230 | 442766 |
+| hybrid_inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 464 | 423827 |
+| inplace_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 414 | 416774 |
+| zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 163 | 55830 |
+| hybrid_zip_sort | Yes | Yes | O(n log n) | O(n log n) | (1) when optimised | - | 133 | 51786 |
+| stackless_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 283 | 38154 |
+| hybrid_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 192 | 37818 |
+| rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | - | 254 | 26060 |
+| hybrid_stackless_rotate_merge_sort | Yes | Yes | O(n log n) | O(n log n) | (1) | - | 232 | 24472 |
+| merge_sweep_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 407 | 20294 |
+| stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 93 | 7795 |
+| adaptive_stable_quick_sort | Yes | Yes | O(n log n) | O(n<sup>2</sup>) | approx (log N) | (N) | 105 | 7443 |
+| adaptive_stable_intro_sort | Yes | Yes | O(n log n) | O(n log n) | approx (log N) | (N) | 77 | 6561 |
+| quick_sort | Yes | No | O(n log n) | O(n<sup>2</sup>) | approx (log N) | - | 101 | 5544 |
+| merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 70 | 5216 |
+| intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 58 | 4859 |
+| adaptive_intro_sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 60 | 4717 |
+| hybrid_merge_sort | No | Yes | O(n log n) | O(n log n) | (1) when optimised | (N) | 60 | 4687 |
+| std::stable_sort | No | Yes | O(n log n) | O(n log n) | (1) | (N) | 71 | 4682 |
+| std::sort | Yes | No | O(n log n) | O(n log n) | approx (log N) | - | 93 | 4440 |
 
 (All tests with MSVC compiler in release x64)
 (times in microseconds, times are only indicitive as they are somewhat data dependant)
