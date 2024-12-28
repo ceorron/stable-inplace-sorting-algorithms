@@ -1132,19 +1132,14 @@ void multi_insertion_sort(Itr beg, Itr end) {
 	valueof* arr = (valueof*)item;
 
 	Itr strt = beg + 1;
-	do {
-		//go through all of the items greater/equal to the last item
-		move_past_larger(strt, end);
-		//test if we have reached the end?
-		if(strt == end)
-			break;
+	while(strt != end) {
 		//build up an auxiliary array with correctly ordered items
 		unsigned count = make_auxiliary_array(strt, end, arr, items);
 		//insert the items from the auxiliary array into the correct places in the main array
 		multi_insert(beg, strt + count, strt, arr, count);
 		//exit if we have reached the end
 		strt = strt + count;
-	} while(strt != end);
+	}
 }
 template<typename Itr, typename Comp>
 void move_past_larger(Itr& beg, Itr end, Comp cmp) {
@@ -1243,19 +1238,14 @@ void multi_insertion_sort(Itr beg, Itr end, Comp cmp) {
 	valueof* arr = (valueof*)item;
 
 	Itr strt = beg + 1;
-	do {
-		//go through all of the items greater/equal to the last item
-		move_past_larger(strt, end, cmp);
-		//test if we have reached the end?
-		if(strt == end)
-			break;
+	while(strt != end) {
 		//build up an auxiliary array with correctly ordered items
 		unsigned count = make_auxiliary_array(strt, end, arr, items, cmp);
 		//insert the items from the auxiliary array into the correct places in the main array
 		multi_insert(beg, strt + count, strt, arr, count, cmp);
 		//exit if we have reached the end
 		strt = strt + count;
-	} while(strt != end);
+	}
 }
 
 
