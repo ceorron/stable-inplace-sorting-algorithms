@@ -1044,22 +1044,22 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_
 	unsigned count = 1;
 	unsigned up_down = 0; // 0 is unknown, 1 if ascending, 2 is decending
 	if(beg != end) {
-		if(stdlib_internal::less_func(*beg, *strt)) {
+		if(stlib_internal::less_func(*beg, *strt)) {
 			//we are decending
 			up_down = 2;
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stdlib_internal::less_func(*beg, *(beg - 1), cmp));
+			} while(beg != end && count < item_count && stlib_internal::less_func(*beg, *(beg - 1), cmp));
 		} else {
 			//we are ascending
 			up_down = 1;
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stdlib_internal::greater_equal_func(*beg, *(beg - 1), cmp));
+			} while(beg != end && count < item_count && stlib_internal::greater_equal_func(*beg, *(beg - 1), cmp));
 			//if we are ascending and we have reached the end of the data or used all of the remaining space, test if we don't need to move any data (optimisation)
-			if(test_consecutive && (beg == end || count == item_count) && stdlib_internal::less_equal_func(*(strt - 1), *strt, cmp)) {
+			if(test_consecutive && (beg == end || count == item_count) && stlib_internal::less_equal_func(*(strt - 1), *strt, cmp)) {
 				test_consecutive = false;
 				return count;
 			}
@@ -1148,22 +1148,22 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_
 	unsigned count = 1;
 	unsigned up_down = 0; // 0 is unknown, 1 if ascending, 2 is decending
 	if(beg != end) {
-		if(stdlib_internal::less_func(*beg, *strt, cmp)) {
+		if(stlib_internal::less_func(*beg, *strt, cmp)) {
 			//we are decending
 			up_down = 2;
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stdlib_internal::less_func(*beg, *(beg - 1), cmp));
+			} while(beg != end && count < item_count && stlib_internal::less_func(*beg, *(beg - 1), cmp));
 		} else {
 			//we are ascending
 			up_down = 1;
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stdlib_internal::greater_equal_func(*beg, *(beg - 1), cmp));
+			} while(beg != end && count < item_count && stlib_internal::greater_equal_func(*beg, *(beg - 1), cmp));
 			//if we are ascending and we have reached the end of the data or used all of the remaining space, test if we don't need to move any data (optimisation)
-			if(test_consecutive && (beg == end || count == item_count) && stdlib_internal::less_equal_func(*(strt - 1), *strt, cmp)) {
+			if(test_consecutive && (beg == end || count == item_count) && stlib_internal::less_equal_func(*(strt - 1), *strt, cmp)) {
 				test_consecutive = false;
 				return count;
 			}
@@ -5653,5 +5653,6 @@ inline void sort(Itr beg, Itr end, Comp cmp) {
 }
 
 }
+
 
 
