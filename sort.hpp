@@ -2,7 +2,7 @@
  |																					|
  | sort.hpp																			|
  |																					|
- | Copyright (c) 2020-2024 Richard Cookman											|
+ | Copyright (c) 2020-2025 Richard Cookman											|
  |																					|
  | Permission is hereby granted, free of charge, to any person obtaining a copy		|
  | of this software and associated documentation files (the "Software"), to deal	|
@@ -1035,17 +1035,7 @@ void insertion_sort(Itr beg, Itr end, Comp cmp) {
 
 
 template<typename Itr>
-void move_past_larger(Itr& beg, Itr end) {
-	//beg separates the sorted from the unsorted, keep adding items to the sorted if they are greater or equal to the end item
-	while(beg != end) {
-		Itr tmp = beg - 1;
-		if(stlib_internal::less_func(*beg, *tmp))
-			break;
-		++beg;
-	}
-}
-template<typename Itr>
-unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_for<Itr>::value_type* arr, unsigned item_count) {
+unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_for<Itr>::value_type* arr, unsigned item_count, bool& test_consecutive) {
 	//there must be atleast one item in the list in order for us to be here
 	//move values from the array into the auxiliary array
 
@@ -1054,20 +1044,25 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_
 	unsigned count = 1;
 	unsigned up_down = 0; // 0 is unknown, 1 if ascending, 2 is decending
 	if(beg != end) {
-		if(stlib_internal::less_func(*beg, *strt)) {
+		if(stdlib_internal::less_func(*beg, *strt)) {
 			//we are decending
 			up_down = 2;
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stlib_internal::less_func(*beg, *(beg - 1)));
+			} while(beg != end && count < item_count && stdlib_internal::less_func(*beg, *(beg - 1), cmp));
 		} else {
 			//we are ascending
 			up_down = 1;
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stlib_internal::greater_equal_func(*beg, *(beg - 1)));
+			} while(beg != end && count < item_count && stdlib_internal::greater_equal_func(*beg, *(beg - 1), cmp));
+			//if we are ascending and we have reached the end of the data or used all of the remaining space, test if we don't need to move any data (optimisation)
+			if(test_consecutive && (beg == end || count == item_count) && stdlib_internal::less_equal_func(*(strt - 1), *strt, cmp)) {
+				test_consecutive = false;
+				return count;
+			}
 		}
 	}
 
@@ -1077,7 +1072,7 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_
 		unsigned idx = 0;
 		while(cnt > 0) {
 			Itr itr = strt + (cnt - 1);
-			stlib_internal::construct(arr[idx], std::move(*itr));
+			construct(arr[idx], std::move(*itr));
 			--cnt;
 			++idx;
 		}
@@ -1086,7 +1081,7 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_
 		unsigned idx = 0;
 		while(cnt > 0) {
 			Itr itr = strt + idx;
-			stlib_internal::construct(arr[idx], std::move(*itr));
+			construct(arr[idx], std::move(*itr));
 			--cnt;
 			++idx;
 		}
@@ -1134,25 +1129,17 @@ void multi_insertion_sort(Itr beg, Itr end) {
 	Itr strt = beg + 1;
 	while(strt != end) {
 		//build up an auxiliary array with correctly ordered items
-		unsigned count = make_auxiliary_array(strt, end, arr, items);
-		//insert the items from the auxiliary array into the correct places in the main array
-		multi_insert(beg, strt + count, strt, arr, count);
+		bool test_consecutive = true;
+		unsigned count = make_auxiliary_array(strt, end, arr, items, test_consecutive);
+		if(test_consecutive)
+			//insert the items from the auxiliary array into the correct places in the main array
+			multi_insert(beg, strt + count, strt, arr, count);
 		//exit if we have reached the end
 		strt = strt + count;
 	}
 }
 template<typename Itr, typename Comp>
-void move_past_larger(Itr& beg, Itr end, Comp cmp) {
-	//beg separates the sorted from the unsorted, keep adding items to the sorted if they are greater or equal to the end item
-	while(beg != end) {
-		Itr tmp = beg - 1;
-		if(stlib_internal::less_func(*beg, *tmp, cmp))
-			break;
-		++beg;
-	}
-}
-template<typename Itr, typename Comp>
-unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_for<Itr>::value_type* arr, unsigned item_count, Comp cmp) {
+unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_for<Itr>::value_type* arr, unsigned item_count, bool& test_consecutive, Comp cmp) {
 	//there must be atleast one item in the list in order for us to be here
 	//move values from the array into the auxiliary array
 
@@ -1161,20 +1148,25 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_
 	unsigned count = 1;
 	unsigned up_down = 0; // 0 is unknown, 1 if ascending, 2 is decending
 	if(beg != end) {
-		if(stlib_internal::less_func(*beg, *strt, cmp)) {
+		if(stdlib_internal::less_func(*beg, *strt, cmp)) {
 			//we are decending
 			up_down = 2;
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stlib_internal::less_func(*beg, *(beg - 1), cmp));
+			} while(beg != end && count < item_count && stdlib_internal::less_func(*beg, *(beg - 1), cmp));
 		} else {
 			//we are ascending
 			up_down = 1;
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stlib_internal::greater_equal_func(*beg, *(beg - 1), cmp));
+			} while(beg != end && count < item_count && stdlib_internal::greater_equal_func(*beg, *(beg - 1), cmp));
+			//if we are ascending and we have reached the end of the data or used all of the remaining space, test if we don't need to move any data (optimisation)
+			if(test_consecutive && (beg == end || count == item_count) && stdlib_internal::less_equal_func(*(strt - 1), *strt, cmp)) {
+				test_consecutive = false;
+				return count;
+			}
 		}
 	}
 
@@ -1184,7 +1176,7 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_
 		unsigned idx = 0;
 		while(cnt > 0) {
 			Itr itr = strt + (cnt - 1);
-			stlib_internal::construct(arr[idx], std::move(*itr));
+			construct(arr[idx], std::move(*itr));
 			--cnt;
 			++idx;
 		}
@@ -1193,7 +1185,7 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_
 		unsigned idx = 0;
 		while(cnt > 0) {
 			Itr itr = strt + idx;
-			stlib_internal::construct(arr[idx], std::move(*itr));
+			construct(arr[idx], std::move(*itr));
 			--cnt;
 			++idx;
 		}
@@ -1240,9 +1232,11 @@ void multi_insertion_sort(Itr beg, Itr end, Comp cmp) {
 	Itr strt = beg + 1;
 	while(strt != end) {
 		//build up an auxiliary array with correctly ordered items
-		unsigned count = make_auxiliary_array(strt, end, arr, items, cmp);
-		//insert the items from the auxiliary array into the correct places in the main array
-		multi_insert(beg, strt + count, strt, arr, count, cmp);
+		bool test_consecutive = true;
+		unsigned count = make_auxiliary_array(strt, end, arr, items, test_consecutive, cmp);
+		if(test_consecutive)
+			//insert the items from the auxiliary array into the correct places in the main array
+			multi_insert(beg, strt + count, strt, arr, count, cmp);
 		//exit if we have reached the end
 		strt = strt + count;
 	}
@@ -2598,6 +2592,35 @@ void out_of_place_insertion_sort(Itr beg, Itr end, T* buf, Comp cmp) {
 	}
 }
 template<typename Itr, typename T, typename Comp>
+void out_of_place_multi_insertion_sort(Itr beg, Itr end, T* buf, Comp cmp) {
+	if(distance(beg, end) <= 1)
+		return;
+
+	//move this to the correct place (do insert)
+	using valueof = typename stlib_internal::value_for<Itr>::value_type;
+	constexpr unsigned itm_num = (((1024 / sizeof(valueof)) + (1024 % sizeof(valueof) ? 1 : 0)) < 10 ? ((1024 / sizeof(valueof)) + (1024 % sizeof(valueof) ? 1 : 0)) : 10);
+	constexpr unsigned items = (itm_num < 5 ? 5 : itm_num);
+	alignas(valueof) char item[sizeof(valueof) * items];
+	valueof* arr = (valueof*)item;
+
+	//move the results into the output buffer
+	T* bufbg = buf;
+	T* bufed = buf;
+	construct(*buf, std::move(*beg));
+	Itr strt = beg + 1;
+	++bufed;
+	do {
+		//build up an auxiliary array with correctly ordered items
+		bool test_consecutive = false;
+		unsigned count = make_auxiliary_array(strt, end, arr, items, test_consecutive, cmp);
+		//insert the items from the auxiliary array into the correct places in the main array
+		multi_insert(bufbg, bufed + count, bufed, arr, count, cmp);
+		//exit if we have reached the end
+		strt = strt + count;
+		bufed = bufed + count;
+	} while(strt != end);
+}
+template<typename Itr, typename T, typename Comp>
 void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 	uint64_t sze = distance(beg, end);
 	if(sze <= 1)
@@ -2611,7 +2634,7 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf, Comp cmp) {
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			out_of_place_insertion_sort(bg, ed, buf + count, cmp);
+			out_of_place_multi_insertion_sort(bg, ed, buf + count, cmp);
 			bg = ed;
 		}
 	} else {
@@ -2808,6 +2831,35 @@ void out_of_place_insertion_sort(Itr beg, Itr end, T* buf) {
 	}
 }
 template<typename Itr, typename T>
+void out_of_place_multi_insertion_sort(Itr beg, Itr end, T* buf) {
+	if(distance(beg, end) <= 1)
+		return;
+
+	//move this to the correct place (do insert)
+	using valueof = typename stlib_internal::value_for<Itr>::value_type;
+	constexpr unsigned itm_num = (((1024 / sizeof(valueof)) + (1024 % sizeof(valueof) ? 1 : 0)) < 10 ? ((1024 / sizeof(valueof)) + (1024 % sizeof(valueof) ? 1 : 0)) : 10);
+	constexpr unsigned items = (itm_num < 5 ? 5 : itm_num);
+	alignas(valueof) char item[sizeof(valueof) * items];
+	valueof* arr = (valueof*)item;
+
+	//move the results into the output buffer
+	T* bufbg = buf;
+	T* bufed = buf;
+	construct(*buf, std::move(*beg));
+	Itr strt = beg + 1;
+	++bufed;
+	do {
+		//build up an auxiliary array with correctly ordered items
+		bool test_consecutive = false;
+		unsigned count = make_auxiliary_array(strt, end, arr, items, test_consecutive);
+		//insert the items from the auxiliary array into the correct places in the main array
+		multi_insert(bufbg, bufed + count, bufed, arr, count);
+		//exit if we have reached the end
+		strt = strt + count;
+		bufed = bufed + count;
+	} while(strt != end);
+}
+template<typename Itr, typename T>
 void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf) {
 	uint64_t sze = distance(beg, end);
 	if(sze <= 1)
@@ -2821,7 +2873,7 @@ void hybrid_merge_sort_internal(Itr beg, Itr end, T* buf) {
 		uint64_t count = 0;
 		for(Itr bg = beg; bg != end; count+=len) {
 			Itr ed = (count + len > sze ? end : bg + len);
-			out_of_place_insertion_sort(bg, ed, buf + count);
+			out_of_place_multi_insertion_sort(bg, ed, buf + count);
 			bg = ed;
 		}
 	} else {
@@ -5601,4 +5653,5 @@ inline void sort(Itr beg, Itr end, Comp cmp) {
 }
 
 }
+
 
