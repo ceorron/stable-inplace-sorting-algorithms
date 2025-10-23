@@ -1050,16 +1050,16 @@ unsigned make_auxiliary_array(Itr strt, Itr end, typename stlib_internal::value_
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stlib_internal::less_func(*beg, *(beg - 1), cmp));
+			} while(beg != end && count < item_count && stlib_internal::less_func(*beg, *(beg - 1)));
 		} else {
 			//we are ascending
 			up_down = 1;
 			do {
 				++count;
 				++beg;
-			} while(beg != end && count < item_count && stlib_internal::greater_equal_func(*beg, *(beg - 1), cmp));
+			} while(beg != end && count < item_count && stlib_internal::greater_equal_func(*beg, *(beg - 1)));
 			//if we are ascending and we have reached the end of the data or used all of the remaining space, test if we don't need to move any data (optimisation)
-			if(test_consecutive && (beg == end || count == item_count) && stlib_internal::less_equal_func(*(strt - 1), *strt, cmp)) {
+			if(test_consecutive && (beg == end || count == item_count) && stlib_internal::less_equal_func(*(strt - 1), *strt)) {
 				test_consecutive = false;
 				return count;
 			}
@@ -5653,6 +5653,7 @@ inline void sort(Itr beg, Itr end, Comp cmp) {
 }
 
 }
+
 
 
 
